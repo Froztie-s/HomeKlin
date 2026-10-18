@@ -4,16 +4,16 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
 
 const copy = {
-  title: "Layanan",
+  title: "Layanan & Harga",
   emptyTitle: "Belum ada layanan",
   emptyBody:
-    "Layanan dan harga agensi Anda muncul di sini. Pelanggan melihat harga ini apa adanya, tanpa biaya tambahan.",
+    "Daftar layanan dan harga HomeKlin muncul di sini. Pelanggan melihat harga ini apa adanya, tanpa biaya tambahan.",
 };
 
 export const metadata: Metadata = { title: copy.title };
 
-// Placeholder until the feature is built; the empty state says what will appear here.
-export default function AgencyServicesPage() {
+// Placeholder until T7b builds the editor for HomeKlin's one price list; the empty state says what will appear.
+export default function AdminServicesPage() {
   return (
     <>
       <PageHeader title={copy.title} />

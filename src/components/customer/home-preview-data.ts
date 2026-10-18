@@ -1,29 +1,38 @@
-// PREVIEW DATA, for the T3 design review only.
-// The static customer home shows these fictional agencies and this fictional job so the look can
-// be reviewed before the catalog exists. T7-T8 replace this file with real catalog data and the
-// customer's real order status. Every name here is invented; none is a real company or person.
+// SAMPLE DATA for the T3b preview of the landing page and the customer app (the only source for both).
+// Everything here is fictional: the prices, durations and free slots, the running job, and the cleaner
+// "Wulan Anggraeni" (a stock photo with an invented name; credits in docs/image-sources.md).
+// Replaced by real data in T7 (services and the HomeKlin price list), T8 (free slots per area),
+// T12 (the customer's orders) and T28 (the cleaner assigned to a job).
+// One brand to the customer (PRODUCT.md principle 6): nothing here names who supplies the cleaners.
 
 export type ServiceArea = { id: string; label: string };
 
-export type PreviewAgency = {
+/**
+ * A photo in public/images, with its intrinsic size so next/image can reserve the space.
+ * `focus` is the CSS object-position to keep in frame when a wide crop cuts the photo (default centre).
+ */
+export type PreviewPhoto = { src: string; width: number; height: number; alt: string; focus?: string };
+
+export type PreviewService = {
   id: string;
   name: string;
-  initials: string;
-  rating: number;
-  reviewCount: number;
-  district: string;
-  verified: boolean;
-  services: readonly string[];
-  nextSlot: string;
+  description: string;
+  duration: string;
+  /** Whole rupiah; shown with formatRupiah after "mulai dari". */
   startingPrice: number;
+  /** The next free slot in the chosen area (Jakarta Selatan in the preview). */
+  nextSlot: string;
+  photo: PreviewPhoto;
 };
 
+export type PreviewCleaner = { name: string; photo: PreviewPhoto };
+
 export type PreviewJob = {
-  status: string;
   service: string;
-  agency: string;
   scheduled: string;
-  arrivedAt: string;
+  checkedInAt: string;
+  finishesAround: string;
+  cleaner: PreviewCleaner;
 };
 
 export const serviceAreas: readonly ServiceArea[] = [
@@ -34,63 +43,77 @@ export const serviceAreas: readonly ServiceArea[] = [
   { id: "jakarta-utara", label: "Jakarta Utara" },
 ];
 
-export const previewArea = serviceAreas[0];
+export const defaultArea: ServiceArea = serviceAreas[0];
 
-export const previewAgencies: readonly PreviewAgency[] = [
+export const previewServices: readonly PreviewService[] = [
   {
-    id: "melati-kilau",
-    name: "Melati Kilau",
-    initials: "MK",
-    rating: 4.9,
-    reviewCount: 212,
-    district: "Kebayoran Baru",
-    verified: true,
-    services: ["Pembersihan Rutin", "Deep Cleaning"],
-    nextSlot: "Besok, 08.00",
+    id: "regular",
+    name: "Pembersihan Rutin",
+    description: "Lantai, debu, dapur, dan kamar mandi untuk perawatan rutin.",
+    duration: "± 2 jam",
     startingPrice: 85000,
+    nextSlot: "Besok, 08.00",
+    photo: {
+      src: "/images/service-regular.jpg",
+      width: 1200,
+      height: 675,
+      alt: "Petugas kebersihan mengepel lantai ruang tamu yang terang",
+    },
   },
   {
-    id: "sinar-rapi",
-    name: "Sinar Rapi",
-    initials: "SR",
-    rating: 4.8,
-    reviewCount: 168,
-    district: "Cilandak",
-    verified: true,
-    services: ["Pembersihan Rutin", "Sofa & Karpet"],
-    nextSlot: "Hari ini, 15.00",
-    startingPrice: 95000,
-  },
-  {
-    id: "teduh-bersih",
-    name: "Teduh Bersih",
-    initials: "TB",
-    rating: 4.7,
-    reviewCount: 94,
-    district: "Tebet",
-    verified: true,
-    services: ["Deep Cleaning", "Dapur & Kamar Mandi"],
-    nextSlot: "Besok, 10.00",
-    startingPrice: 120000,
-  },
-  {
-    id: "griya-bening",
-    name: "Griya Bening",
-    initials: "GB",
-    rating: 4.6,
-    reviewCount: 57,
-    district: "Pasar Minggu",
-    verified: true,
-    services: ["Pembersihan Rutin", "Dapur & Kamar Mandi", "Sofa & Karpet"],
+    id: "deep",
+    name: "Deep Cleaning",
+    description: "Pembersihan menyeluruh sampai sudut, perabot, dan peralatan dapur.",
+    duration: "± 4 jam",
+    startingPrice: 250000,
     nextSlot: "Sab, 09.00",
-    startingPrice: 90000,
+    photo: {
+      src: "/images/service-deep.jpg",
+      width: 1200,
+      height: 800,
+      alt: "Petugas kebersihan mengelap mesin kopi di meja dapur",
+    },
+  },
+  {
+    id: "sofa-carpet",
+    name: "Sofa & Karpet",
+    description: "Penyedotan dan pembersihan kain sofa dan karpet.",
+    duration: "± 2 jam",
+    startingPrice: 150000,
+    nextSlot: "Hari ini, 15.00",
+    photo: {
+      src: "/images/service-sofa.jpg",
+      width: 1200,
+      height: 800,
+      alt: "Petugas kebersihan bersarung tangan menyedot debu dudukan sofa",
+    },
+  },
+  {
+    id: "kitchen-bathroom",
+    name: "Dapur & Kamar Mandi",
+    description: "Kerak, lemak, dan noda air di dapur serta kamar mandi.",
+    duration: "± 3 jam",
+    startingPrice: 120000,
+    nextSlot: "Besok, 10.00",
+    photo: {
+      src: "/images/service-kitchen-bath.jpg",
+      width: 1200,
+      height: 800,
+      alt: "Petugas kebersihan memakai sarung tangan karet di dekat wastafel dapur",
+      focus: "50% 25%",
+    },
   },
 ];
 
+export const previewCleaner: PreviewCleaner = {
+  name: "Wulan Anggraeni",
+  photo: { src: "/images/cleaner-avatar.jpg", width: 400, height: 400, alt: "Foto Wulan Anggraeni" },
+};
+
 export const previewJob: PreviewJob = {
-  status: "Petugas sudah check-in",
   service: "Pembersihan Rutin",
-  agency: "Melati Kilau",
   scheduled: "Hari ini, 09.00",
-  arrivedAt: "09.04",
+  checkedInAt: "09.04",
+  finishesAround: "11.00",
+  cleaner: previewCleaner,
 };

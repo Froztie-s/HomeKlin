@@ -17,7 +17,7 @@ export const metadata: Metadata = { title: copy.title };
 export default function SupportPage() {
   return (
     <PageContainer>
-      <PageHeader title={copy.title} />
+      <PageHeader title={copy.title} size="large" />
       <EmptyState icon={CircleQuestionMark} title={copy.emptyTitle}>
         {copy.emptyBody}
       </EmptyState>

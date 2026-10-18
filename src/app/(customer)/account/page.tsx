@@ -17,7 +17,7 @@ export const metadata: Metadata = { title: copy.title };
 export default function AccountPage() {
   return (
     <PageContainer>
-      <PageHeader title={copy.title} />
+      <PageHeader title={copy.title} size="large" />
       <EmptyState icon={UserRound} title={copy.emptyTitle}>
         {copy.emptyBody}
       </EmptyState>

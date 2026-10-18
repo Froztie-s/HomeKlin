@@ -5,14 +5,14 @@ test.use({ viewport: { width: 360, height: 740 } });
 
 const pages = [
   "/",
-  "/agencies",
+  "/home",
+  "/services",
   "/orders",
   "/support",
   "/account",
   "/cleaner",
   "/cleaner/account",
   "/agency",
-  "/agency/services",
   "/agency/schedule",
   "/agency/cleaners",
   "/agency/orders",
@@ -21,6 +21,7 @@ const pages = [
   "/admin/monitor",
   "/admin/tickets",
   "/admin/recordings",
+  "/admin/services",
   "/admin/faq",
 ];
 

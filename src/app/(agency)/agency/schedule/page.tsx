@@ -5,9 +5,9 @@ import { PageHeader } from "@/components/ui/page-header";
 
 const copy = {
   title: "Jadwal",
-  emptyTitle: "Belum ada slot jadwal",
+  emptyTitle: "Belum ada ketersediaan",
   emptyBody:
-    "Slot waktu yang dapat dipesan pelanggan muncul di sini. Slot yang sudah dipesan tidak dapat dipesan lagi.",
+    "Ketersediaan agensi Anda per area muncul di sini. Pelanggan hanya ditawari slot yang masih kosong.",
 };
 
 export const metadata: Metadata = { title: copy.title };

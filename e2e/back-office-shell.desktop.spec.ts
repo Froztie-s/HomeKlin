@@ -8,7 +8,6 @@ const shells = [
     navLabel: "Navigasi agensi",
     items: [
       { label: "Dasbor", path: "/agency" },
-      { label: "Layanan", path: "/agency/services" },
       { label: "Jadwal", path: "/agency/schedule" },
       { label: "Petugas", path: "/agency/cleaners" },
       { label: "Pesanan", path: "/agency/orders" },
@@ -24,6 +23,7 @@ const shells = [
       { label: "Monitor Langsung", path: "/admin/monitor" },
       { label: "Tiket", path: "/admin/tickets" },
       { label: "Rekaman", path: "/admin/recordings" },
+      { label: "Layanan & Harga", path: "/admin/services" },
       { label: "FAQ", path: "/admin/faq" },
     ],
   },

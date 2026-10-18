@@ -12,7 +12,7 @@ test.describe("back-office menu on a narrow screen", () => {
     await menu.click();
     await expect(menu).toHaveAttribute("aria-expanded", "true");
     const nav = page.getByRole("navigation", { name: "Navigasi agensi" });
-    await expect(nav.getByRole("link")).toHaveCount(6);
+    await expect(nav.getByRole("link")).toHaveCount(5);
     await expect(nav.getByRole("link", { name: "Dasbor" })).toHaveAttribute("aria-current", "page");
   });
 
@@ -47,7 +47,7 @@ test.describe("back-office menu on a narrow screen", () => {
 
     await menu.click();
     const links = page.getByRole("navigation", { name: "Navigasi admin" }).getByRole("link");
-    await expect(links).toHaveCount(5);
+    await expect(links).toHaveCount(6);
     for (const link of await links.all()) {
       const box = await link.boundingBox();
       expect(box?.height).toBeGreaterThanOrEqual(44);

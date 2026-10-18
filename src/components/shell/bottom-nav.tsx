@@ -3,16 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isActivePath } from "./is-active-path";
-import { navigation, type NavKey } from "./navigation";
+import { appNavigation } from "./app-navigation";
+import type { AppNavKey } from "./navigation";
 
 type BottomNavProps = {
-  nav: Extract<NavKey, "customer" | "cleaner">;
+  nav: AppNavKey;
 };
 
 // Phone navigation: fixed to the bottom, labels always visible, 44 px+ targets, clears the home indicator.
 export function BottomNav({ nav }: BottomNavProps) {
   const pathname = usePathname();
-  const { label, items } = navigation[nav];
+  const { label, items } = appNavigation[nav];
 
   return (
     <nav

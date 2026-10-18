@@ -1,17 +1,24 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 
-// One family for the whole product; hierarchy comes from weight and size (docs/design.md).
-const jakarta = Plus_Jakarta_Sans({
-  variable: "--font-jakarta",
-  subsets: ["latin"],
+// Two families (docs/design.md section 3). Both are variable fonts, so no weights are listed.
+// Bricolage Grotesque also loads its optical-size axis: large headings get the display cut.
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin", "latin-ext"],
+  axes: ["opsz"],
+});
+
+const figtree = Figtree({
+  variable: "--font-figtree",
+  subsets: ["latin", "latin-ext"],
 });
 
 export const metadata: Metadata = {
-  // Home is "HomeKlin"; other pages read "Pesanan · HomeKlin" in the browser tab.
+  // The landing page sets no title, so its tab reads "HomeKlin"; other pages read "Layanan · HomeKlin".
   title: { default: "HomeKlin", template: "%s · HomeKlin" },
-  description: "Layanan kebersihan rumah tepercaya, dari agensi pilihan.",
+  description: "Jasa kebersihan rumah yang bisa Anda tonton langsung.",
 };
 
 // viewport-fit=cover lets the bottom navigation pad itself for the phone's home indicator.
@@ -21,8 +28,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="id" className={`${jakarta.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+    <html lang="id" className={`${bricolage.variable} ${figtree.variable} h-full antialiased`}>
+      <body className="flex min-h-full flex-col bg-canvas font-sans text-ink">{children}</body>
     </html>
   );
 }

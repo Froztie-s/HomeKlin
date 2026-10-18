@@ -17,7 +17,7 @@ export const metadata: Metadata = { title: copy.title };
 export default function OrdersPage() {
   return (
     <PageContainer>
-      <PageHeader title={copy.title} />
+      <PageHeader title={copy.title} size="large" />
       <EmptyState icon={ClipboardList} title={copy.emptyTitle}>
         {copy.emptyBody}
       </EmptyState>

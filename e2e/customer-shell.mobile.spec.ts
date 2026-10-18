@@ -2,8 +2,8 @@ import { expect, test } from "@playwright/test";
 
 // Customer pages are mobile-first: on a phone the main navigation is a bottom bar.
 const sections = [
-  { label: "Beranda", path: "/", heading: "Pilih agensi kebersihan di area Anda" },
-  { label: "Agensi", path: "/agencies", heading: "Agensi" },
+  { label: "Beranda", path: "/home", heading: "Pesan kebersihan rumah" },
+  { label: "Layanan", path: "/services", heading: "Layanan" },
   { label: "Pesanan", path: "/orders", heading: "Pesanan" },
   { label: "Bantuan", path: "/support", heading: "Bantuan" },
   { label: "Akun", path: "/account", heading: "Akun" },
@@ -11,7 +11,7 @@ const sections = [
 
 test.describe("customer bottom navigation", () => {
   test("sits at the bottom of the screen with five labelled items", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/home");
     const nav = page.getByRole("navigation", { name: "Navigasi utama" });
     await expect(nav).toBeVisible();
 
@@ -25,14 +25,14 @@ test.describe("customer bottom navigation", () => {
   });
 
   test("marks only the current page", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/home");
     const nav = page.getByRole("navigation", { name: "Navigasi utama" });
     await expect(nav.getByRole("link", { name: "Beranda" })).toHaveAttribute("aria-current", "page");
     await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
   });
 
   test("navigates to every section and moves the current marker", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/home");
     const nav = page.getByRole("navigation", { name: "Navigasi utama" });
 
     for (const { label, path, heading } of [...sections.slice(1), sections[0]]) {
@@ -48,7 +48,7 @@ test.describe("customer bottom navigation", () => {
   });
 
   test("gives every item a touch target of at least 44 px", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/home");
     const links = page.getByRole("navigation", { name: "Navigasi utama" }).getByRole("link");
     await expect(links).toHaveCount(sections.length);
     for (const link of await links.all()) {
@@ -56,5 +56,13 @@ test.describe("customer bottom navigation", () => {
       expect(box?.width).toBeGreaterThanOrEqual(44);
       expect(box?.height).toBeGreaterThanOrEqual(44);
     }
+  });
+
+  test("shows the wordmark at the top of the home screen", async ({ page }) => {
+    await page.goto("/home");
+    const wordmark = page.getByRole("main").getByText("HomeKlin", { exact: true });
+    await expect(wordmark).toBeVisible();
+    const box = await wordmark.boundingBox();
+    expect(box?.y).toBeLessThan(80);
   });
 });

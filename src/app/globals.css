@@ -2,14 +2,14 @@
 
 /*
  * HomeKlin design tokens: the single source for colour, type, spacing, radii, elevation,
- * layering and motion. The rules for using them are in docs/design.md.
+ * layering and motion. The rules for using them are in docs/design.md (rewritten in T3b).
  *
  * Tailwind's default palette, radii, shadows, font sizes and fonts are cleared below, so a
  * component can only use these tokens (a stray `text-zinc-600` simply does not exist).
  * `static` emits every variable even when no utility uses it, so `var(--z-nav)` etc. work.
  *
- * Light theme only: customers check on their home from a phone in daylight (at the office,
- * on the train), and agency staff work at desks in lit rooms. See docs/design.md.
+ * Light theme only (user decision, 2026-10-18): customers check on their home from a phone in
+ * daylight, and agency staff work at desks in lit rooms. See docs/design.md.
  */
 @theme static {
   --color-*: initial;
@@ -18,35 +18,35 @@
   --text-*: initial;
   --font-*: initial;
 
-  /* Neutrals: cool off-white, tinted toward the brand hue (269). Not cream, not grey. */
-  --color-canvas: oklch(0.977 0.006 269); /* page background */
-  --color-surface: oklch(1 0 0); /* cards, bars, inputs */
-  --color-surface-sunken: oklch(0.958 0.01 269); /* chips, hover on surface */
-  --color-panel: oklch(0.962 0.009 269); /* back-office sidebar: the second neutral layer */
-  --color-border: oklch(0.905 0.012 269); /* dividers, card edges */
-  --color-border-control: oklch(0.62 0.02 269); /* form-control edges: 3.6:1 on surface */
-  --color-ink: oklch(0.25 0.035 269); /* body text: 16.0:1 on surface */
-  --color-ink-muted: oklch(0.46 0.03 269); /* secondary text: 7.1:1 on surface, 6.7:1 on canvas */
-  --color-ink-faint: oklch(0.53 0.025 269); /* meta, placeholders: 5.3:1 on surface, 4.9:1 on canvas */
-  --color-on-brand: oklch(1 0 0); /* text and icons on brand-600 and darker */
+  /* Neutrals: a cool off-white tinted toward the brand hue (165, evergreen). Never pure white. */
+  --color-canvas: oklch(0.982 0.005 165); /* page background */
+  --color-surface: oklch(0.997 0.002 165); /* cards, bars, inputs */
+  --color-surface-sunken: oklch(0.958 0.009 165); /* chips, hover fill on surface, tracks */
+  --color-panel: oklch(0.966 0.008 165); /* back-office sidebar, landing footer */
+  --color-border: oklch(0.91 0.012 165); /* dividers, card edges (decorative) */
+  --color-border-control: oklch(0.6 0.02 165); /* form-control edges: 3.9:1 on surface */
+  --color-ink: oklch(0.24 0.025 165); /* headings, body text: 16.2:1 on surface */
+  --color-ink-muted: oklch(0.44 0.02 165); /* secondary text: 7.6:1 on surface, 7.3:1 on canvas */
+  --color-ink-faint: oklch(0.52 0.018 165); /* meta, placeholders: 5.4:1 on surface, 4.8:1 on sunken */
+  --color-on-brand: oklch(0.995 0.003 165); /* text and icons on brand-600 and darker */
 
-  /* Brand: the reference's periwinkle (brand-500), deepened to 600 wherever text sits on it. */
-  --color-brand-50: oklch(0.97 0.014 269);
-  --color-brand-100: oklch(0.935 0.03 269);
-  --color-brand-200: oklch(0.87 0.06 269);
-  --color-brand-400: oklch(0.7 0.13 269);
-  --color-brand-500: oklch(0.635 0.155 269); /* reference colour; decoration only (white on it is 3.5:1) */
-  --color-brand-600: oklch(0.56 0.15 269); /* header, primary buttons: white text 4.8:1 */
-  --color-brand-700: oklch(0.49 0.145 269); /* hover, links: 6.5:1 on surface */
-  --color-brand-800: oklch(0.41 0.12 269); /* pressed, text on brand-100: 7.4:1 */
-  --color-brand-900: oklch(0.32 0.09 269);
+  /* Brand: evergreen. Text sits on 600 and darker only; 500 and lighter are decoration. */
+  --color-brand-50: oklch(0.968 0.02 165); /* tinted panels, icon circles, live pill */
+  --color-brand-100: oklch(0.935 0.04 165); /* selected nav item: brand-800 text on it 8.8:1 */
+  --color-brand-200: oklch(0.875 0.065 165); /* hover border on tints */
+  --color-brand-300: oklch(0.79 0.09 165); /* timeline line, decorative strokes */
+  --color-brand-500: oklch(0.6 0.11 165); /* live dot; never under text (white on it 3.7:1) */
+  --color-brand-600: oklch(0.5 0.095 165); /* primary buttons, focus ring: white text 5.7:1 */
+  --color-brand-700: oklch(0.43 0.082 165); /* hover, text links, live text: 7.7:1 on surface */
+  --color-brand-800: oklch(0.36 0.068 165); /* pressed, text on brand-100 */
+  --color-brand-900: oklch(0.29 0.05 165); /* pressed on brand-700 */
 
   /* Focus ring. Containers on brand colour set --color-focus to on-brand locally. */
   --color-focus: var(--color-brand-600);
 
   /* Semantic states: text colour (>= 5:1 on its surface) plus a tinted surface. */
-  --color-success: oklch(0.5 0.11 155);
-  --color-success-surface: oklch(0.955 0.035 155);
+  --color-success: oklch(0.5 0.11 150);
+  --color-success-surface: oklch(0.955 0.035 150);
   --color-warning: oklch(0.52 0.11 65);
   --color-warning-surface: oklch(0.962 0.04 85);
   --color-danger: oklch(0.52 0.17 25);
@@ -54,16 +54,18 @@
   --color-info: oklch(0.5 0.1 235);
   --color-info-surface: oklch(0.958 0.022 235);
 
-  /* Live video: calm teal, never a red REC dot. Always paired with the word "Langsung" or similar. */
-  --color-live: oklch(0.5 0.09 180);
-  --color-live-dot: oklch(0.6 0.11 175);
-  --color-live-surface: oklch(0.955 0.03 180);
+  /* Live video is the reassuring core of the product, so it wears the brand green, never a red
+     REC dot. Always paired with words ("Sedang berlangsung"). */
+  --color-live: var(--color-brand-700);
+  --color-live-surface: var(--color-brand-50);
+  --color-live-dot: var(--color-brand-500);
 
-  /* Star rating icon. The number next to it carries the meaning, in ink. */
+  /* Star rating icon only (T30). The number next to it carries the meaning, in ink. */
   --color-rating: oklch(0.7 0.15 70);
 
-  /* Type: one family, weight contrast for hierarchy, fixed rem scale (ratio ~1.125-1.2). */
-  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+  /* Type: Figtree for text, Bricolage Grotesque for display (h1, h2, wordmark, landing prices). */
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), var(--font-figtree), ui-sans-serif, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --text-xs: 0.75rem;
   --text-xs--line-height: 1rem;
@@ -72,14 +74,20 @@
   --text-base: 1rem;
   --text-base--line-height: 1.5rem;
   --text-lg: 1.125rem;
-  --text-lg--line-height: 1.625rem;
+  --text-lg--line-height: 1.75rem;
   --text-xl: 1.25rem;
   --text-xl--line-height: 1.75rem;
   --text-2xl: 1.5rem;
-  --text-2xl--line-height: 2rem;
-  --text-3xl: 1.75rem;
+  --text-2xl--line-height: 1.875rem;
+  --text-3xl: 1.875rem;
   --text-3xl--line-height: 2.25rem;
-  --tracking-heading: -0.012em;
+  --text-4xl: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+  --text-5xl: 3rem;
+  --text-5xl--line-height: 3.25rem;
+  --text-6xl: 3.5rem;
+  --text-6xl--line-height: 3.75rem;
+  --tracking-display: -0.02em; /* display sizes (text-3xl and up) */
 
   /* Spacing: a 4 px base (Tailwind's numeric scale) plus named layout values. */
   --spacing: 0.25rem;
@@ -91,22 +99,20 @@
   --spacing-sidebar: 16rem; /* back-office sidebar width */
 
   /* Content widths. Running text uses Tailwind's max-w-prose (65ch). */
+  --container-page: 76rem; /* landing page */
   --container-content: 60rem; /* customer and cleaner pages */
   --container-dashboard: 76rem; /* agency and admin pages */
 
-  /* Radii: small for controls, larger for cards, largest for the home header. */
-  --radius-xs: 0.375rem;
-  --radius-sm: 0.5rem;
+  /* Radii, one rule: interactive = pill (full), containers = xl (20 px), nested inside a
+     container = md (12 px). No other radius exists. */
   --radius-md: 0.75rem;
-  --radius-lg: 1rem;
-  --radius-xl: 1.5rem;
+  --radius-xl: 1.25rem;
   --radius-full: 9999px;
 
-  /* Elevation: few, soft, tinted with the ink hue. */
-  --shadow-xs: 0 1px 2px oklch(0.25 0.035 269 / 0.06);
-  --shadow-card: 0 1px 2px oklch(0.25 0.035 269 / 0.04), 0 2px 8px oklch(0.25 0.035 269 / 0.05);
-  --shadow-raised: 0 1px 3px oklch(0.25 0.035 269 / 0.06), 0 8px 24px oklch(0.25 0.035 269 / 0.1);
-  --shadow-nav: 0 -1px 12px oklch(0.25 0.035 269 / 0.06);
+  /* Elevation: few, soft, tinted with the ink hue. Never black. */
+  --shadow-card: 0 1px 2px oklch(0.24 0.025 165 / 0.05), 0 2px 8px oklch(0.24 0.025 165 / 0.05);
+  --shadow-raised: 0 1px 3px oklch(0.24 0.025 165 / 0.06), 0 12px 32px oklch(0.24 0.025 165 / 0.12);
+  --shadow-nav: 0 -1px 12px oklch(0.24 0.025 165 / 0.06);
 
   /* Layering, lowest to highest. Use as z-(--z-nav). */
   --z-sticky: 20;
@@ -116,9 +122,10 @@
   --z-toast: 60;
   --z-tooltip: 70;
 
-  /* Motion: short, ease-out, state changes only. */
+  /* Motion: CSS only. Colour changes 150 ms; one hero entry; the live dot breathes. */
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
   --animate-breathe: breathe 2.4s ease-in-out infinite;
+  --animate-rise: rise 500ms var(--ease-out-quart) both;
 
   @keyframes breathe {
     0%,
@@ -127,6 +134,17 @@
     }
     50% {
       opacity: 0.4;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
     }
   }
 }
@@ -142,7 +160,10 @@
   h2,
   h3 {
     text-wrap: balance;
-    letter-spacing: var(--tracking-heading);
+  }
+
+  p {
+    text-wrap: pretty;
   }
 
   /* One visible focus style for every interactive element. */
@@ -156,6 +177,11 @@
     color: var(--color-ink-faint);
     opacity: 1;
   }
+}
+
+/* Stagger for the hero entry: animate-rise plus animate-delay-80, animate-delay-160 (ms). */
+@utility animate-delay-* {
+  animation-delay: calc(--value(integer) * 1ms);
 }
 
 /* Side gutters that also clear a phone's notch in landscape (needs viewport-fit=cover). */
@@ -179,6 +205,7 @@
   ::before,
   ::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;

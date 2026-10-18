@@ -1,33 +1,36 @@
 import { describe, expect, it } from "vitest";
 import { isActivePath } from "@/components/shell/is-active-path";
+import { appNavigation } from "@/components/shell/app-navigation";
+import { backOfficeNavigation } from "@/components/shell/back-office-navigation";
 import { navigation } from "@/components/shell/navigation";
 
 describe("isActivePath", () => {
-  it("marks a section root as active only on that exact path", () => {
-    const home = { href: "/", exact: true };
-    expect(isActivePath("/", home)).toBe(true);
-    expect(isActivePath("/agencies", home)).toBe(false);
+  it("marks an exact item as active only on that exact path", () => {
+    const home = { href: "/home", exact: true };
+    expect(isActivePath("/home", home)).toBe(true);
+    expect(isActivePath("/home/settings", home)).toBe(false);
+    expect(isActivePath("/services", home)).toBe(false);
   });
 
   it("keeps a dashboard root inactive on its sub-pages", () => {
     const dashboard = { href: "/agency", exact: true };
     expect(isActivePath("/agency", dashboard)).toBe(true);
-    expect(isActivePath("/agency/services", dashboard)).toBe(false);
+    expect(isActivePath("/agency/schedule", dashboard)).toBe(false);
   });
 
   it("marks a section as active on its own path and on deeper paths", () => {
-    const agencies = { href: "/agencies" };
-    expect(isActivePath("/agencies", agencies)).toBe(true);
-    expect(isActivePath("/agencies/melati-kilau", agencies)).toBe(true);
+    const services = { href: "/services" };
+    expect(isActivePath("/services", services)).toBe(true);
+    expect(isActivePath("/services/deep", services)).toBe(true);
   });
 
   it("does not treat a path that only shares a prefix as the same section", () => {
-    expect(isActivePath("/agency", { href: "/agencies" })).toBe(false);
-    expect(isActivePath("/agencies-old", { href: "/agencies" })).toBe(false);
+    expect(isActivePath("/order", { href: "/orders" })).toBe(false);
+    expect(isActivePath("/services-old", { href: "/services" })).toBe(false);
   });
 
   it("ignores a trailing slash", () => {
-    expect(isActivePath("/agencies/", { href: "/agencies" })).toBe(true);
+    expect(isActivePath("/services/", { href: "/services" })).toBe(true);
     expect(isActivePath("/agency/", { href: "/agency", exact: true })).toBe(true);
   });
 });
@@ -35,12 +38,25 @@ describe("isActivePath", () => {
 describe("navigation", () => {
   it("gives the customer the five agreed sections, in order", () => {
     expect(navigation.customer.items.map((item) => [item.label, item.href])).toEqual([
-      ["Beranda", "/"],
-      ["Agensi", "/agencies"],
+      ["Beranda", "/home"],
+      ["Layanan", "/services"],
       ["Pesanan", "/orders"],
       ["Bantuan", "/support"],
       ["Akun", "/account"],
     ]);
+  });
+
+  it("never names or links a partner agency in the customer navigation", () => {
+    for (const item of navigation.customer.items) {
+      expect(`${item.label} ${item.href}`).not.toMatch(/agensi|agenc|mitra/i);
+    }
+  });
+
+  it("keeps the back-office menus out of the module the customer and cleaner pages download", () => {
+    expect(Object.keys(appNavigation)).toEqual(["customer", "cleaner"]);
+    expect(Object.keys(backOfficeNavigation)).toEqual(["agency", "admin"]);
+    expect(JSON.stringify(appNavigation)).not.toMatch(/agensi|agency|mitra/i);
+    expect(navigation).toEqual({ ...appNavigation, ...backOfficeNavigation });
   });
 
   it("keeps the cleaner navigation minimal", () => {
@@ -50,10 +66,9 @@ describe("navigation", () => {
     ]);
   });
 
-  it("gives the agency its back-office sections", () => {
+  it("gives the agency its back-office sections, without services or prices", () => {
     expect(navigation.agency.items.map((item) => [item.label, item.href])).toEqual([
       ["Dasbor", "/agency"],
-      ["Layanan", "/agency/services"],
       ["Jadwal", "/agency/schedule"],
       ["Petugas", "/agency/cleaners"],
       ["Pesanan", "/agency/orders"],
@@ -61,21 +76,23 @@ describe("navigation", () => {
     ]);
   });
 
-  it("gives the admin its console sections", () => {
+  it("gives the admin its console sections, including the price list", () => {
     expect(navigation.admin.items.map((item) => [item.label, item.href])).toEqual([
       ["Dasbor", "/admin"],
       ["Monitor Langsung", "/admin/monitor"],
       ["Tiket", "/admin/tickets"],
       ["Rekaman", "/admin/recordings"],
+      ["Layanan & Harga", "/admin/services"],
       ["FAQ", "/admin/faq"],
     ]);
   });
 
-  it("matches each section root exactly, so only one item is ever current", () => {
-    for (const { items } of Object.values(navigation)) {
-      const [root, ...rest] = items;
-      expect(root.exact).toBe(true);
-      for (const item of rest) expect(item.href.startsWith(root.href)).toBe(true);
+  it("marks exactly one item as current on each item's own page", () => {
+    for (const [key, { items }] of Object.entries(navigation)) {
+      for (const item of items) {
+        const current = items.filter((other) => isActivePath(item.href, other)).map((other) => other.href);
+        expect(current, `${key} navigation on ${item.href}`).toEqual([item.href]);
+      }
     }
   });
 

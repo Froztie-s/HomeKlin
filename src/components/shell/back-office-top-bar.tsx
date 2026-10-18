@@ -51,7 +51,7 @@ export function BackOfficeTopBar({ nav, roleLabel }: BackOfficeTopBarProps) {
           aria-expanded={open}
           aria-controls={menuId}
           onClick={() => setOpenedOn(open ? null : pathname)}
-          className="-mr-2 inline-flex min-h-touch items-center gap-2 rounded-md px-3 text-sm font-semibold text-ink transition-colors duration-150 ease-out-quart hover:bg-surface-sunken active:bg-brand-50 aria-expanded:bg-surface-sunken"
+          className="-mr-2 inline-flex min-h-touch items-center gap-2 rounded-full px-4 text-sm font-semibold text-ink transition-colors duration-150 ease-out-quart hover:bg-surface-sunken active:bg-brand-50 aria-expanded:bg-surface-sunken"
         >
           {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
           {copy.menu}
