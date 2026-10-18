@@ -6,7 +6,8 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 1. Read, in this order: this file, `README.md`, `SPEC.md`, `tasks/plan.md`, `tasks/todo.md`. Do not read the two `.docx` files unless you need to check a Contract detail (see "Reading the source documents").
 2. **Current state: T1 and T2 done (2026-10-18).** Live at **https://home-klin.vercel.app** (Vercel, auto-deploys on push to `main`; per-deployment URLs sit behind Vercel login, which is expected). Code at https://github.com/Froztie-s/HomeKlin (public). CI passes. `/api/health` returns 200 with Supabase `ok` locally and live. Env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are set in Vercel and in the local git-ignored `.env`.
 3. **T3 done (2026-10-18)**, built by the dedicated frontend agent (`.claude/agents/homeklin-frontend.md`; after a restart it is the `homeklin-frontend` agent type; use it for every UI task). Design system in `docs/design.md`, screenshots in `docs/screenshots/t3/`. **The user found the T3 look too generic and corrected the business model** (see "Decisions made": one brand to the customer).
-   **Next action: T3b redesign.** The user restarts Claude Code (this loads impeccable 4.6.0, the Vercel plugin and the `homeklin-frontend` agent type), then runs `/design-taste-frontend Follow docs/prompts/t3b-redesign.md`. That prompt holds every confirmed decision, the steps and the definition of done. After T3b comes T4 (bilingual switch; needs the user's OK to add `next-intl`, already in the approved stack). Open item from T2: the user still has to add an UptimeRobot monitor on `https://home-klin.vercel.app/api/health`. The Vercel plugin (`vercel-plugin@vercel`) is installed at user scope; the Vercel CLI is not logged in.
+   **T3b done (2026-10-18)** with the `design-taste-frontend` skill (prompt: `docs/prompts/t3b-redesign.md`): docs rewritten for the one-brand model; new design direction in `docs/design.md` (evergreen OKLCH palette, Bricolage Grotesque + Figtree, one radius rule, CSS-only motion, five researched references); landing page at `/`; customer app home at `/home` plus `/services`; `/agencies` and the agency "Layanan" page removed; admin "Layanan & Harga" placeholder at `/admin/services`; free stock photos in `public/images/` credited in `docs/image-sources.md`; an e2e test fails if any customer page says "agensi", "agency" or "mitra". Screenshots: `docs/screenshots/t3b/` (before: `docs/screenshots/t3/`). Waiting for the user's review of T3b.
+   **Next action: T4** (bilingual switch; needs the user's OK to add `next-intl`, already in the approved stack). Open review points from T3b are listed under "Known risks and open items". Open item from T2: the user still has to add an UptimeRobot monitor on `https://home-klin.vercel.app/api/health`. The Vercel plugin (`vercel-plugin@vercel`) is installed at user scope; the Vercel CLI is not logged in.
 4. Follow the plan's workflow: one task at a time, tests first, checkpoint reviews, tick the box in `tasks/todo.md` as tasks finish, and update this file's "Where we are" table.
 5. The user wants to **review at checkpoints** and wants things explained, because they must be able to demo and defend the product. Keep answers short and plain. Do not make large unrequested changes.
 6. Skills installed that matter (invoke with the Skill tool): `agent-skills:*` (e.g. `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `security-and-hardening`, `source-driven-development`, `code-review-and-quality`, `shipping-and-launch`), plus the UI skills `design-taste-frontend`, `impeccable` and `ui-ux-pro-max`. The mapping of skill to task is in `tasks/plan.md`. The Figma connection failed earlier, so skip the Figma skills.
@@ -23,7 +24,7 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 | Interview (what the user actually wants) | done | summarised below |
 | Spec | done, approved | `SPEC.md` |
 | Plan and task list (39 tasks, 11 phases) | done, approved | `tasks/plan.md`, `tasks/todo.md` |
-| Build | **in progress: T1–T3 done, next T3b redesign (prompt ready)** | `tasks/todo.md`, `docs/prompts/t3b-redesign.md` |
+| Build | **in progress: T1–T3b done (T3b awaiting review), next T4** | `tasks/todo.md` |
 
 ## Decisions made (do not re-ask these)
 - **Platform:** a website, not the Android app the Contract names. The client agreed, but it should still be written as a Contract addendum (Pasal 8).
@@ -43,8 +44,9 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
   - **Landing page** at `/` for visitors (one CTA "Pesan sekarang"); the customer app home moves to `/home`.
   - **Photos:** free stock photos (Unsplash/Pexels).
   - **Theme:** light only.
-  - The SPEC/PRODUCT/task updates are step 1 of `docs/prompts/t3b-redesign.md`.
-- **Design direction (2026-10-18):** brief in `PRODUCT.md`: product register; personality "trustworthy, calm, clear"; avoid busy super-app, cold corporate, CCTV look. The T3 build (periwinkle header, agency cards, Plus Jakarta Sans) was judged **too generic** by the user; T3b redoes it with the `design-taste-frontend` skill and references researched online, driven by `PRODUCT.md` and `docs/design.md`. Agency/admin keep a denser desktop sidebar layout.
+  - `SPEC.md`, `PRODUCT.md`, `README.md` and the tasks were updated for this in T3b (new task T7b: admin services and price list; T7, T8, T9, T27, T28, T30 reworded; new risk "no partner agency free in an area").
+- **Design direction (2026-10-18):** brief in `PRODUCT.md`: product register; personality "trustworthy, calm, clear"; avoid busy super-app, cold corporate, CCTV look. The T3 build (periwinkle header, agency cards, Plus Jakarta Sans) was judged **too generic** by the user; T3b redid it with the `design-taste-frontend` skill. Agency/admin keep a denser desktop sidebar layout.
+- **T3b design system (2026-10-18; source of truth `docs/design.md`):** evergreen brand colour (OKLCH hue 165) on green-tinted off-white, all text pairs AA; Bricolage Grotesque (headings) + Figtree (text); radius rule: interactive = pill, containers = 20 px, nested = 12 px; CSS-only motion (hero entry, press feedback, live dot), no animation library; light only. Dials: landing 5/4/4, app 3/3/5. References: MyClean, Fantastic Services, KliknClean, Justlife, Wise (what was borrowed from each is in `docs/design.md` section 8). Navigation data is split into `app-navigation.ts` and `back-office-navigation.ts` so customer bundles never carry agency labels.
 - **Frontend agent:** every UI task goes to the dedicated frontend agent (user request). Vercel work goes to a separate Vercel agent.
 - **Dependencies approved:** `lucide-react` (icons).
 - **Not required:** the Development Plan's Scrum process, cost estimates, iOS app, store submission, wearable camera hardware.
@@ -68,6 +70,7 @@ One answer was ambiguous and I interpreted it: the user said replay "should not 
 - **Repo is public, so docs use role titles, not real names** (user's decision). Keep it that way in every file and commit message.
 - With clips standing in for the stream, the Quality Plan's 3-second latency target can only be shown once the real LiveKit source exists.
 - The Plan promises "end-to-end encryption", but a hosted stream is encrypted in transit, not end to end. T38 includes an ADR that says so plainly.
+- **T3b points for the user to review:** (1) the live-view copy says "Anda dan tim pemantau HomeKlin" instead of "only you", because `SPEC.md` lets admin (and the agency, which the customer sees as HomeKlin) watch too; (2) the hero headline is a plain sentence ("Jasa kebersihan rumah yang bisa Anda tonton langsung"); (3) the sample cleaner "Wulan Anggraeni" is a stock photo with an invented name, labelled as sample data; (4) the landing's service cards link to `/services`, and nothing is bookable until T9.
 
 ## Reading the source documents
 - The Contract and Plan are `.docx` files in Indonesian (the Plan is mixed Indonesian and English). The Read tool could not open the earlier PDF versions because `pdftoppm` is not installed. The `.docx` files can be read with Python's `zipfile` to read `word/document.xml` and strip the tags.
@@ -91,7 +94,9 @@ One answer was ambiguous and I interpreted it: the user said replay "should not 
 | `CONSTRAINTS.md` | the quality bar (checks that must pass, banned shortcuts) |
 | `PRODUCT.md` | design brief: users, personality, anti-references, design principles |
 | `.claude/agents/homeklin-frontend.md` | the dedicated frontend agent's role and rules |
-| `docs/prompts/t3b-redesign.md` | the ready-to-run prompt for the T3b redesign (one-brand model, landing page, taste skill) |
+| `docs/prompts/t3b-redesign.md` | the prompt that ran T3b (one-brand model, landing page, taste skill) |
+| `docs/design.md` | the design system (tokens, components, references, decisions) |
+| `docs/image-sources.md` | source, photographer and licence of every photo in `public/images/` |
 | `AGENTS.md` | Next.js 16 agent notes (generated by Next.js) plus a pointer to `CONSTRAINTS.md` |
 | `SPEC.md` | what we are building and how we'll know it's done |
 | `tasks/plan.md` | the implementation plan, risks, and which skills to use when |

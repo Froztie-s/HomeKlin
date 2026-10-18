@@ -16,7 +16,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: design tokens (colour, type, spacing); mobile shell with bottom navigation for customer/cleaner; desktop shell with sidebar for agency/admin; one chosen design skill documented in `docs/design.md`.
   - Verify: Playwright screenshots at phone and desktop widths; no horizontal scroll at 360 px.
   - Deps: T2. Skills: `design-taste-frontend` or `impeccable`, `ui-ux-pro-max`, `frontend-ui-engineering`.
-- [ ] **T3b Redesign: one brand to the customer, landing page** (M) — user request after the T3 review (2026-10-18); prompt in `docs/prompts/t3b-redesign.md`
+- [x] **T3b Redesign: one brand to the customer, landing page** (M) — user request after the T3 review (2026-10-18); prompt in `docs/prompts/t3b-redesign.md`. Done 2026-10-18: live at `/` and `/home`, CI green; awaiting the user's review
   - Accept: `PRODUCT.md`, `SPEC.md` and the tasks describe the one-brand model; `docs/design.md` rewritten with a design read, dials and researched references (taste skill); landing page at `/` (own layout, one CTA "Pesan sekarang", real photos); customer app home at `/home`; customer nav Beranda, Layanan, Pesanan, Bantuan, Akun; no customer page contains "agensi", "agency" or "mitra"; `/agencies` and the agency "Layanan" page removed; admin "Layanan & Harga" placeholder at `/admin/services`; photos credited in `docs/image-sources.md`.
   - Verify: `npm run check`; `npm run test:e2e` (incl. the no-agency-wording test); `npm run screenshots -- t3b`; taste-skill pre-flight; the live URL serves `/` and `/home`.
   - Deps: T3. Skills: `design-taste-frontend`, `frontend-ui-engineering`, `test-driven-development`.
