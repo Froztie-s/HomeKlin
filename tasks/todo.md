@@ -8,7 +8,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: Next.js+TS+Tailwind app runs; scripts `dev build typecheck lint test test:e2e db:seed` exist; Vitest and Playwright run one placeholder test; `CONSTRAINTS.md` states the bar (no skipped tests, no suppressions); git repo initialised.
   - Verify: `npm run build && npm test && npm run test:e2e`.
   - Deps: none. Skills: `constraint-driven-development`, `git-workflow-and-versioning`, `source-driven-development`.
-- [ ] **T2 Deploy skeleton and CI** (S)
+- [x] **T2 Deploy skeleton and CI** (S) — live at https://home-klin.vercel.app; uptime monitor still to be added by the user
   - Accept: public Vercel URL serves a health page; Supabase project connected via env vars; CI runs typecheck, lint, test on push; uptime monitor pointed at `/api/health`.
   - Verify: open the URL; trigger CI; health endpoint returns 200.
   - Deps: T1, human accounts. Skills: `ci-cd-and-automation`, `source-driven-development`.

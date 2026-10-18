@@ -20,8 +20,8 @@ export async function checkHealth(env: HealthEnv, fetchFn: typeof fetch = fetch)
 async function checkSupabase({ supabaseUrl, supabaseKey }: HealthEnv, fetchFn: typeof fetch): Promise<SupabaseCheck> {
   if (!supabaseUrl || !supabaseKey) return "not_configured";
 
-  // UNVERIFIED: Supabase does not document a health endpoint. /auth/v1/health is the Auth
-  // server's health route; keys go in the `apikey` header
+  // Supabase does not document a health endpoint. /auth/v1/health is the Auth server's health
+  // route (confirmed working against our project on 2026-10-18); keys go in the `apikey` header
   // (https://supabase.com/docs/guides/api/api-keys). A paused project fails this check.
   const url = new URL("/auth/v1/health", supabaseUrl);
   try {

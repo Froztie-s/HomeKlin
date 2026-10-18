@@ -4,8 +4,8 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 
 ## Instructions for the next Claude session (read this first)
 1. Read, in this order: this file, `README.md`, `SPEC.md`, `tasks/plan.md`, `tasks/todo.md`. Do not read the two `.docx` files unless you need to check a Contract detail (see "Reading the source documents").
-2. **Current state: T1 done; T2 half done (2026-10-18).** Code is on GitHub at https://github.com/Froztie-s/HomeKlin (public, `main`), and CI (`.github/workflows/ci.yml`) passes. `/api/health` exists (200 when Supabase answers, 503 otherwise). Not deployed yet.
-3. **Next action: finish T2.** Waiting on the user for (a) the Supabase publishable key, (b) the Vercel project: the user imports the repo in the Vercel dashboard, sets `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and sends the URL, (c) an UptimeRobot monitor on `/api/health`. Then verify `/api/health` returns 200 on the live URL (this also confirms the undocumented `/auth/v1/health` probe in `src/lib/health.ts` works), tick T2, and start T3.
+2. **Current state: T1 and T2 done (2026-10-18).** Live at **https://home-klin.vercel.app** (Vercel, auto-deploys on push to `main`; per-deployment URLs sit behind Vercel login, which is expected). Code at https://github.com/Froztie-s/HomeKlin (public). CI passes. `/api/health` returns 200 with Supabase `ok` locally and live. Env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are set in Vercel and in the local git-ignored `.env`.
+3. **Next action: T3** (design direction and layout shells). Confirm with the user first. Open item from T2: the user still has to add an UptimeRobot monitor on `https://home-klin.vercel.app/api/health`. The Vercel plugin (`vercel-plugin@vercel`) is installed at user scope; the Vercel CLI is not logged in.
 4. Follow the plan's workflow: one task at a time, tests first, checkpoint reviews, tick the box in `tasks/todo.md` as tasks finish, and update this file's "Where we are" table.
 5. The user wants to **review at checkpoints** and wants things explained, because they must be able to demo and defend the product. Keep answers short and plain. Do not make large unrequested changes.
 6. Skills installed that matter (invoke with the Skill tool): `agent-skills:*` (e.g. `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `security-and-hardening`, `source-driven-development`, `code-review-and-quality`, `shipping-and-launch`), plus the UI skills `design-taste-frontend`, `impeccable` and `ui-ux-pro-max`. The mapping of skill to task is in `tasks/plan.md`. The Figma connection failed earlier, so skip the Figma skills.
@@ -22,7 +22,7 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 | Interview (what the user actually wants) | done | summarised below |
 | Spec | done, approved | `SPEC.md` |
 | Plan and task list (39 tasks, 11 phases) | done, approved | `tasks/plan.md`, `tasks/todo.md` |
-| Build | **in progress: T1 done, T2 waiting on Vercel + Supabase key** | `tasks/todo.md` |
+| Build | **in progress: T1–T2 done, next T3** | `tasks/todo.md` |
 
 ## Decisions made (do not re-ask these)
 - **Platform:** a website, not the Android app the Contract names. The client agreed, but it should still be written as a Contract addendum (Pasal 8).
