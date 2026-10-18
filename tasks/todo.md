@@ -4,7 +4,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 1: Foundation
 
-- [ ] **T1 Scaffold project and quality gates** (S)
+- [x] **T1 Scaffold project and quality gates** (S)
   - Accept: Next.js+TS+Tailwind app runs; scripts `dev build typecheck lint test test:e2e db:seed` exist; Vitest and Playwright run one placeholder test; `CONSTRAINTS.md` states the bar (no skipped tests, no suppressions); git repo initialised.
   - Verify: `npm run build && npm test && npm run test:e2e`.
   - Deps: none. Skills: `constraint-driven-development`, `git-workflow-and-versioning`, `source-driven-development`.
