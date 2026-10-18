@@ -13,6 +13,7 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "screenshots": "playwright test --config playwright.screenshots.config.ts",
     "check": "npm run typecheck && npm run lint && npm test",
     "db:seed": "node -e \"console.log('No seed yet: the seed script is added in task T6.')\""
   },

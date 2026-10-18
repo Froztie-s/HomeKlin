@@ -1,0 +1,60 @@
+import { expect, test } from "@playwright/test";
+
+// Customer pages are mobile-first: on a phone the main navigation is a bottom bar.
+const sections = [
+  { label: "Beranda", path: "/", heading: "Pilih agensi kebersihan di area Anda" },
+  { label: "Agensi", path: "/agencies", heading: "Agensi" },
+  { label: "Pesanan", path: "/orders", heading: "Pesanan" },
+  { label: "Bantuan", path: "/support", heading: "Bantuan" },
+  { label: "Akun", path: "/account", heading: "Akun" },
+];
+
+test.describe("customer bottom navigation", () => {
+  test("sits at the bottom of the screen with five labelled items", async ({ page }) => {
+    await page.goto("/");
+    const nav = page.getByRole("navigation", { name: "Navigasi utama" });
+    await expect(nav).toBeVisible();
+
+    const box = await nav.boundingBox();
+    const viewport = page.viewportSize();
+    expect(box && viewport && Math.round(box.y + box.height)).toBe(viewport?.height);
+
+    for (const { label } of sections) {
+      await expect(nav.getByRole("link", { name: label, exact: true })).toBeVisible();
+    }
+  });
+
+  test("marks only the current page", async ({ page }) => {
+    await page.goto("/");
+    const nav = page.getByRole("navigation", { name: "Navigasi utama" });
+    await expect(nav.getByRole("link", { name: "Beranda" })).toHaveAttribute("aria-current", "page");
+    await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+  });
+
+  test("navigates to every section and moves the current marker", async ({ page }) => {
+    await page.goto("/");
+    const nav = page.getByRole("navigation", { name: "Navigasi utama" });
+
+    for (const { label, path, heading } of [...sections.slice(1), sections[0]]) {
+      await nav.getByRole("link", { name: label, exact: true }).click();
+      await expect(page).toHaveURL(path);
+      await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
+      await expect(nav.getByRole("link", { name: label, exact: true })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
+      await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+    }
+  });
+
+  test("gives every item a touch target of at least 44 px", async ({ page }) => {
+    await page.goto("/");
+    const links = page.getByRole("navigation", { name: "Navigasi utama" }).getByRole("link");
+    await expect(links).toHaveCount(sections.length);
+    for (const link of await links.all()) {
+      const box = await link.boundingBox();
+      expect(box?.width).toBeGreaterThanOrEqual(44);
+      expect(box?.height).toBeGreaterThanOrEqual(44);
+    }
+  });
+});

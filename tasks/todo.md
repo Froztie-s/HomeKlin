@@ -12,7 +12,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: public Vercel URL serves a health page; Supabase project connected via env vars; CI runs typecheck, lint, test on push; uptime monitor pointed at `/api/health`.
   - Verify: open the URL; trigger CI; health endpoint returns 200.
   - Deps: T1, human accounts. Skills: `ci-cd-and-automation`, `source-driven-development`.
-- [ ] **T3 Design direction and layout shells** (M)
+- [x] **T3 Design direction and layout shells** (M) — plus a static customer home preview with sample data (user approved)
   - Accept: design tokens (colour, type, spacing); mobile shell with bottom navigation for customer/cleaner; desktop shell with sidebar for agency/admin; one chosen design skill documented in `docs/design.md`.
   - Verify: Playwright screenshots at phone and desktop widths; no horizontal scroll at 360 px.
   - Deps: T2. Skills: `design-taste-frontend` or `impeccable`, `ui-ux-pro-max`, `frontend-ui-engineering`.

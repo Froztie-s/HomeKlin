@@ -17,9 +17,10 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   // Customer and cleaner pages are mobile-first; agency and admin pages are desktop-first.
+  // `*.spec.ts` runs in both projects; `*.mobile.spec.ts` and `*.desktop.spec.ts` run only in theirs.
   projects: [
-    { name: "mobile", use: { ...devices["Pixel 9"] } },
-    { name: "desktop", use: { ...devices["Desktop Chrome"] } },
+    { name: "mobile", use: { ...devices["Pixel 9"] }, testIgnore: /\.desktop\.spec\.ts$/ },
+    { name: "desktop", use: { ...devices["Desktop Chrome"] }, testIgnore: /\.mobile\.spec\.ts$/ },
   ],
   webServer: {
     command: `npm run build && npm run start -- --port ${port}`,
