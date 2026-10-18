@@ -17,6 +17,7 @@
     "db:seed": "node -e \"console.log('No seed yet: the seed script is added in task T6.')\""
   },
   "dependencies": {
+    "lucide-react": "^1.59.0",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0"

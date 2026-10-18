@@ -5,7 +5,7 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 ## Instructions for the next Claude session (read this first)
 1. Read, in this order: this file, `README.md`, `SPEC.md`, `tasks/plan.md`, `tasks/todo.md`. Do not read the two `.docx` files unless you need to check a Contract detail (see "Reading the source documents").
 2. **Current state: T1 and T2 done (2026-10-18).** Live at **https://home-klin.vercel.app** (Vercel, auto-deploys on push to `main`; per-deployment URLs sit behind Vercel login, which is expected). Code at https://github.com/Froztie-s/HomeKlin (public). CI passes. `/api/health` returns 200 with Supabase `ok` locally and live. Env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are set in Vercel and in the local git-ignored `.env`.
-3. **Next action: T3** (design direction and layout shells). Confirm with the user first. Open item from T2: the user still has to add an UptimeRobot monitor on `https://home-klin.vercel.app/api/health`. The Vercel plugin (`vercel-plugin@vercel`) is installed at user scope; the Vercel CLI is not logged in.
+3. **In progress: T3** (design direction and layout shells), built by the dedicated frontend agent (`.claude/agents/homeklin-frontend.md`; after a restart it is the `homeklin-frontend` agent type; use it for every UI task). Design inputs are settled (see "Decisions made"). When T3 lands: review the agent's report and screenshots in `docs/screenshots/t3/`, run checks, commit, push, then stop at the T3 review with the user. Open item from T2: the user still has to add an UptimeRobot monitor on `https://home-klin.vercel.app/api/health`. The Vercel plugin (`vercel-plugin@vercel`) is installed at user scope; the Vercel CLI is not logged in.
 4. Follow the plan's workflow: one task at a time, tests first, checkpoint reviews, tick the box in `tasks/todo.md` as tasks finish, and update this file's "Where we are" table.
 5. The user wants to **review at checkpoints** and wants things explained, because they must be able to demo and defend the product. Keep answers short and plain. Do not make large unrequested changes.
 6. Skills installed that matter (invoke with the Skill tool): `agent-skills:*` (e.g. `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `security-and-hardening`, `source-driven-development`, `code-review-and-quality`, `shipping-and-launch`), plus the UI skills `design-taste-frontend`, `impeccable` and `ui-ux-pro-max`. The mapping of skill to task is in `tasks/plan.md`. The Figma connection failed earlier, so skip the Figma skills.
@@ -22,7 +22,7 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 | Interview (what the user actually wants) | done | summarised below |
 | Spec | done, approved | `SPEC.md` |
 | Plan and task list (39 tasks, 11 phases) | done, approved | `tasks/plan.md`, `tasks/todo.md` |
-| Build | **in progress: T1–T2 done, next T3** | `tasks/todo.md` |
+| Build | **in progress: T1–T2 done, T3 being built** | `tasks/todo.md` |
 
 ## Decisions made (do not re-ask these)
 - **Platform:** a website, not the Android app the Contract names. The client agreed, but it should still be written as a Contract addendum (Pasal 8).
@@ -35,6 +35,9 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 - **Payment:** simulated with the Midtrans Sandbox.
 - **Working style:** Claude builds, the user reviews at checkpoints.
 - **Everything stays in scope.** If time runs short, the lowest-priority tasks stay unfinished, in this order: real LiveKit stream, reviews, agency back office, admin grid.
+- **Design direction (2026-10-18):** brief in `PRODUCT.md`: product register; personality "trustworthy, calm, clear"; avoid busy super-app, cold corporate, CCTV look. Design skill: `impeccable` (v4.6.0 after restart). Customer side follows the user's reference (periwinkle-blue rounded header with area picker and search, round category icons, rating cards, 5-item bottom nav), adapted: provider cards become **agency cards** (choosing between agencies is central) and the promo carousel becomes a calm **current-job status card** (no promos). Agency/admin: same tokens, denser desktop sidebar layout. Font suggestion: Plus Jakarta Sans. T3 also builds a static preview of the customer home with fictional sample data (user approved).
+- **Frontend agent:** every UI task goes to the dedicated frontend agent (user request). Vercel work goes to a separate Vercel agent.
+- **Dependencies approved:** `lucide-react` (icons).
 - **Not required:** the Development Plan's Scrum process, cost estimates, iOS app, store submission, wearable camera hardware.
 
 One answer was ambiguous and I interpreted it: the user said replay "should not include the livestreaming". I took that to mean no recording of the live stream is captured and live streaming stays. The user later clarified they do want recording storage with demo clips, so the spec now reflects that.
@@ -77,6 +80,8 @@ One answer was ambiguous and I interpreted it: the user said replay "should not 
 | `Progress.md` | this file |
 | `CLAUDE.md` | standing instructions that point new sessions to this file |
 | `CONSTRAINTS.md` | the quality bar (checks that must pass, banned shortcuts) |
+| `PRODUCT.md` | design brief: users, personality, anti-references, design principles |
+| `.claude/agents/homeklin-frontend.md` | the dedicated frontend agent's role and rules |
 | `AGENTS.md` | Next.js 16 agent notes (generated by Next.js) plus a pointer to `CONSTRAINTS.md` |
 | `SPEC.md` | what we are building and how we'll know it's done |
 | `tasks/plan.md` | the implementation plan, risks, and which skills to use when |
