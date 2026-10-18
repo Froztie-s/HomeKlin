@@ -4,14 +4,14 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 
 ## Instructions for the next Claude session (read this first)
 1. Read, in this order: this file, `README.md`, `SPEC.md`, `tasks/plan.md`, `tasks/todo.md`. Do not read the two `.docx` files unless you need to check a Contract detail (see "Reading the source documents").
-2. **Current state: T1 is done (2026-10-18).** The Next.js app is scaffolded with Vitest, Playwright and `CONSTRAINTS.md`, and the folder is a git repo on `main` (local only, no remote yet). Nothing is deployed.
-3. **Next action: task T2 in `tasks/todo.md`** (deploy skeleton and CI). T2 needs the user's Vercel and Supabase accounts, and a GitHub repo for CI. Ask the user for these before starting.
+2. **Current state: T1 done; T2 half done (2026-10-18).** Code is on GitHub at https://github.com/Froztie-s/HomeKlin (public, `main`), and CI (`.github/workflows/ci.yml`) passes. `/api/health` exists (200 when Supabase answers, 503 otherwise). Not deployed yet.
+3. **Next action: finish T2.** Waiting on the user for (a) the Supabase publishable key, (b) the Vercel project: the user imports the repo in the Vercel dashboard, sets `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and sends the URL, (c) an UptimeRobot monitor on `/api/health`. Then verify `/api/health` returns 200 on the live URL (this also confirms the undocumented `/auth/v1/health` probe in `src/lib/health.ts` works), tick T2, and start T3.
 4. Follow the plan's workflow: one task at a time, tests first, checkpoint reviews, tick the box in `tasks/todo.md` as tasks finish, and update this file's "Where we are" table.
 5. The user wants to **review at checkpoints** and wants things explained, because they must be able to demo and defend the product. Keep answers short and plain. Do not make large unrequested changes.
 6. Skills installed that matter (invoke with the Skill tool): `agent-skills:*` (e.g. `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `security-and-hardening`, `source-driven-development`, `code-review-and-quality`, `shipping-and-launch`), plus the UI skills `design-taste-frontend`, `impeccable` and `ui-ux-pro-max`. The mapping of skill to task is in `tasks/plan.md`. The Figma connection failed earlier, so skip the Figma skills.
 
 ## What this project is
-- A university project for **Software Audit and Quality Assurance** (Semester 5). It is a **role-play**: another group wrote the client's Contract and Development and Quality Plan. The user is the **software house** (PIHAK PERTAMA in the Contract) and must build the product. The client and QA/UAT party is **the client group** (PIHAK KEDUA in the Contract), who assess the product against their own Contract and Quality Plan.
+- A university project for **Software Audit and Quality Assurance** (Semester 5). It is a **role-play**: another group wrote the client's Contract and Development and Quality Plan. The user is the **software house** (PIHAK PERTAMA in the Contract) and must build the product. The client and QA/UAT party is **another student group** (PIHAK KEDUA in the Contract), who assess the product against their own Contract and Quality Plan.
 - Product: **HomeKlin**, a hosted, bilingual (Indonesian default, English) website that is a middleman between customers and cleaning agencies.
 - Whether the user's own product is graded is unknown. It is not a blocker.
 - Contract term: **8 Sep to 9 Nov 2026**. From 17 Oct that leaves about 3 weeks.
@@ -22,7 +22,7 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 | Interview (what the user actually wants) | done | summarised below |
 | Spec | done, approved | `SPEC.md` |
 | Plan and task list (39 tasks, 11 phases) | done, approved | `tasks/plan.md`, `tasks/todo.md` |
-| Build | **in progress: T1 done, next T2** | `tasks/todo.md` |
+| Build | **in progress: T1 done, T2 waiting on Vercel + Supabase key** | `tasks/todo.md` |
 
 ## Decisions made (do not re-ask these)
 - **Platform:** a website, not the Android app the Contract names. The client agreed, but it should still be written as a Contract addendum (Pasal 8).
@@ -50,7 +50,10 @@ One answer was ambiguous and I interpreted it: the user said replay "should not 
 
 ## Known risks and open items
 - About 3 weeks for a large scope. The dates in `tasks/plan.md` are estimates.
-- Free-tier figures came from a web search on 17 Oct 2026 and conflicted between sources, so re-check the official pages: LiveKit free is about 5,000 participant minutes and 50 GB downstream per month with only about 60 minutes of recording-type egress. Supabase free is about 1 GB file storage and 5 GB egress, and **projects pause after about a week of inactivity** (wake it before the demo). Vercel Hobby limits are not checked yet.
+- Free-tier figures came from a web search on 17 Oct 2026 and conflicted between sources, so re-check the official pages: LiveKit free is about 5,000 participant minutes and 50 GB downstream per month with only about 60 minutes of recording-type egress. Supabase free is about 1 GB file storage and 5 GB egress, and **projects pause after about a week of inactivity** (wake it before the demo).
+- Vercel Hobby (checked 2026-10-18 on vercel.com/docs): 1M function invocations and 100 GB transfer per month, 300 s max function duration, 100 deployments per day, non-commercial use only. **Cron jobs run at most once per day, with up to 59 minutes of jitter**, which is enough for the 7-day recording cleanup (T16); anything more frequent needs Supabase pg_cron.
+- Supabase keys: use the new publishable key (`sb_publishable_...`, browser-safe) and secret key (`sb_secret_...`, server only, bypasses RLS). The legacy `anon`/`service_role` keys are deprecated by end of 2026. Supabase sends keys in the `apikey` header. Never paste the secret key in chat or commit it.
+- **Repo is public, so docs use role titles, not real names** (user's decision). Keep it that way in every file and commit message.
 - With clips standing in for the stream, the Quality Plan's 3-second latency target can only be shown once the real LiveKit source exists.
 - The Plan promises "end-to-end encryption", but a hosted stream is encrypted in transit, not end to end. T38 includes an ADR that says so plainly.
 
@@ -63,6 +66,8 @@ One answer was ambiguous and I interpreted it: the user said replay "should not 
 - Windows 11. The shell tools are PowerShell 5.1 and Git Bash. In PowerShell 5.1, `>>` writes UTF-16, so use `Out-File -Encoding ascii` or write files with the Write tool. Passing multi-line Python to `python -c` through PowerShell mangles quotes, so use a Bash heredoc (`python -I - <<'PY'`) instead.
 - Node 24.11, npm 11.6. Scaffolded with Next.js 16.4.2 and React 19.3. Next 16 ships its docs in `node_modules/next/dist/docs/`; read them before writing Next.js code (`AGENTS.md`). `@types/node` was raised to `^24` because Vitest 5 needs 22 or newer.
 - The `.docx` client documents are git-ignored (they hold names and signatures), so they stay local.
+- **npm version mismatch:** CI uses Node 24.22 with npm 11.19.1. The local npm 11.6.1 on Windows left `@emnapi/*` entries out of `package-lock.json`, which broke `npm ci` in CI. Until the user upgrades npm, add dependencies with `npx npm@11.19.1 install ...` so the lockfile stays valid.
+- Pushing works over HTTPS through Git Credential Manager (no SSH key on GitHub). `gh` CLI is not installed; the public GitHub REST API (curl) is enough to read CI run status.
 - Windows OpenSSH here is too old for GitHub's key exchange. Git for Windows' `ssh-keyscan` works. The GitHub host key has already been added to `~/.ssh/known_hosts`. The `agent-skills` plugin is installed.
 
 ## Files in this folder
