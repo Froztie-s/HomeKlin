@@ -1,6 +1,6 @@
 # HomeKlin
 
-A website that connects customers with cleaning agencies. Customers book a cleaning service, pay (simulated), and can watch their cleaner's live camera feed during the job. They can replay the recording for 7 days afterwards. Agencies manage their services and cleaners, and admins monitor jobs and answer support chats.
+A website that connects customers with partner cleaning agencies. To the customer, HomeKlin is one cleaning company: they book a HomeKlin service in their area, pay (simulated), and can watch their cleaner's live camera feed during the job. They can replay the recording for 7 days afterwards. Behind the scenes each booking is routed to a partner agency with the slot free; agencies manage their cleaners and availability, and admins set the prices, monitor jobs and answer support chats.
 
 This is a university project for **Software Audit and Quality Assurance** (Semester 5). We build the product as the software house, and the client group assesses it against their Contract and Quality Plan.
 
@@ -12,7 +12,7 @@ Planning is done. **No code has been written yet.**
 |---|---|---|
 | Customer | phone (mobile-first) | browse, book, pay, watch live, replay recordings, FAQ and chat |
 | Cleaner | phone (mobile-first) | see jobs, check in and out, stream camera |
-| Agency | desktop | manage services, prices, cleaners and assignments, view own cleaners' video |
+| Agency (partner, back office only) | desktop | manage own cleaners, availability and assignments of routed jobs, view own cleaners' video |
 | Admin | desktop | support inbox, multi-feed live grid, recording replay |
 
 The site is available in Indonesian (default) and English.

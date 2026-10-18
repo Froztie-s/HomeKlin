@@ -16,6 +16,10 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: design tokens (colour, type, spacing); mobile shell with bottom navigation for customer/cleaner; desktop shell with sidebar for agency/admin; one chosen design skill documented in `docs/design.md`.
   - Verify: Playwright screenshots at phone and desktop widths; no horizontal scroll at 360 px.
   - Deps: T2. Skills: `design-taste-frontend` or `impeccable`, `ui-ux-pro-max`, `frontend-ui-engineering`.
+- [ ] **T3b Redesign: one brand to the customer, landing page** (M) — user request after the T3 review (2026-10-18); prompt in `docs/prompts/t3b-redesign.md`
+  - Accept: `PRODUCT.md`, `SPEC.md` and the tasks describe the one-brand model; `docs/design.md` rewritten with a design read, dials and researched references (taste skill); landing page at `/` (own layout, one CTA "Pesan sekarang", real photos); customer app home at `/home`; customer nav Beranda, Layanan, Pesanan, Bantuan, Akun; no customer page contains "agensi", "agency" or "mitra"; `/agencies` and the agency "Layanan" page removed; admin "Layanan & Harga" placeholder at `/admin/services`; photos credited in `docs/image-sources.md`.
+  - Verify: `npm run check`; `npm run test:e2e` (incl. the no-agency-wording test); `npm run screenshots -- t3b`; taste-skill pre-flight; the live URL serves `/` and `/home`.
+  - Deps: T3. Skills: `design-taste-frontend`, `frontend-ui-engineering`, `test-driven-development`.
 - [ ] **T4 Bilingual switch (ID default, EN)** (S)
   - Accept: language switch in both shells; choice persists; all shell text translated; missing-key test fails the build.
   - Verify: Playwright toggles language and checks text.
@@ -35,17 +39,21 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 ## Phase 2: Catalog and order
 
 - [ ] **T7 Catalog data and API** (M)
-  - Accept: tables for services (type, price, area), schedule slots per agency; seed includes at least 6 services across 2 agencies; list endpoint supports area/type filters and keyword search; RLS: public read of active services only.
-  - Verify: Vitest for filters and RLS.
+  - Accept: tables for HomeKlin services (type, one price set by admin), service areas, partner agencies and the areas they serve, and agency availability slots per area; an "available slots" query returns, per area, the combined free slots of the agencies serving it (a slot appears only if at least one agency there has it free); seed includes at least 6 services and 2 agencies covering overlapping areas; list endpoint supports area/type filters and keyword search; RLS: public read of active services and of aggregated availability only, never of agency identity.
+  - Verify: Vitest for filters, slot aggregation (incl. an area with no free agency) and RLS.
   - Deps: T6. Skills: `api-and-interface-design`.
+- [ ] **T7b Admin services and price list** (S)
+  - Accept: admin creates and edits HomeKlin services and their prices at `/admin/services`; non-admins are refused on the server and by RLS; changes appear in the customer catalog.
+  - Verify: Playwright desktop admin edit; Vitest/RLS test that an agency or customer cannot change a price.
+  - Deps: T7. Skills: `frontend-ui-engineering`, `security-and-hardening`.
 - [ ] **T8 Customer catalog UI** (M)
-  - Accept: mobile-first browse/search/filter; price shown clearly with no hidden fees; available slots visible; empty and loading states.
-  - Verify: Playwright mobile: find a service by area and type.
+  - Accept: mobile-first browse/search/filter of HomeKlin's services; price shown clearly with no hidden fees; free slots for the chosen area visible; no agency shown or named anywhere; empty state when no slot is free in the area; loading states.
+  - Verify: Playwright mobile: find a service by area and type; the no-agency-wording test still passes.
   - Deps: T7. Skills: `frontend-ui-engineering`.
-- [ ] **T9 Booking with streaming consent** (M)
-  - Accept: customer books a slot with address; a taken slot is rejected; consent toggle must be on to submit; order status `pending_payment`.
-  - Verify: Vitest double-booking test; Playwright booking happy path and rejection.
-  - Deps: T8. Skills: `api-and-interface-design`, `doubt-driven-development` (double-booking race).
+- [ ] **T9 Booking with streaming consent and automatic routing** (M)
+  - Accept: customer books a service and a free slot with address; the booking is routed automatically to one partner agency in that area with the slot free; routing is race-safe (two simultaneous bookings for the last free capacity: exactly one succeeds, the other is told the slot is no longer free); consent toggle must be on to submit; order status `pending_payment`; the customer's response never contains the agency.
+  - Verify: Vitest concurrent-booking test and routing tests (one agency free, several free, none free); Playwright booking happy path and rejection.
+  - Deps: T8. Skills: `api-and-interface-design`, `doubt-driven-development` (routing race).
 - [ ] **T10 Midtrans Sandbox payment start** (S)
   - Accept: server creates a Snap transaction for an order; pay screen opens the sandbox payment; keys only in env vars.
   - Verify: manual sandbox payment; unit test for payload.
@@ -150,13 +158,13 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 8: Agency back office
 
-- [ ] **T27 Agency manages services, prices, slots** (M)
-  - Accept: agency CRUD on own services and slots only; changes appear in the customer catalog.
-  - Verify: Playwright; RLS test that agency A cannot edit agency B.
+- [ ] **T27 Agency manages its availability** (M)
+  - Accept: agency CRUD on its own availability slots per service area only (page "Jadwal"); changes appear in the customer's aggregated free slots; agencies cannot create services or change prices.
+  - Verify: Playwright; RLS tests that agency A cannot edit agency B's slots and that no agency can write services or prices.
   - Deps: T7. Skills: `frontend-ui-engineering`, `security-and-hardening`.
-- [ ] **T28 Agency manages cleaners and assigns jobs** (M)
-  - Accept: agency adds cleaners and assigns them to paid orders; cleaner then sees the job.
-  - Verify: Playwright agency -> cleaner flow.
+- [ ] **T28 Agency manages cleaners and assigns routed jobs** (M)
+  - Accept: agency adds its cleaners (name, photo); sees only the paid jobs routed to it; assigns one of its own cleaners; the cleaner then sees the job, and the customer sees the cleaner's name and photo as "Petugas HomeKlin" (never the agency).
+  - Verify: Playwright agency -> cleaner -> customer flow; RLS test that an agency cannot see or assign another agency's jobs.
   - Deps: T27, T17.
 - [ ] **T29 Agency video access (own cleaners only)** (M)
   - Accept: agency watches live stream and recordings of its own cleaners; other agencies' are refused.
@@ -169,7 +177,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 ## Phase 9: Reviews
 
 - [ ] **T30 Rating and review after completed job** (S)
-  - Accept: customer rates a completed job once; shown on the service; only the booking's customer can review.
+  - Accept: customer rates a completed job once, for the HomeKlin service and the cleaner ("Petugas HomeKlin"); shown on the service; never names a partner agency on customer pages; only the booking's customer can review.
   - Verify: Playwright; RLS test.
   - Deps: T12.
 

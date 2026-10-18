@@ -16,7 +16,7 @@ Sources: `HomeKlin Contract.docx`, `HomeKlin Development and Quality Plan.docx`,
 
 ## Objective
 
-A website that acts as the middleman between **customers** who want cleaning services and **cleaning agencies** who provide them. Customers browse agencies and services, book, and pay (simulated). Cleaners check in at the job and stream live video from their phone, so the customer feels safe. Customers can reach an admin through FAQ-to-chat escalation. Admins monitor live sessions and handle support.
+A website that acts as the middleman between **customers** who want cleaning services and **partner cleaning agencies** who provide the cleaners. **To the customer, HomeKlin is one cleaning company** with its own services and one price list; partner agencies are never shown or named on customer pages (decision of 2026-10-18). Customers choose a HomeKlin service and a free time slot in their area, book, and pay (simulated). HomeKlin routes each booking automatically to a partner agency in that area with the slot free, and the agency assigns one of its cleaners. Cleaners check in at the job and stream live video from their phone, so the customer feels safe. Customers can reach an admin through FAQ-to-chat escalation. Admins set the services and prices, monitor live sessions and handle support. Visitors arrive on a landing page at `/`; the customer app home is `/home`.
 
 Success means the client group can open the public URL, run every critical scenario in the Quality Plan, and hit no blocker.
 
@@ -24,18 +24,19 @@ Success means the client group can open the public URL, run every critical scena
 
 | Role | Device | Does |
 |---|---|---|
-| customer | phone (mobile-first) | browse, book, pay, watch live stream, FAQ, chat, rate |
-| cleaner | phone (mobile-first) | see assigned jobs, check in/out, stream video |
-| agency | desktop-first | manage services, prices, schedules, cleaners, assign jobs |
-| admin | desktop-first | monitor live feed, answer chat tickets, review incidents, manage FAQ |
+| visitor | phone or desktop | read the landing page at `/`, start booking with "Pesan sekarang" |
+| customer | phone (mobile-first) | browse HomeKlin services and prices, pick a free slot in their area, book, pay, watch live stream, FAQ, chat, rate the service and cleaner. Sees HomeKlin only, never a partner agency |
+| cleaner | phone (mobile-first) | see assigned jobs, check in/out, stream video. Shown to the customer as "Petugas HomeKlin" (name and photo) |
+| agency (partner) | desktop-first | back office only: manage own cleaners and availability (schedule slots per area), assign own cleaners to jobs routed to the agency, watch own cleaners' video. Does not set customer prices |
+| admin | desktop-first | manage HomeKlin's services and price list, monitor live feed, answer chat tickets, review incidents, manage FAQ |
 
 ## Capability map
 
 | Module id | Responsibility | Depends on |
 |---|---|---|
-| foundation | project setup, auth, roles, RLS, seed data, CI | none |
-| catalog | agencies, services, prices, schedules, search/filter | foundation |
-| order | booking flow, simulated Midtrans payment, order status | catalog |
+| foundation | project setup, auth, roles, RLS, seed data, CI, landing page | none |
+| catalog | HomeKlin services and one price list (set by admin), service areas, partner agencies' coverage and availability per area, free slots aggregated per area, search/filter | foundation |
+| order | booking flow, automatic race-safe routing to a partner agency with the slot free, simulated Midtrans payment, order status | catalog |
 | checkin | cleaner job list, check-in/out with location | order |
 | streaming | cleaner publishes video, customer/admin view, consent toggle | order, checkin |
 | support | FAQ with search, escalation to admin chat, ticket inbox | foundation |
@@ -83,7 +84,8 @@ Seed DB:    npm run db:seed
 ## Project Structure
 
 ```
-src/app/(customer)/    customer pages (mobile-first)
+src/app/(marketing)/   landing page at / (no app navigation)
+src/app/(customer)/    customer app pages (mobile-first), home at /home
 src/app/(cleaner)/     cleaner pages (mobile-first)
 src/app/(agency)/      agency back office (desktop-first)
 src/app/(admin)/       admin console (desktop-first)
@@ -138,9 +140,15 @@ Conventions: kebab-case files, PascalCase components, camelCase variables, snake
 
 Priority: P0 must work at hand-over, P1 should work, P2 stretch.
 
+**Landing page (P0)**
+- Visitors see a landing page at `/` that says what HomeKlin is, shows HomeKlin's services with "mulai dari" prices, how it works, safety and privacy facts (only the customer watches their own job live; recordings kept 7 days, then deleted; the cleaner checks in at the address; consent asked at booking), a short FAQ teaser linking to `/support`, and one primary action, "Pesan sekarang", into booking.
+- The customer app home is `/home`. After sign-in (T5), customers land on `/home`.
+
 **Order (P0)**
-- Customer can search and filter agencies by area and service type, see prices and available schedule slots.
-- Customer can book a service for a slot; double-booking a taken slot is rejected.
+- Customer browses **HomeKlin's services** (one price list set by admin), searches and filters by service type, and sees full prices with no hidden fees.
+- Customer picks a service area. The time slots shown are the **combined free slots of the partner agencies serving that area**. A slot no agency can serve is never offered.
+- Customer can book a service for a slot. The booking is **routed automatically** to one partner agency in that area with that slot free. Routing is race-safe: two customers booking the last free capacity of a slot at the same moment cannot both succeed, and the loser is told the slot is no longer free.
+- No customer page shows, names or hints at a partner agency. Once a cleaner is assigned, the customer sees the cleaner's name and photo as "Petugas HomeKlin".
 - Streaming consent toggle must be switched on at booking time (Plan, Risk 3).
 - Payment via Midtrans Sandbox leads to exactly one of: successful, failed, cancelled. Order status matches payment status in every case, including webhook retries (idempotent).
 
@@ -172,11 +180,14 @@ Priority: P0 must work at hand-over, P1 should work, P2 stretch.
 **Language (P0)**
 - Every page works in Indonesian and English, with a visible language switch that remembers the choice.
 
+**Admin services and prices (P0)**
+- Admin manages HomeKlin's service list and its one price list (`/admin/services`). Customers see exactly these prices.
+
 **Agency (P1)**
-- Agency manages services, prices, schedule slots and cleaners, and assigns cleaners to orders.
+- A partner agency manages its own cleaners and its availability (schedule slots per service area), and assigns its own cleaners to the jobs routed to it. Agencies do not set customer prices or manage services.
 
 **Reviews (P2)**
-- Customer can rate and review a completed job.
+- Customer can rate and review a completed job: the HomeKlin service and the cleaner ("Petugas HomeKlin"). Reviews never name a partner agency on customer pages.
 
 ## Success Criteria
 
@@ -208,6 +219,15 @@ Note on "end-to-end encryption" from the Plan: a hosted streaming server encrypt
 ## Open Questions
 
 Resolved in review: platform is a website (the client agreed); admin and agency are desktop-first; UI is bilingual; the admin multi-feed grid is included; recording and replay are simulated (no real video storage); agencies get video access for their own cleaners; customers see only their own cleaner's live stream; the whole scope stays in, built in the priority order below; whether the product is graded is not a blocker.
+
+Resolved on 2026-10-18 (user decisions; they override anything older in this file):
+1. **One brand to the customer.** Customers see HomeKlin as a single cleaning company with its own services. Partner agencies are never shown, named or hinted at on any customer page.
+2. **Routing is automatic by area.** The slots a customer sees are the combined free slots of the partner agencies serving their area; the booking goes to an agency with that slot free. A slot no agency can serve is never offered.
+3. **Pricing:** HomeKlin admin sets one price list. Agencies do not set customer prices; they manage their cleaners and availability and assign their own cleaners to the jobs routed to them.
+4. **The cleaner shown to the customer:** name and photo, as "Petugas HomeKlin", once assigned. Never the agency.
+5. **Landing page at `/`** for visitors, with one primary action "Pesan sekarang" into booking. The customer app home is `/home`; signed-in customers go to `/home` (T5).
+6. **Photos:** free stock photos (Unsplash or Pexels licence), stored in the repo and credited in `docs/image-sources.md`.
+7. **Theme:** light only.
 
 ## Build Priority
 

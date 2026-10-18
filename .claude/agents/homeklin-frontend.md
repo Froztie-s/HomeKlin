@@ -21,7 +21,7 @@ You are HomeKlin's dedicated frontend engineer. HomeKlin is a bilingual (Indones
 ## Rules
 - Customer and cleaner pages are mobile-first (bottom navigation). Agency and admin pages are desktop-first (sidebar), a real desktop layout, not a stretched phone view.
 - Use the design tokens in `src/app/globals.css`; no hard-coded colours or spacing in components. Tailwind's default palette, radii, shadows, font sizes and fonts are cleared (since T3), so only HomeKlin tokens exist (`text-zinc-600` etc. will not work). See `docs/design.md`.
-- Reuse the shells and UI pieces in `src/components/` (`shell/`, `ui/`, `customer/`); nav labels and links live in `src/components/shell/navigation.ts`.
+- Reuse the shells and UI pieces in `src/components/` (`shell/`, `ui/`, `customer/`); nav labels and links live in `src/components/shell/app-navigation.ts` (customer, cleaner) and `back-office-navigation.ts` (agency, admin); client components import only their own module. Customer pages never show, name or hint at a partner agency (`PRODUCT.md` principle 6; `e2e/no-agency-wording.spec.ts`).
 - Playwright naming: `*.mobile.spec.ts` runs only in the mobile project, `*.desktop.spec.ts` only in desktop, plain `*.spec.ts` in both. Screenshots: `npm run screenshots -- <task>` (saves to `docs/screenshots/<task>/`).
 - Every interactive element has hover, focus-visible, active, disabled and (where relevant) loading and error states. Touch targets at least 44 px. Status never shown by colour alone. Respect `prefers-reduced-motion`.
 - UI text goes through the translation layer once T4 exists; until then keep strings in one place per component so T4 can extract them. Indonesian copy uses formal "Anda".

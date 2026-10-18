@@ -1,7 +1,7 @@
 # Implementation Plan: HomeKlin Web Platform
 
 ## Overview
-Build the HomeKlin website: a hosted, bilingual (Indonesian/English) marketplace between customers and cleaning agencies. Customers and cleaners use mobile-first pages. Agencies and admins use desktop-first pages. Scope is everything the Quality Plan tests, built in the spec's priority order. Deadline: Contract end, **9 Nov 2026** (about 3 weeks from 17 Oct). Free tiers only. Demo footage is pre-recorded clips you supply.
+Build the HomeKlin website: a hosted, bilingual (Indonesian/English) middleman between customers and partner cleaning agencies. **To the customer, HomeKlin is one cleaning company** with its own services and one price list (set by admin); bookings are routed automatically to a partner agency in the customer's area with the slot free, and agencies are never shown on customer pages (decision of 2026-10-18). Visitors land on a landing page at `/`; the customer app home is `/home`. Customers and cleaners use mobile-first pages. Agencies and admins use desktop-first pages. Scope is everything the Quality Plan tests, built in the spec's priority order. Deadline: Contract end, **9 Nov 2026** (about 3 weeks from 17 Oct). Free tiers only. Demo footage is pre-recorded clips you supply.
 
 ## Architecture decisions
 - **Next.js (App Router) + TypeScript + Tailwind, on Vercel.** One codebase with route groups per role: `(customer)`, `(cleaner)`, `(agency)`, `(admin)`.
@@ -19,6 +19,7 @@ Build the HomeKlin website: a hosted, bilingual (Indonesian/English) marketplace
 | Setup (T1-T2) | `constraint-driven-development`, `git-workflow-and-versioning`, `ci-cd-and-automation` | write CONSTRAINTS.md, atomic commits, CI gates |
 | Any library code (Next, Supabase, LiveKit, Midtrans, next-intl) | `source-driven-development` | check current official docs before coding |
 | UI direction (T3) | `design-taste-frontend` **or** `impeccable` (pick one), `ui-ux-pro-max` | one-time visual direction, tokens, patterns |
+| Redesign and landing page (T3b) | `design-taste-frontend` (incl. its Section 14 pre-flight), `frontend-ui-engineering` | one-brand redesign from researched references; landing rules |
 | Every UI task | `frontend-ui-engineering` | accessible, responsive components |
 | Endpoints (orders, webhook, tokens, signed URLs) | `api-and-interface-design` | contracts and error shapes |
 | Access-control tasks | `security-and-hardening`, `doubt-driven-development` | RLS, token scoping, payment status |
@@ -46,8 +47,8 @@ Figma skills are skipped: the Figma connection failed earlier.
 
 ## Dependency graph (summary)
 ```
-T1 scaffold -> T2 deploy -> T3 design shell -> T4 i18n -> T5 auth/roles -> T6 seed
-T6 -> catalog (T7,T8) -> booking (T9) -> payment (T10,T11) -> order status (T12)
+T1 scaffold -> T2 deploy -> T3 design shell -> T3b redesign + landing -> T4 i18n -> T5 auth/roles -> T6 seed
+T6 -> catalog (T7, T7b admin prices, T8) -> booking with routing (T9) -> payment (T10,T11) -> order status (T12)
 T12 -> recordings (T13-T16)           [customer replay = top priority]
 T12 -> cleaner jobs + check-in (T17,T18) -> attaches recording at check-out
 T5 -> support (T19-T21)               [independent of orders; can run in parallel]
@@ -75,6 +76,8 @@ If behind schedule, work stops at the lowest-priority task reached (spec's Build
 | Free tiers: Supabase pauses idle projects; 1 GB storage; LiveKit 5,000 min/month | Med | keep clips small; wake project before demo; LiveKit last |
 | Role/RLS mistakes leak other users' video | High | RLS tests in the same task as each policy; T34 audit |
 | Midtrans webhook retries cause wrong status | Med | idempotent handler + unit tests (T11) |
+| No partner agency free in an area (or two customers take the last free capacity at once) | Med | only offer slots at least one agency in the area can serve (T7); race-safe routing that re-checks capacity in one transaction (T9); honest "no free slot in your area" empty state (T8); seed overlapping coverage for the demo (T6) |
+| An agency name leaks onto a customer page | Med | e2e test that no customer page contains "agensi", "agency" or "mitra" (T3b, kept green in every later task); customer APIs never return agency identity (T7, T9) |
 | Website vs Contract's Android app | Med | ADR (T38); the client agreed, get it in writing as Pasal 8 addendum |
 | WebRTC latency/recovery can't be shown with clips | Med | explicit T33 measurement once LiveKit exists |
 | Chrome DevTools MCP / accounts not set up | Low | human setup list below |
