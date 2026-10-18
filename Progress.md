@@ -1,0 +1,75 @@
+# HomeKlin: Progress and Handoff Notes
+
+Last updated: 2026-10-17. Written so that a **brand-new Claude session with no memory** can pick up exactly where we stopped.
+
+## Instructions for the next Claude session (read this first)
+1. Read, in this order: this file, `README.md`, `SPEC.md`, `tasks/plan.md`, `tasks/todo.md`. Do not read the two `.docx` files unless you need to check a Contract detail (see "Reading the source documents").
+2. **Current state: planning is finished and approved. No code exists yet.** Nothing has been built, deployed, or committed. This folder is not a git repository.
+3. **Next action: task T1 in `tasks/todo.md`** (scaffold the Next.js project and quality gates). T1 needs nothing from the user. T2 needs the user's Vercel and Supabase accounts. Confirm with the user before starting, since the user paused here on purpose.
+4. Follow the plan's workflow: one task at a time, tests first, checkpoint reviews, tick the box in `tasks/todo.md` as tasks finish, and update this file's "Where we are" table.
+5. The user wants to **review at checkpoints** and wants things explained, because they must be able to demo and defend the product. Keep answers short and plain. Do not make large unrequested changes.
+6. Skills installed that matter (invoke with the Skill tool): `agent-skills:*` (e.g. `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `security-and-hardening`, `source-driven-development`, `code-review-and-quality`, `shipping-and-launch`), plus the UI skills `design-taste-frontend`, `impeccable` and `ui-ux-pro-max`. The mapping of skill to task is in `tasks/plan.md`. The Figma connection failed earlier, so skip the Figma skills.
+
+## What this project is
+- A university project for **Software Audit and Quality Assurance** (Semester 5). It is a **role-play**: another group wrote the client's Contract and Development and Quality Plan. The user is the **software house** (PIHAK PERTAMA in the Contract) and must build the product. The client and QA/UAT party is **the client group** (PIHAK KEDUA in the Contract), who assess the product against their own Contract and Quality Plan.
+- Product: **HomeKlin**, a hosted, bilingual (Indonesian default, English) website that is a middleman between customers and cleaning agencies.
+- Whether the user's own product is graded is unknown. It is not a blocker.
+- Contract term: **8 Sep to 9 Nov 2026**. From 17 Oct that leaves about 3 weeks.
+
+## Where we are
+| Step | Status | File |
+|---|---|---|
+| Interview (what the user actually wants) | done | summarised below |
+| Spec | done, approved | `SPEC.md` |
+| Plan and task list (39 tasks, 11 phases) | done, approved | `tasks/plan.md`, `tasks/todo.md` |
+| Build | **not started** | |
+
+## Decisions made (do not re-ask these)
+- **Platform:** a website, not the Android app the Contract names. The client agreed, but it should still be written as a Contract addendum (Pasal 8).
+- **Layout:** customer and cleaner pages are mobile-first. Agency and admin pages are desktop-first (a real desktop site, not a mobile view).
+- **Scope:** everything the Quality Plan tests: booking, simulated payment, cleaner check-in/out, live viewing, FAQ with escalation to admin chat, admin monitoring (multi-feed grid), recording replay, agency back office, reviews.
+- **Stack (free tiers only):** Next.js + TypeScript + Tailwind on Vercel; Supabase (Postgres, Auth, Realtime, Storage); Midtrans Sandbox for simulated payment; LiveKit Cloud for the real live stream, built last. The user left the stack choice to Claude.
+- **Streaming:** the demo uses **pre-recorded short clips supplied by the user**, as a stand-in for a real live stream. The code uses a swappable stream source so real LiveKit can replace the clips (task priority 10). The user will present the user-side UI/UX flow and explain the clips stand in for live video.
+- **Recordings:** storage and the 7-day deletion are **real**; the footage is the demo clips. Replay is allowed for the booking's customer, the owning agency, and admin. **Customer replay is the user's top priority**, so it is Phase 3, straight after booking and payment.
+- **Video access rules:** a customer sees only their own cleaner's live stream, only during their active job. An agency sees only its own cleaners. Admin sees all, in a multi-feed grid. Each cleaner has one camera.
+- **Payment:** simulated with the Midtrans Sandbox.
+- **Working style:** Claude builds, the user reviews at checkpoints.
+- **Everything stays in scope.** If time runs short, the lowest-priority tasks stay unfinished, in this order: real LiveKit stream, reviews, agency back office, admin grid.
+- **Not required:** the Development Plan's Scrum process, cost estimates, iOS app, store submission, wearable camera hardware.
+
+One answer was ambiguous and I interpreted it: the user said replay "should not include the livestreaming". I took that to mean no recording of the live stream is captured and live streaming stays. The user later clarified they do want recording storage with demo clips, so the spec now reflects that.
+
+## Build priority (from the spec)
+1. Foundation  2. Catalog and ordering with payment  3. Customer recording replay  4. Check-in  5. Support (FAQ and chat)  6. Live viewer with demo clips  7. Admin console and grid  8. Agency back office  9. Reviews  10. Real LiveKit stream.
+
+## Things only the user can do
+- Create accounts and keys: Vercel and Supabase (needed at T2), Midtrans Sandbox (T10), LiveKit Cloud (T31).
+- Supply the short demo clips, kept small because free storage is about 1 GB (needed at T13).
+- Get the client's agreement to the website in writing.
+- Optional: set up the Chrome DevTools connection for browser checks (T35).
+
+## Known risks and open items
+- About 3 weeks for a large scope. The dates in `tasks/plan.md` are estimates.
+- Free-tier figures came from a web search on 17 Oct 2026 and conflicted between sources, so re-check the official pages: LiveKit free is about 5,000 participant minutes and 50 GB downstream per month with only about 60 minutes of recording-type egress. Supabase free is about 1 GB file storage and 5 GB egress, and **projects pause after about a week of inactivity** (wake it before the demo). Vercel Hobby limits are not checked yet.
+- With clips standing in for the stream, the Quality Plan's 3-second latency target can only be shown once the real LiveKit source exists.
+- The Plan promises "end-to-end encryption", but a hosted stream is encrypted in transit, not end to end. T38 includes an ADR that says so plainly.
+
+## Reading the source documents
+- The Contract and Plan are `.docx` files in Indonesian (the Plan is mixed Indonesian and English). The Read tool could not open the earlier PDF versions because `pdftoppm` is not installed. The `.docx` files can be read with Python's `zipfile` to read `word/document.xml` and strip the tags.
+- Key Contract facts: scope is the Check-in and Order modules only (Pasal 1); there is no fixed feature list, since scope is agreed at sprint planning on the 1st and 15th; term ends 9 Nov 2026 (Pasal 5); the developer must do internal testing before client QA/UAT (Pasal 4); the developer hands over source code, documentation, config and access (Pasal 4); additions go in as addenda (Pasal 8).
+- Key Quality Plan targets are in `SPEC.md` under Success Criteria.
+
+## Environment notes
+- Windows 11. The shell tools are PowerShell 5.1 and Git Bash. In PowerShell 5.1, `>>` writes UTF-16, so use `Out-File -Encoding ascii` or write files with the Write tool. Passing multi-line Python to `python -c` through PowerShell mangles quotes, so use a Bash heredoc (`python -I - <<'PY'`) instead.
+- Windows OpenSSH here is too old for GitHub's key exchange. Git for Windows' `ssh-keyscan` works. The GitHub host key has already been added to `~/.ssh/known_hosts`. The `agent-skills` plugin is installed.
+
+## Files in this folder
+| File | What it is |
+|---|---|
+| `README.md` | short overview of the project |
+| `Progress.md` | this file |
+| `CLAUDE.md` | standing instructions that point new sessions to this file |
+| `SPEC.md` | what we are building and how we'll know it's done |
+| `tasks/plan.md` | the implementation plan, risks, and which skills to use when |
+| `tasks/todo.md` | the 39 tasks with acceptance criteria |
+| `HomeKlin Contract.docx`, `HomeKlin Development and Quality Plan.docx` | the client's documents |
