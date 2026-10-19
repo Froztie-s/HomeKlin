@@ -3,14 +3,14 @@
 Last updated: 2026-10-18. Written so that a **brand-new Claude session with no memory** can pick up exactly where we stopped.
 
 ## Instructions for the next Claude session (read this first)
-1. Read, in this order: this file, `README.md`, `SPEC.md`, `tasks/plan.md`, `tasks/todo.md`. Do not read the two `.docx` files unless you need to check a Contract detail (see "Reading the source documents").
+1. Read, in this order: this file, `README.md`, `markdown/SPEC.md`, `markdown/tasks/plan.md`, `markdown/tasks/todo.md`. Do not read the two `.docx` files unless you need to check a Contract detail (see "Reading the source documents").
 2. **Current state: T1 and T2 done (2026-10-18).** Live at **https://home-klin.vercel.app** (Vercel, auto-deploys on push to `main`; per-deployment URLs sit behind Vercel login, which is expected). Code at https://github.com/Froztie-s/HomeKlin (public). CI passes. `/api/health` returns 200 with Supabase `ok` locally and live. Env vars `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` are set in Vercel and in the local git-ignored `.env`.
-3. **T3 done (2026-10-18)**, built by the dedicated frontend agent (`.claude/agents/homeklin-frontend.md`; after a restart it is the `homeklin-frontend` agent type; use it for every UI task). Design system in `docs/design.md`, screenshots in `docs/screenshots/t3/`. **The user found the T3 look too generic and corrected the business model** (see "Decisions made": one brand to the customer).
-   **T3b done (2026-10-18)** with the `design-taste-frontend` skill (prompt: `docs/prompts/t3b-redesign.md`): docs rewritten for the one-brand model; new design direction in `docs/design.md` (evergreen OKLCH palette, Bricolage Grotesque + Figtree, one radius rule, CSS-only motion, five researched references); landing page at `/`; customer app home at `/home` plus `/services`; `/agencies` and the agency "Layanan" page removed; admin "Layanan & Harga" placeholder at `/admin/services`; free stock photos in `public/images/` credited in `docs/image-sources.md`; an e2e test fails if any customer page says "agensi", "agency" or "mitra". Screenshots: `docs/screenshots/t3b/` (before: `docs/screenshots/t3/`). Waiting for the user's review of T3b.
+3. **T3 done (2026-10-18)**, built by the dedicated frontend agent (`.claude/agents/homeklin-frontend.md`; after a restart it is the `homeklin-frontend` agent type; use it for every UI task). Design system in `markdown/design.md`, screenshots in `docs/screenshots/t3/`. **The user found the T3 look too generic and corrected the business model** (see "Decisions made": one brand to the customer).
+   **T3b done (2026-10-18)** with the `design-taste-frontend` skill (prompt: `markdown/prompts/t3b-redesign.md`): docs rewritten for the one-brand model; new design direction in `markdown/design.md` (evergreen OKLCH palette, Bricolage Grotesque + Figtree, one radius rule, CSS-only motion, five researched references); landing page at `/`; customer app home at `/home` plus `/services`; `/agencies` and the agency "Layanan" page removed; admin "Layanan & Harga" placeholder at `/admin/services`; free stock photos in `public/images/` credited in `markdown/image-sources.md`; an e2e test fails if any customer page says "agensi", "agency" or "mitra". Screenshots: `docs/screenshots/t3b/` (before: `docs/screenshots/t3/`). Waiting for the user's review of T3b.
    **Next action: T4** (bilingual switch; needs the user's OK to add `next-intl`, already in the approved stack). Open review points from T3b are listed under "Known risks and open items". Open item from T2: the user still has to add an UptimeRobot monitor on `https://home-klin.vercel.app/api/health`. The Vercel plugin (`vercel-plugin@vercel`) is installed at user scope; the Vercel CLI is not logged in.
-4. Follow the plan's workflow: one task at a time, tests first, checkpoint reviews, tick the box in `tasks/todo.md` as tasks finish, and update this file's "Where we are" table.
+4. Follow the plan's workflow: one task at a time, tests first, checkpoint reviews, tick the box in `markdown/tasks/todo.md` as tasks finish, and update this file's "Where we are" table.
 5. The user wants to **review at checkpoints** and wants things explained, because they must be able to demo and defend the product. Keep answers short and plain. Do not make large unrequested changes.
-6. Skills installed that matter (invoke with the Skill tool): `agent-skills:*` (e.g. `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `security-and-hardening`, `source-driven-development`, `code-review-and-quality`, `shipping-and-launch`), plus the UI skills `design-taste-frontend`, `impeccable` and `ui-ux-pro-max`. The mapping of skill to task is in `tasks/plan.md`. The Figma connection failed earlier, so skip the Figma skills.
+6. Skills installed that matter (invoke with the Skill tool): `agent-skills:*` (e.g. `incremental-implementation`, `test-driven-development`, `frontend-ui-engineering`, `security-and-hardening`, `source-driven-development`, `code-review-and-quality`, `shipping-and-launch`), plus the UI skills `design-taste-frontend`, `impeccable` and `ui-ux-pro-max`. The mapping of skill to task is in `markdown/tasks/plan.md`. The Figma connection failed earlier, so skip the Figma skills.
 
 ## What this project is
 - A university project for **Software Audit and Quality Assurance** (Semester 5). It is a **role-play**: another group wrote the client's Contract and Development and Quality Plan. The user is the **software house** (PIHAK PERTAMA in the Contract) and must build the product. The client and QA/UAT party is **another student group** (PIHAK KEDUA in the Contract), who assess the product against their own Contract and Quality Plan.
@@ -22,9 +22,9 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 | Step | Status | File |
 |---|---|---|
 | Interview (what the user actually wants) | done | summarised below |
-| Spec | done, approved | `SPEC.md` |
-| Plan and task list (39 tasks, 11 phases) | done, approved | `tasks/plan.md`, `tasks/todo.md` |
-| Build | **in progress: T1–T3b done (T3b awaiting review), next T4** | `tasks/todo.md` |
+| Spec | done, approved | `markdown/SPEC.md` |
+| Plan and task list (39 tasks, 11 phases) | done, approved | `markdown/tasks/plan.md`, `markdown/tasks/todo.md` |
+| Build | **in progress: T1–T3b done (T3b awaiting review), next T4** | `markdown/tasks/todo.md` |
 
 ## Decisions made (do not re-ask these)
 - **Platform:** a website, not the Android app the Contract names. The client agreed, but it should still be written as a Contract addendum (Pasal 8).
@@ -37,16 +37,16 @@ Last updated: 2026-10-18. Written so that a **brand-new Claude session with no m
 - **Payment:** simulated with the Midtrans Sandbox.
 - **Working style:** Claude builds, the user reviews at checkpoints.
 - **Everything stays in scope.** If time runs short, the lowest-priority tasks stay unfinished, in this order: real LiveKit stream, reviews, agency back office, admin grid.
-- **One brand to the customer (2026-10-18, user correction; overrides the agency-browsing parts of SPEC.md, PRODUCT.md and the T3 build):** customers see HomeKlin as one cleaning company with its own services and never see, or learn the names of, partner agencies. Behind the scenes:
+- **One brand to the customer (2026-10-18, user correction; overrides the agency-browsing parts of markdown/SPEC.md, markdown/PRODUCT.md and the T3 build):** customers see HomeKlin as one cleaning company with its own services and never see, or learn the names of, partner agencies. Behind the scenes:
   - **Routing:** automatic by area. Customers see the combined free slots of the partner agencies in their area; the booking goes to an agency with that slot free.
   - **Pricing:** HomeKlin admin sets one price list. Agencies manage only their cleaners and availability, and assign their cleaners to the jobs routed to them.
   - **Cleaner:** shown to the customer by name and photo as "Petugas HomeKlin", never the agency.
   - **Landing page** at `/` for visitors (one CTA "Pesan sekarang"); the customer app home moves to `/home`.
   - **Photos:** free stock photos (Unsplash/Pexels).
   - **Theme:** light only.
-  - `SPEC.md`, `PRODUCT.md`, `README.md` and the tasks were updated for this in T3b (new task T7b: admin services and price list; T7, T8, T9, T27, T28, T30 reworded; new risk "no partner agency free in an area").
-- **Design direction (2026-10-18):** brief in `PRODUCT.md`: product register; personality "trustworthy, calm, clear"; avoid busy super-app, cold corporate, CCTV look. The T3 build (periwinkle header, agency cards, Plus Jakarta Sans) was judged **too generic** by the user; T3b redid it with the `design-taste-frontend` skill. Agency/admin keep a denser desktop sidebar layout.
-- **T3b design system (2026-10-18; source of truth `docs/design.md`):** evergreen brand colour (OKLCH hue 165) on green-tinted off-white, all text pairs AA; Bricolage Grotesque (headings) + Figtree (text); radius rule: interactive = pill, containers = 20 px, nested = 12 px; CSS-only motion (hero entry, press feedback, live dot), no animation library; light only. Dials: landing 5/4/4, app 3/3/5. References: MyClean, Fantastic Services, KliknClean, Justlife, Wise (what was borrowed from each is in `docs/design.md` section 8). Navigation data is split into `app-navigation.ts` and `back-office-navigation.ts` so customer bundles never carry agency labels.
+  - `markdown/SPEC.md`, `markdown/PRODUCT.md`, `README.md` and the tasks were updated for this in T3b (new task T7b: admin services and price list; T7, T8, T9, T27, T28, T30 reworded; new risk "no partner agency free in an area").
+- **Design direction (2026-10-18):** brief in `markdown/PRODUCT.md`: product register; personality "trustworthy, calm, clear"; avoid busy super-app, cold corporate, CCTV look. The T3 build (periwinkle header, agency cards, Plus Jakarta Sans) was judged **too generic** by the user; T3b redid it with the `design-taste-frontend` skill. Agency/admin keep a denser desktop sidebar layout.
+- **T3b design system (2026-10-18; source of truth `markdown/design.md`):** evergreen brand colour (OKLCH hue 165) on green-tinted off-white, all text pairs AA; Bricolage Grotesque (headings) + Figtree (text); radius rule: interactive = pill, containers = 20 px, nested = 12 px; CSS-only motion (hero entry, press feedback, live dot), no animation library; light only. Dials: landing 5/4/4, app 3/3/5. References: MyClean, Fantastic Services, KliknClean, Justlife, Wise (what was borrowed from each is in `markdown/design.md` section 8). Navigation data is split into `app-navigation.ts` and `back-office-navigation.ts` so customer bundles never carry agency labels.
 - **Frontend agent:** every UI task goes to the dedicated frontend agent (user request). Vercel work goes to a separate Vercel agent.
 - **Dependencies approved:** `lucide-react` (icons).
 - **Not required:** the Development Plan's Scrum process, cost estimates, iOS app, store submission, wearable camera hardware.
@@ -63,19 +63,19 @@ One answer was ambiguous and I interpreted it: the user said replay "should not 
 - Optional: set up the Chrome DevTools connection for browser checks (T35).
 
 ## Known risks and open items
-- About 3 weeks for a large scope. The dates in `tasks/plan.md` are estimates.
+- About 3 weeks for a large scope. The dates in `markdown/tasks/plan.md` are estimates.
 - Free-tier figures came from a web search on 17 Oct 2026 and conflicted between sources, so re-check the official pages: LiveKit free is about 5,000 participant minutes and 50 GB downstream per month with only about 60 minutes of recording-type egress. Supabase free is about 1 GB file storage and 5 GB egress, and **projects pause after about a week of inactivity** (wake it before the demo).
 - Vercel Hobby (checked 2026-10-18 on vercel.com/docs): 1M function invocations and 100 GB transfer per month, 300 s max function duration, 100 deployments per day, non-commercial use only. **Cron jobs run at most once per day, with up to 59 minutes of jitter**, which is enough for the 7-day recording cleanup (T16); anything more frequent needs Supabase pg_cron.
 - Supabase keys: use the new publishable key (`sb_publishable_...`, browser-safe) and secret key (`sb_secret_...`, server only, bypasses RLS). The legacy `anon`/`service_role` keys are deprecated by end of 2026. Supabase sends keys in the `apikey` header. Never paste the secret key in chat or commit it.
 - **Repo is public, so docs use role titles, not real names** (user's decision). Keep it that way in every file and commit message.
 - With clips standing in for the stream, the Quality Plan's 3-second latency target can only be shown once the real LiveKit source exists.
 - The Plan promises "end-to-end encryption", but a hosted stream is encrypted in transit, not end to end. T38 includes an ADR that says so plainly.
-- **T3b points for the user to review:** (1) the live-view copy says "Anda dan tim pemantau HomeKlin" instead of "only you", because `SPEC.md` lets admin (and the agency, which the customer sees as HomeKlin) watch too; (2) the hero headline is a plain sentence ("Jasa kebersihan rumah yang bisa Anda tonton langsung"); (3) the sample cleaner "Wulan Anggraeni" is a stock photo with an invented name, labelled as sample data; (4) the landing's service cards link to `/services`, and nothing is bookable until T9.
+- **T3b points for the user to review:** (1) the live-view copy says "Anda dan tim pemantau HomeKlin" instead of "only you", because `markdown/SPEC.md` lets admin (and the agency, which the customer sees as HomeKlin) watch too; (2) the hero headline is a plain sentence ("Jasa kebersihan rumah yang bisa Anda tonton langsung"); (3) the sample cleaner "Wulan Anggraeni" is a stock photo with an invented name, labelled as sample data; (4) the landing's service cards link to `/services`, and nothing is bookable until T9.
 
 ## Reading the source documents
 - The Contract and Plan are `.docx` files in Indonesian (the Plan is mixed Indonesian and English). The Read tool could not open the earlier PDF versions because `pdftoppm` is not installed. The `.docx` files can be read with Python's `zipfile` to read `word/document.xml` and strip the tags.
 - Key Contract facts: scope is the Check-in and Order modules only (Pasal 1); there is no fixed feature list, since scope is agreed at sprint planning on the 1st and 15th; term ends 9 Nov 2026 (Pasal 5); the developer must do internal testing before client QA/UAT (Pasal 4); the developer hands over source code, documentation, config and access (Pasal 4); additions go in as addenda (Pasal 8).
-- Key Quality Plan targets are in `SPEC.md` under Success Criteria.
+- Key Quality Plan targets are in `markdown/SPEC.md` under Success Criteria.
 
 ## Environment notes
 - Windows 11. The shell tools are PowerShell 5.1 and Git Bash. In PowerShell 5.1, `>>` writes UTF-16, so use `Out-File -Encoding ascii` or write files with the Write tool. Passing multi-line Python to `python -c` through PowerShell mangles quotes, so use a Bash heredoc (`python -I - <<'PY'`) instead.
@@ -86,19 +86,24 @@ One answer was ambiguous and I interpreted it: the user said replay "should not 
 - Windows OpenSSH here is too old for GitHub's key exchange. Git for Windows' `ssh-keyscan` works. The GitHub host key has already been added to `~/.ssh/known_hosts`. The `agent-skills` plugin is installed.
 
 ## Files in this folder
+All project markdown lives in `markdown/` and the client Word files in `docx/`. Only `CLAUDE.md`, `AGENTS.md`, `README.md` and `.claude/agents/` stay in the root, because tools look for them there.
+
 | File | What it is |
 |---|---|
 | `README.md` | short overview of the project |
-| `Progress.md` | this file |
+| `markdown/Progress.md` | this file |
 | `CLAUDE.md` | standing instructions that point new sessions to this file |
-| `CONSTRAINTS.md` | the quality bar (checks that must pass, banned shortcuts) |
-| `PRODUCT.md` | design brief: users, personality, anti-references, design principles |
+| `markdown/CONSTRAINTS.md` | the quality bar (checks that must pass, banned shortcuts) |
+| `markdown/PRODUCT.md` | design brief: users, personality, anti-references, design principles |
 | `.claude/agents/homeklin-frontend.md` | the dedicated frontend agent's role and rules |
-| `docs/prompts/t3b-redesign.md` | the prompt that ran T3b (one-brand model, landing page, taste skill) |
-| `docs/design.md` | the design system (tokens, components, references, decisions) |
-| `docs/image-sources.md` | source, photographer and licence of every photo in `public/images/` |
-| `AGENTS.md` | Next.js 16 agent notes (generated by Next.js) plus a pointer to `CONSTRAINTS.md` |
-| `SPEC.md` | what we are building and how we'll know it's done |
-| `tasks/plan.md` | the implementation plan, risks, and which skills to use when |
-| `tasks/todo.md` | the 39 tasks with acceptance criteria |
-| `HomeKlin Contract.docx`, `HomeKlin Development and Quality Plan.docx` | the client's documents |
+| `markdown/prompts/t3b-redesign.md` | the prompt that ran T3b (one-brand model, landing page, taste skill) |
+| `markdown/design.md` | the redesign spec (Stitch format: tokens, components, contrast table, migration plan), written 2026-10-19, not yet built |
+| `markdown/design-t3b.md` | the T3b design system as built today (what `globals.css` still implements) |
+| `markdown/references/brightnest-design.md` | the user's reference design.md (Brightnest); format and mood only, not HomeKlin content |
+| `.claude/settings.json` | sets `IMPECCABLE_CONTEXT_DIR=markdown` so the Impeccable skill still finds `PRODUCT.md` and `design.md` |
+| `markdown/image-sources.md` | source, photographer and licence of every photo in `public/images/` |
+| `AGENTS.md` | Next.js 16 agent notes (generated by Next.js) plus a pointer to `markdown/CONSTRAINTS.md` |
+| `markdown/SPEC.md` | what we are building and how we'll know it's done |
+| `markdown/tasks/plan.md` | the implementation plan, risks, and which skills to use when |
+| `markdown/tasks/todo.md` | the 39 tasks with acceptance criteria |
+| `docx/HomeKlin Contract.docx`, `docx/HomeKlin Development and Quality Plan.docx` | the client's documents |

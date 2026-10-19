@@ -1,6 +1,6 @@
 # HomeKlin Design System
 
-The visual rules for every HomeKlin screen. The tokens live in `src/app/globals.css` (Tailwind v4 `@theme`); this file explains them and how to use them. Brand brief: `PRODUCT.md`. Business model: one brand to the customer (`SPEC.md`, decisions of 2026-10-18).
+The visual rules for every HomeKlin screen. The tokens live in `src/app/globals.css` (Tailwind v4 `@theme`); this file explains them and how to use them. Brand brief: `markdown/PRODUCT.md`. Business model: one brand to the customer (`markdown/SPEC.md`, decisions of 2026-10-18).
 
 Rewritten in T3b (2026-10-18) with the `design-taste-frontend` skill, as a "Redesign - Overhaul" of the T3 visuals (the T3 version is in git history). Screenshots: `docs/screenshots/t3b/` (before: `docs/screenshots/t3/`).
 
@@ -23,7 +23,7 @@ What that means on screen:
 
 | Surface | DESIGN_VARIANCE | MOTION_INTENSITY | VISUAL_DENSITY | Why |
 |---|---|---|---|---|
-| Landing `/` | 5 | 4 | 4 | The skill's trust-first preset is 3-4 / 2-3 / 4-5 and its landing default is 7 / 6 / 4. `PRODUCT.md` says "trustworthy, calm, clear" and "calm is not lifeless", and the user found T3 too generic, so variance sits one step above trust-first (an asymmetric split hero, an offset bento, a timeline) while motion stays low: one hero entry, press feedback, the live dot. No scroll hijack, parallax or marquee. |
+| Landing `/` | 5 | 4 | 4 | The skill's trust-first preset is 3-4 / 2-3 / 4-5 and its landing default is 7 / 6 / 4. `markdown/PRODUCT.md` says "trustworthy, calm, clear" and "calm is not lifeless", and the user found T3 too generic, so variance sits one step above trust-first (an asymmetric split hero, an offset bento, a timeline) while motion stays low: one hero entry, press feedback, the live dot. No scroll hijack, parallax or marquee. |
 | Customer app | 3 | 3 | 5 | A product surface used one-handed: predictable layout, familiar patterns, motion only as feedback for state changes. |
 | Agency and admin | 2 | 2 | 7 | Desktop tools; unchanged from T3 apart from the new tokens. |
 
@@ -190,7 +190,7 @@ Layering scale (use as `z-(--z-nav)`): `sticky` 20, `nav` 30, `overlay` 40, `dra
 - Show, name or hint at a partner agency on a customer page: no agency lists, cards, names, ratings, "verified agency" badges or "our partners" copy. An e2e test fails the build if a customer page contains "agensi", "agency" or "mitra".
 - Use em dashes or en dashes in any visible text; use a hyphen, a comma or two sentences.
 - Put text on `brand-500` or lighter brand tints.
-- Add promo banners, vouchers, countdown deals, review counts, press logos or claims beyond `SPEC.md`.
+- Add promo banners, vouchers, countdown deals, review counts, press logos or claims beyond `markdown/SPEC.md`.
 - Use red, REC dots or dark grids for live video.
 - Overlay pills or labels on photos, or caption stock photos as if they were our staff.
 - Build fake screenshots out of divs, or use gradients, glass, glows or gradient text.
@@ -206,16 +206,16 @@ Layering scale (use as `z-(--z-nav)`): `sticky` 20, `nav` 30, `overlay` 40, `dra
 | Reference | What was borrowed | What was left out |
 |---|---|---|
 | [MyClean](https://www.myclean.com/) (New York; one company, own staff) | A flat "starting at" price per service right on the landing page ("Book from $92"; "Standard $92/visit") became "mulai dari Rp ..." on every service; the plain "No hidden fees, ever." promise; short, declarative copy. | Claims HomeKlin cannot make (employees, insurance, guarantee, review counts, press logos). |
-| [Fantastic Services](https://www.fantasticservices.com/cleaning/) (UK; one brand, in-house cleaners) | Photography of a cleaner at work in a real home; a short, plain "how it works" sequence. | Deal tags ("£10 OFF") and several CTA labels for the same intent (promo noise is a `PRODUCT.md` anti-reference). |
+| [Fantastic Services](https://www.fantasticservices.com/cleaning/) (UK; one brand, in-house cleaners) | Photography of a cleaner at work in a real home; a short, plain "how it works" sequence. | Deal tags ("£10 OFF") and several CTA labels for the same intent (promo noise is a `markdown/PRODUCT.md` anti-reference). |
 | [KliknClean](https://www.kliknclean.com/) (Indonesia; one operator, "Helper KliknClean") | The CTA label "Pesan Sekarang" that Indonesian customers already know; "mulai dari Rp .../jam" price wording; naming staff with the brand ("Helper KliknClean" became "Petugas HomeKlin"); steps written as verbs (Pilih Layanan, Lakukan Pembayaran). | Trust labels with no facts behind them ("Terpercaya", "Berkualitas"), the partner-logo wall, WhatsApp and app-store detours. |
 | [Justlife](https://www.justlife.com/en-AE/house-cleaning) (UAE; one brand that picks the professional) | The customer never chooses a provider ("You do not have to worry about picking a professional, as we will take care of it"), which is exactly HomeKlin's automatic routing; booking starts with location, then service, then slots, so `/home` starts with the area picker. | "Super app" framing and rating badges. |
 | [Wise](https://wise.com/) and [Wise pricing](https://wise.com/pricing/) (trust-first consumer service) | A short hero (five-word headline, one CTA); price shown upfront as the full amount ("you always know exactly what to pay upfront"); safety stated as plain facts in its own block ("Safe at every step"). | The calculator widget and the bright lime accent. |
 
-**Photos:** free stock photos (Pexels and Unsplash licences) in `public/images/`, chosen for Asian cleaners in bright homes with no visible brand logos; sources, authors and licences in `docs/image-sources.md`. Two candidates were rejected for visible brands (product bottles, a cartoon T-shirt).
+**Photos:** free stock photos (Pexels and Unsplash licences) in `public/images/`, chosen for Asian cleaners in bright homes with no visible brand logos; sources, authors and licences in `markdown/image-sources.md`. Two candidates were rejected for visible brands (product bottles, a cartoon T-shirt).
 
 **Decisions to review**
 - The hero headline states what HomeKlin is in one sentence ("Jasa kebersihan rumah yang bisa Anda tonton langsung") rather than a slogan.
-- `SPEC.md` lets admin watch every live feed and an agency watch its own cleaners, so the copy says the live view is for "Anda dan tim pemantau HomeKlin", not "only you". This keeps the landing inside `SPEC.md`; the agency stays invisible because, to the customer, its staff are part of HomeKlin.
+- `markdown/SPEC.md` lets admin watch every live feed and an agency watch its own cleaners, so the copy says the live view is for "Anda dan tim pemantau HomeKlin", not "only you". This keeps the landing inside `markdown/SPEC.md`; the agency stays invisible because, to the customer, its staff are part of HomeKlin.
 - The sample cleaner is a stock photo with an invented name, labelled as sample data, until T28 assigns real cleaners.
 
 ## 9. Screenshots

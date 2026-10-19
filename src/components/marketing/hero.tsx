@@ -9,7 +9,7 @@ const copy = {
   prices: "Lihat harga",
 };
 
-// Pexels photo, credited in docs/image-sources.md.
+// Pexels photo, credited in markdown/image-sources.md.
 const photo = {
   src: "/images/hero-wiping-counter.jpg",
   width: 1600,

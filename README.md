@@ -23,14 +23,16 @@ Next.js + TypeScript + Tailwind on Vercel, Supabase (database, login, chat, file
 For the demo, pre-recorded short clips stand in for the live camera.
 
 ## Project files
+Project markdown is in `markdown/`; the client documents are in `docx/`. `CLAUDE.md` and `README.md` stay in the root.
+
 | File | What it is |
 |---|---|
-| `HomeKlin Contract.docx` | the client's Contract (in Indonesian) |
-| `HomeKlin Development and Quality Plan.docx` | the client's development and quality plan |
-| `SPEC.md` | what we are building and how we'll know it's done |
-| `tasks/plan.md` | the implementation plan, risks, and which skills to use when |
-| `tasks/todo.md` | the 39 tasks with acceptance criteria |
-| `Progress.md` | progress notes and decisions, for resuming in a new session |
+| `docx/HomeKlin Contract.docx` | the client's Contract (in Indonesian) |
+| `docx/HomeKlin Development and Quality Plan.docx` | the client's development and quality plan |
+| `markdown/SPEC.md` | what we are building and how we'll know it's done |
+| `markdown/tasks/plan.md` | the implementation plan, risks, and which skills to use when |
+| `markdown/tasks/todo.md` | the 39 tasks with acceptance criteria |
+| `markdown/Progress.md` | progress notes and decisions, for resuming in a new session |
 | `CLAUDE.md` | standing instructions that Claude reads at the start of each session |
 
 ## Deadline

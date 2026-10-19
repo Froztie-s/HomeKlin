@@ -8,4 +8,4 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-Read `CONSTRAINTS.md` before writing code. Do not weaken it to make a change pass. Project instructions are in `CLAUDE.md`.
+Read `markdown/CONSTRAINTS.md` before writing code. Do not weaken it to make a change pass. Project instructions are in `CLAUDE.md`.

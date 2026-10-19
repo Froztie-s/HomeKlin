@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// One brand to the customer (PRODUCT.md principle 6): customer pages never name or hint at a
+// One brand to the customer (markdown/PRODUCT.md principle 6): customer pages never name or hint at a
 // partner agency. Checked in what people read, what screen readers announce, and the raw HTML.
 const customerPages = ["/", "/home", "/services", "/orders", "/support", "/account"];
 const agencyWording = /agensi|agency|mitra/i;

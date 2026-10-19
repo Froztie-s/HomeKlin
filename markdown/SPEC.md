@@ -1,7 +1,7 @@
 # Spec: HomeKlin Web Platform
 
 Status: **REVISED after first review, awaiting approval.** No code has been written.
-Sources: `HomeKlin Contract.docx`, `HomeKlin Development and Quality Plan.docx`, `HomeKlin Interview Notes.md`.
+Sources: `docx/HomeKlin Contract.docx`, `docx/HomeKlin Development and Quality Plan.docx`, `HomeKlin Interview Notes.md`.
 
 ## Assumptions (correct me before planning starts)
 
@@ -98,8 +98,9 @@ supabase/migrations/   SQL schema and RLS policies
 supabase/seed/         demo data
 tests/                 Vitest unit and integration tests
 e2e/                   Playwright specs, one per Quality Plan scenario
-docs/                  test evidence, decisions
-SPEC.md                this file
+docs/                  test evidence, screenshots
+markdown/              all project documents (spec, plan, progress, design, constraints)
+docx/                  the client's Contract and Quality Plan
 ```
 
 ## Code Style
@@ -226,7 +227,7 @@ Resolved on 2026-10-18 (user decisions; they override anything older in this fil
 3. **Pricing:** HomeKlin admin sets one price list. Agencies do not set customer prices; they manage their cleaners and availability and assign their own cleaners to the jobs routed to them.
 4. **The cleaner shown to the customer:** name and photo, as "Petugas HomeKlin", once assigned. Never the agency.
 5. **Landing page at `/`** for visitors, with one primary action "Pesan sekarang" into booking. The customer app home is `/home`; signed-in customers go to `/home` (T5).
-6. **Photos:** free stock photos (Unsplash or Pexels licence), stored in the repo and credited in `docs/image-sources.md`.
+6. **Photos:** free stock photos (Unsplash or Pexels licence), stored in the repo and credited in `markdown/image-sources.md`.
 7. **Theme:** light only.
 
 ## Build Priority

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// The landing page at / (SPEC.md "Landing page"): what HomeKlin is, services with sample prices,
+// The landing page at / (markdown/SPEC.md "Landing page"): what HomeKlin is, services with sample prices,
 // how it works, safety facts, a FAQ teaser and one primary action, "Pesan sekarang", into booking.
 const headline = "Jasa kebersihan rumah yang bisa Anda tonton langsung";
 

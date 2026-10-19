@@ -2,7 +2,7 @@
 
 The quality bar for HomeKlin. Every agent and person reads this before writing code. Do not weaken it to make a change pass.
 
-Last reviewed: 2026-10-18 (T1). Thresholds come from `SPEC.md` (Boundaries, Testing Strategy, Success Criteria).
+Last reviewed: 2026-10-18 (T1). Thresholds come from `markdown/SPEC.md` (Boundaries, Testing Strategy, Success Criteria).
 
 ## Floor (always enforced)
 
@@ -34,7 +34,7 @@ Last reviewed: 2026-10-18 (T1). Thresholds come from `SPEC.md` (Boundaries, Test
 | Metric | Today (2026-10-18) | Direction |
 |---|---|---|
 | Dev-dependency audit | 5 high, all `braces` pulled in by `eslint-config-next` (lint tooling, not shipped to users) | must not grow; recheck when Next.js updates |
-| Coverage | not measured; `SPEC.md` sets no percentage, critical paths must have e2e tests | critical paths covered |
+| Coverage | not measured; `markdown/SPEC.md` sets no percentage, critical paths must have e2e tests | critical paths covered |
 
 ## Planned (added at the named task, needs a running URL)
 

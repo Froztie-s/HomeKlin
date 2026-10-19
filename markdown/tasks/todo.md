@@ -5,7 +5,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 ## Phase 1: Foundation
 
 - [x] **T1 Scaffold project and quality gates** (S)
-  - Accept: Next.js+TS+Tailwind app runs; scripts `dev build typecheck lint test test:e2e db:seed` exist; Vitest and Playwright run one placeholder test; `CONSTRAINTS.md` states the bar (no skipped tests, no suppressions); git repo initialised.
+  - Accept: Next.js+TS+Tailwind app runs; scripts `dev build typecheck lint test test:e2e db:seed` exist; Vitest and Playwright run one placeholder test; `markdown/CONSTRAINTS.md` states the bar (no skipped tests, no suppressions); git repo initialised.
   - Verify: `npm run build && npm test && npm run test:e2e`.
   - Deps: none. Skills: `constraint-driven-development`, `git-workflow-and-versioning`, `source-driven-development`.
 - [x] **T2 Deploy skeleton and CI** (S) — live at https://home-klin.vercel.app; uptime monitor still to be added by the user
@@ -13,11 +13,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Verify: open the URL; trigger CI; health endpoint returns 200.
   - Deps: T1, human accounts. Skills: `ci-cd-and-automation`, `source-driven-development`.
 - [x] **T3 Design direction and layout shells** (M) — plus a static customer home preview with sample data (user approved)
-  - Accept: design tokens (colour, type, spacing); mobile shell with bottom navigation for customer/cleaner; desktop shell with sidebar for agency/admin; one chosen design skill documented in `docs/design.md`.
+  - Accept: design tokens (colour, type, spacing); mobile shell with bottom navigation for customer/cleaner; desktop shell with sidebar for agency/admin; one chosen design skill documented in `markdown/design.md`.
   - Verify: Playwright screenshots at phone and desktop widths; no horizontal scroll at 360 px.
   - Deps: T2. Skills: `design-taste-frontend` or `impeccable`, `ui-ux-pro-max`, `frontend-ui-engineering`.
-- [x] **T3b Redesign: one brand to the customer, landing page** (M) — user request after the T3 review (2026-10-18); prompt in `docs/prompts/t3b-redesign.md`. Done 2026-10-18: live at `/` and `/home`, CI green; awaiting the user's review
-  - Accept: `PRODUCT.md`, `SPEC.md` and the tasks describe the one-brand model; `docs/design.md` rewritten with a design read, dials and researched references (taste skill); landing page at `/` (own layout, one CTA "Pesan sekarang", real photos); customer app home at `/home`; customer nav Beranda, Layanan, Pesanan, Bantuan, Akun; no customer page contains "agensi", "agency" or "mitra"; `/agencies` and the agency "Layanan" page removed; admin "Layanan & Harga" placeholder at `/admin/services`; photos credited in `docs/image-sources.md`.
+- [x] **T3b Redesign: one brand to the customer, landing page** (M) — user request after the T3 review (2026-10-18); prompt in `markdown/prompts/t3b-redesign.md`. Done 2026-10-18: live at `/` and `/home`, CI green; awaiting the user's review
+  - Accept: `markdown/PRODUCT.md`, `markdown/SPEC.md` and the tasks describe the one-brand model; `markdown/design.md` rewritten with a design read, dials and researched references (taste skill); landing page at `/` (own layout, one CTA "Pesan sekarang", real photos); customer app home at `/home`; customer nav Beranda, Layanan, Pesanan, Bantuan, Akun; no customer page contains "agensi", "agency" or "mitra"; `/agencies` and the agency "Layanan" page removed; admin "Layanan & Harga" placeholder at `/admin/services`; photos credited in `markdown/image-sources.md`.
   - Verify: `npm run check`; `npm run test:e2e` (incl. the no-agency-wording test); `npm run screenshots -- t3b`; taste-skill pre-flight; the live URL serves `/` and `/home`.
   - Deps: T3. Skills: `design-taste-frontend`, `frontend-ui-engineering`, `test-driven-development`.
 - [ ] **T4 Bilingual switch (ID default, EN)** (S)

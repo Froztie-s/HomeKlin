@@ -2,14 +2,14 @@
 
 /*
  * HomeKlin design tokens: the single source for colour, type, spacing, radii, elevation,
- * layering and motion. The rules for using them are in docs/design.md (rewritten in T3b).
+ * layering and motion. The rules for using them are in markdown/design.md (rewritten in T3b).
  *
  * Tailwind's default palette, radii, shadows, font sizes and fonts are cleared below, so a
  * component can only use these tokens (a stray `text-zinc-600` simply does not exist).
  * `static` emits every variable even when no utility uses it, so `var(--z-nav)` etc. work.
  *
  * Light theme only (user decision, 2026-10-18): customers check on their home from a phone in
- * daylight, and agency staff work at desks in lit rooms. See docs/design.md.
+ * daylight, and agency staff work at desks in lit rooms. See markdown/design.md.
  */
 @theme static {
   --color-*: initial;

@@ -1,9 +1,9 @@
 // SAMPLE DATA for the T3b preview of the landing page and the customer app (the only source for both).
 // Everything here is fictional: the prices, durations and free slots, the running job, and the cleaner
-// "Wulan Anggraeni" (a stock photo with an invented name; credits in docs/image-sources.md).
+// "Wulan Anggraeni" (a stock photo with an invented name; credits in markdown/image-sources.md).
 // Replaced by real data in T7 (services and the HomeKlin price list), T8 (free slots per area),
 // T12 (the customer's orders) and T28 (the cleaner assigned to a job).
-// One brand to the customer (PRODUCT.md principle 6): nothing here names who supplies the cleaners.
+// One brand to the customer (markdown/PRODUCT.md principle 6): nothing here names who supplies the cleaners.
 
 export type ServiceArea = { id: string; label: string };
 

@@ -16,7 +16,7 @@ Build the HomeKlin website: a hosted, bilingual (Indonesian/English) middleman b
 | When | Skill | Use |
 |---|---|---|
 | Every task | `incremental-implementation`, `test-driven-development` | thin slices; failing test first |
-| Setup (T1-T2) | `constraint-driven-development`, `git-workflow-and-versioning`, `ci-cd-and-automation` | write CONSTRAINTS.md, atomic commits, CI gates |
+| Setup (T1-T2) | `constraint-driven-development`, `git-workflow-and-versioning`, `ci-cd-and-automation` | write markdown/CONSTRAINTS.md, atomic commits, CI gates |
 | Any library code (Next, Supabase, LiveKit, Midtrans, next-intl) | `source-driven-development` | check current official docs before coding |
 | UI direction (T3) | `design-taste-frontend` **or** `impeccable` (pick one), `ui-ux-pro-max` | one-time visual direction, tokens, patterns |
 | Redesign and landing page (T3b) | `design-taste-frontend` (incl. its Section 14 pre-flight), `frontend-ui-engineering` | one-brand redesign from researched references; landing rules |

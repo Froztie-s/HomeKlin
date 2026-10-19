@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 
-// Two families (docs/design.md section 3). Both are variable fonts, so no weights are listed.
+// Two families (markdown/design.md section 3). Both are variable fonts, so no weights are listed.
 // Bricolage Grotesque also loads its optical-size axis: large headings get the display cut.
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",

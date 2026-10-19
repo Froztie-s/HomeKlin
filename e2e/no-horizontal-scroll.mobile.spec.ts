@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// PRODUCT.md: usable from 360 px wide with no horizontal scroll. Checked on every page that exists.
+// markdown/PRODUCT.md: usable from 360 px wide with no horizontal scroll. Checked on every page that exists.
 test.use({ viewport: { width: 360, height: 740 } });
 
 const pages = [

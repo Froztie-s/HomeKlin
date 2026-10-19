@@ -5,9 +5,9 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // CONSTRAINTS.md floor: inline `eslint-disable` comments are ignored, so a rule cannot be silenced in code.
+  // markdown/CONSTRAINTS.md floor: inline `eslint-disable` comments are ignored, so a rule cannot be silenced in code.
   { linterOptions: { noInlineConfig: true } },
-  // CONSTRAINTS.md floor: no TypeScript suppression comments of any kind.
+  // markdown/CONSTRAINTS.md floor: no TypeScript suppression comments of any kind.
   {
     rules: {
       "@typescript-eslint/ban-ts-comment": [

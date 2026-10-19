@@ -9,7 +9,7 @@ import {
 import type { AppNavKey, Navigation } from "./navigation";
 
 // Customer and cleaner menus. Kept apart from the back-office menus so the pages customers
-// download never carry agency menu labels or routes (PRODUCT.md principle 6).
+// download never carry agency menu labels or routes (markdown/PRODUCT.md principle 6).
 // The first item of each list is its home: the desktop wordmark links there.
 export const appNavigation: Record<AppNavKey, Navigation> = {
   customer: {

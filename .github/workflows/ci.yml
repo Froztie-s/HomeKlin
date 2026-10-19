@@ -1,4 +1,4 @@
-# Runs the CONSTRAINTS.md checks on every push and pull request.
+# Runs the markdown/CONSTRAINTS.md checks on every push and pull request.
 # Sources: https://docs.github.com/actions/writing-workflows/workflow-syntax-for-github-actions
 #          https://playwright.dev/docs/ci
 name: CI

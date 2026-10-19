@@ -5,7 +5,7 @@ import { withNoBreak } from "@/components/ui/no-break";
 
 type Fact = { title: string; body: string; icon: LucideIcon };
 
-// Only what SPEC.md backs: who can watch, check-in at the address, 7-day recordings, consent at booking.
+// Only what markdown/SPEC.md backs: who can watch, check-in at the address, 7-day recordings, consent at booking.
 const copy = {
   title: "Rumah Anda tetap dalam pantauan Anda",
   caption: "Contoh tampilan pesanan berjalan di aplikasi HomeKlin.",

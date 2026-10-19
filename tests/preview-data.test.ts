@@ -10,7 +10,7 @@ import {
 } from "@/components/customer/home-preview-data";
 
 // The sample data shown on the landing page and in the customer app until the catalog exists.
-// One brand to the customer (PRODUCT.md principle 6): nothing in it may name a partner agency.
+// One brand to the customer (markdown/PRODUCT.md principle 6): nothing in it may name a partner agency.
 describe("preview data", () => {
   it("offers the four HomeKlin services, in the agreed order", () => {
     expect(previewServices.map((service) => service.name)).toEqual([

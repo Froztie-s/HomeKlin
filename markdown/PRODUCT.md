@@ -36,7 +36,7 @@ HomeKlin is the brand the customer trusts: to the customer it is one cleaning co
 
 ## Accessibility & Inclusion
 
-- WCAG 2.1 AA (target in `CONSTRAINTS.md`; axe check at T35): 4.5:1 text contrast, visible focus, full keyboard use on desktop surfaces.
+- WCAG 2.1 AA (target in `markdown/CONSTRAINTS.md`; axe check at T35): 4.5:1 text contrast, visible focus, full keyboard use on desktop surfaces.
 - Mobile from 360 px wide with no horizontal scroll; touch targets at least 44 px.
 - Status is never shown by colour alone (icon or text too), for colour-blind users.
 - Respect `prefers-reduced-motion`.
