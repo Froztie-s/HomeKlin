@@ -1,10 +1,13 @@
 import { CalendarCheck, History, MapPinCheck, Video, Wallet, type LucideIcon } from "lucide-react";
 import { withNoBreak } from "@/components/ui/no-break";
+import { anchorOffset, landingContainer, landingSection } from "./landing-layout";
 
 type Step = { title: string; body: string; icon: LucideIcon };
 
 const copy = {
-  title: "Cara kerjanya",
+  titleStart: "Cara kerjanya, dalam",
+  titleAccent: "lima langkah",
+  lead: "Dari memesan sampai memutar ulang rekaman, semuanya dari ponsel Anda.",
   steps: [
     { title: "Pesan", body: "Pilih layanan, area, dan jadwal yang masih kosong.", icon: CalendarCheck },
     { title: "Bayar", body: "Bayar di muka. Harga tampil penuh sebelum Anda membayar.", icon: Wallet },
@@ -26,41 +29,47 @@ const copy = {
   ] satisfies Step[],
 };
 
-// An ordered timeline: the verb is the label (no "Step 1"). Horizontal with a connecting line from
-// 1024 px; a vertical line down the left on phones and tablets.
+// Five cards, no empty cell at any width: five columns from 1280 px; three then two from 768 px
+// (a six-column grid, the first three span two, the last two span three); one column on phones.
+const spans = ["md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-3", "md:col-span-3"];
+
+// The full-bleed dark band (markdown/design.md, Layout): the heading with the one supporting sentence
+// stacked under it, then the steps as raised cards with a lime icon well and a large faint numeral.
+// The verb is each step's label; the numerals only echo the order the list already gives.
 export function HowItWorks() {
   return (
     <section
       id="cara-kerja"
       aria-labelledby="cara-kerja-title"
-      className="scroll-mt-16 border-y border-border bg-surface"
+      className={`${anchorOffset} bg-band text-on-band`}
     >
-      <div className="mx-auto w-full max-w-page px-safe py-16 lg:px-gutter-wide lg:py-24">
+      <div className={`${landingContainer} ${landingSection}`}>
         <h2
           id="cara-kerja-title"
-          className="font-display text-3xl font-semibold tracking-display text-ink lg:text-4xl"
+          className="max-w-3xl font-display text-headline-sm font-semibold md:text-headline-md xl:text-headline"
         >
-          {copy.title}
+          {copy.titleStart} <em className="serif-accent text-lime">{copy.titleAccent}</em>
         </h2>
-        <ol className="mt-10 grid max-w-prose lg:mt-14 lg:max-w-none lg:grid-cols-5 lg:gap-8">
+        <p className="mt-5 max-w-prose text-body-lg text-on-band-muted">{copy.lead}</p>
+
+        <ol className="mt-10 grid gap-5 md:grid-cols-6 lg:mt-14 xl:grid-cols-5">
           {copy.steps.map((step, index) => {
             const Icon = step.icon;
-            const last = index === copy.steps.length - 1;
             return (
-              <li key={step.title} className="relative flex gap-4 pb-8 last:pb-0 lg:flex-col lg:gap-5 lg:pb-0">
-                {last ? null : (
-                  <span
-                    aria-hidden="true"
-                    className="absolute top-12 bottom-0 left-6 w-0.5 -translate-x-1/2 bg-brand-300 lg:top-6 lg:-right-8 lg:bottom-auto lg:left-12 lg:h-0.5 lg:w-auto lg:translate-x-0 lg:-translate-y-1/2"
-                  />
-                )}
-                <span className="relative flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-50 text-brand-700 ring-1 ring-brand-200">
-                  <Icon className="size-5" aria-hidden="true" />
-                </span>
-                <div className="pt-2.5 lg:pt-0">
-                  <h3 className="text-lg font-semibold text-ink">{step.title}</h3>
-                  <p className="mt-1 text-base text-ink-muted">{withNoBreak(step.body, "check-in")}</p>
+              <li
+                key={step.title}
+                className={`flex flex-col rounded-lg border border-on-band/8 bg-band-raised p-6 xl:col-span-1 ${spans[index]}`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <span className="flex size-10 items-center justify-center rounded-sm bg-lime text-on-lime">
+                    <Icon className="size-5" aria-hidden="true" />
+                  </span>
+                  <span aria-hidden="true" className="font-display text-fact font-semibold text-on-band/15">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
                 </div>
+                <h3 className="mt-8 font-display text-lg font-semibold">{step.title}</h3>
+                <p className="mt-2 text-body text-on-band-muted">{withNoBreak(step.body, "check-in")}</p>
               </li>
             );
           })}

@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 // The landing page at / (markdown/SPEC.md "Landing page"): what HomeKlin is, services with sample prices,
 // how it works, safety facts, a FAQ teaser and one primary action, "Pesan sekarang", into booking.
+// Built on the redesign system in markdown/design.md (T3c).
 const headline = "Jasa kebersihan rumah yang bisa Anda tonton langsung";
 
 test.describe("landing page", () => {
@@ -26,6 +27,38 @@ test.describe("landing page", () => {
     expect(box!.y + box!.height).toBeLessThanOrEqual(viewport!.height);
   });
 
+  test("uses the redesign type: Inter Tight headline, Instrument Serif italic for the benefit words", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.evaluate(() => document.fonts.ready);
+    const heading = page.getByRole("heading", { level: 1 });
+    const accent = heading.locator("em");
+    await expect(accent).toHaveText("tonton langsung");
+
+    const headingFont = await heading.evaluate((element) => getComputedStyle(element).fontFamily);
+    const accentStyle = await accent.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { family: style.fontFamily, style: style.fontStyle };
+    });
+    expect(headingFont).toMatch(/Inter[ _]Tight/);
+    expect(accentStyle.family).toMatch(/Instrument[ _]Serif/);
+    expect(accentStyle.style).toBe("italic");
+  });
+
+  test("sits on the warm cream canvas", async ({ page }) => {
+    await page.goto("/");
+    const background = await page.locator("main").evaluate((element) => {
+      // The first ancestor (or the element itself) that paints a background.
+      for (let node: Element | null = element; node; node = node.parentElement) {
+        const colour = getComputedStyle(node).backgroundColor;
+        if (colour !== "rgba(0, 0, 0, 0)" && colour !== "transparent") return colour;
+      }
+      return "";
+    });
+    expect(background).toBe("rgb(243, 242, 234)");
+  });
+
   test("sends every order button to the booking home", async ({ page }) => {
     await page.goto("/");
     const ctas = page.getByRole("link", { name: "Pesan sekarang" });
@@ -44,6 +77,15 @@ test.describe("landing page", () => {
       .toBeGreaterThan(0);
   });
 
+  test("shows a sample running job in the hero, labelled as a sample", async ({ page }) => {
+    await page.goto("/");
+    const job = page.getByRole("region", { name: headline }).getByRole("group", { name: "Contoh pesanan berjalan" });
+    await expect(job).toBeVisible();
+    await expect(job.getByText("Contoh", { exact: true })).toBeVisible();
+    await expect(job.getByText("Sedang berlangsung")).toBeVisible();
+    await expect(job.getByText("Petugas HomeKlin", { exact: true })).toBeVisible();
+  });
+
   test("has its own header and no app navigation", async ({ page }) => {
     await page.goto("/");
     await expect(page.getByRole("navigation", { name: "Navigasi utama" })).toHaveCount(0);
@@ -57,22 +99,42 @@ test.describe("landing page", () => {
     expect(visible.length).toBeGreaterThanOrEqual(6);
     for (const link of visible) {
       const box = await link.boundingBox();
-      expect(box?.height, await link.textContent() ?? "").toBeGreaterThanOrEqual(44);
+      expect(box?.height, (await link.textContent()) ?? "").toBeGreaterThanOrEqual(44);
     }
+  });
+
+  test("states four safety facts in a row under the hero", async ({ page }) => {
+    await page.goto("/");
+    const facts = page.getByRole("region", { name: "Di setiap pesanan" }).getByRole("listitem");
+    await expect(facts).toHaveCount(4);
+    await expect(facts.nth(0)).toContainText("tim pemantau HomeKlin");
+    await expect(facts.nth(1)).toContainText("check-in");
+    await expect(facts.nth(2)).toContainText("7 hari");
+    await expect(facts.nth(3)).toContainText("Persetujuan");
   });
 
   test("lists the four services with a starting price and marks the prices as samples", async ({ page }) => {
     await page.goto("/");
-    const services = page.getByRole("region", { name: "Layanan dan harga" });
+    const services = page.getByRole("region", { name: "Layanan dan harga, tanpa kejutan" });
     const items = services.getByRole("listitem");
     await expect(items).toHaveCount(4);
     for (const item of await items.all()) {
       await expect(item.getByRole("heading", { level: 3 })).toBeVisible();
       await expect(item).toContainText("mulai dari");
       await expect(item.getByText(/^Rp\s[\d.]+$/)).toBeVisible();
+      await expect(item.getByRole("link")).toHaveAttribute("href", "/services");
     }
     await expect(services.getByText(/Harga contoh selama masa pratinjau/)).toBeVisible();
     await expect(services.getByRole("link", { name: "Lihat semua layanan" })).toHaveAttribute("href", "/services");
+  });
+
+  test("explains safety beside a photo, with the 7-day replay and the check-in", async ({ page }) => {
+    await page.goto("/");
+    const safety = page.getByRole("region", { name: "Rumah Anda tetap dalam pantauan Anda" });
+    await expect(safety.getByRole("img")).toBeVisible();
+    await expect(safety).toContainText("7 hari");
+    await expect(safety).toContainText("check-in");
+    await expect(safety).toContainText("persetujuan");
   });
 
   test("explains how it works in five steps, in order", async ({ page }) => {
@@ -87,19 +149,9 @@ test.describe("landing page", () => {
     ]);
   });
 
-  test("states the safety and privacy facts next to a live job card", async ({ page }) => {
-    await page.goto("/");
-    const safety = page.getByRole("region", { name: "Rumah Anda tetap dalam pantauan Anda" });
-    await expect(safety.getByRole("listitem")).toHaveCount(4);
-    await expect(safety).toContainText("7 hari");
-    await expect(safety).toContainText("Persetujuan");
-    const job = safety.getByRole("region", { name: "Pesanan berjalan" });
-    await expect(job.getByText("Petugas HomeKlin", { exact: true })).toBeVisible();
-  });
-
   test("answers four common questions and links to the full help page", async ({ page }) => {
     await page.goto("/");
-    const faq = page.getByRole("region", { name: "Pertanyaan umum" });
+    const faq = page.getByRole("region", { name: "Ada pertanyaan? Ini jawabannya." });
     const questions = faq.locator("details");
     await expect(questions).toHaveCount(4);
 
@@ -109,6 +161,20 @@ test.describe("landing page", () => {
     await expect(first.getByText(/nama dan fotonya tampil/)).toBeVisible();
 
     await expect(faq.getByRole("link", { name: "Lihat semua pertanyaan" })).toHaveAttribute("href", "/support");
+  });
+
+  test("ends with one call to action and a footer that says the data are samples", async ({ page }) => {
+    await page.goto("/");
+    const cta = page.getByRole("region", { name: "Pilih jadwal yang masih kosong di area Anda" });
+    await expect(cta.getByRole("link", { name: "Pesan sekarang" })).toHaveAttribute("href", "/home");
+    await expect(page.getByRole("contentinfo")).toContainText("Harga dan data di situs ini adalah contoh");
+  });
+
+  test("uses no em dash or en dash in visible text", async ({ page }) => {
+    await page.goto("/");
+    const text = await page.evaluate(() => document.body.innerText);
+    expect(text.length).toBeGreaterThan(500);
+    expect(text).not.toMatch(/[–—]/);
   });
 
   test("has no dead links", async ({ page, request }) => {

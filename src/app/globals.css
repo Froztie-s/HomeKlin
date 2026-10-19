@@ -2,7 +2,8 @@
 
 /*
  * HomeKlin design tokens: the single source for colour, type, spacing, radii, elevation,
- * layering and motion. The rules for using them are in markdown/design.md (rewritten in T3b).
+ * layering and motion. The T3b rules are in markdown/design-t3b.md; the redesign (T3c) is in
+ * markdown/design.md and is live on the landing page through `.theme-forest` (see below).
  *
  * Tailwind's default palette, radii, shadows, font sizes and fonts are cleared below, so a
  * component can only use these tokens (a stray `text-zinc-600` simply does not exist).
@@ -63,10 +64,35 @@
   /* Star rating icon only (T30). The number next to it carries the meaning, in ink. */
   --color-rating: oklch(0.7 0.15 70);
 
+  /* Redesign palette (markdown/design.md, 2026-10-19): forest green for trust, lime for the one
+     action, cream for calm. New names only; the names the redesign shares with T3b (canvas, ink,
+     border, ...) get their new values inside .theme-forest below. Contrast ratios: design.md. */
+  --color-primary: #1b3d2b; /* forest: primary buttons, selected cards; white on it 12.0:1 */
+  --color-primary-container: #22513a; /* CTA shell; cream on it 8.1:1 */
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #f3f2ea;
+  --color-lime: #d8ef6b; /* the one action per viewport; text colour only on the dark greens */
+  --color-on-lime: #14271c; /* 12.3:1 on lime */
+  --color-lime-wash: #e6edc8; /* icon wells, FAQ toggle */
+  --color-on-lime-wash: #1b3d2b; /* 9.9:1 on lime-wash */
+  --color-mint: #2f7a55; /* check icons, status graphics; white on it 5.2:1 */
+  --color-mint-bright: #3c8a64; /* the live dot only; never under text */
+  --color-card: #ffffff; /* cards, FAQ rows, panels on cream */
+  --color-field: #f7f6f0; /* input fill inside a white panel */
+  --color-sunken: #ecebe2; /* separators, sunken chips, table headers */
+  --color-band: #132a1f; /* dark bands, footer, utility bar */
+  --color-band-raised: #24443a; /* step cards on a dark band */
+  --color-on-band: #f3f2ea; /* 13.6:1 on band */
+  --color-on-band-muted: #b3c4b8; /* 8.3:1 on band, 5.9:1 on band-raised, 6.6:1 on primary */
+  --color-outline: #1b3d2b; /* outline buttons and circular icon buttons */
+  --color-wordmark-ghost: #24503a; /* the oversized footer wordmark; decorative, aria-hidden */
+
   /* Type: Figtree for text, Bricolage Grotesque for display (h1, h2, wordmark, landing prices). */
   --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-bricolage), var(--font-figtree), ui-sans-serif, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Redesign accent: Instrument Serif italic for the one to three benefit words in a headline. */
+  --font-accent: var(--font-instrument-serif), ui-serif, Georgia, serif;
   --text-xs: 0.75rem;
   --text-xs--line-height: 1rem;
   --text-sm: 0.875rem;
@@ -89,6 +115,46 @@
   --text-6xl--line-height: 3.75rem;
   --tracking-display: -0.02em; /* display sizes (text-3xl and up) */
 
+  /* Redesign type scale (markdown/design.md, Typography). Each size carries its own leading and
+     tracking, so `text-display` alone sets the hero. Display and headline leading is at least 1.1
+     so the italic accent words never clip their descenders (the "g" in "langsung"). Phone, tablet
+     and desktop steps are separate tokens (display-sm / -md / display), chosen per breakpoint in
+     the component. */
+  --text-display: 4rem; /* 64 px hero h1 from 1280 px */
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.045em;
+  --text-display-md: 3.25rem; /* 52 px */
+  --text-display-md--line-height: 1.1;
+  --text-display-md--letter-spacing: -0.04em;
+  --text-display-sm: 2.5rem; /* 40 px, phones */
+  --text-display-sm--line-height: 1.1;
+  --text-display-sm--letter-spacing: -0.035em;
+  --text-headline: 3rem; /* 48 px landing h2 from 1280 px */
+  --text-headline--line-height: 1.1;
+  --text-headline--letter-spacing: -0.035em;
+  --text-headline-md: 2.5rem; /* 40 px */
+  --text-headline-md--line-height: 1.1;
+  --text-headline-md--letter-spacing: -0.03em;
+  --text-headline-sm: 1.875rem; /* 30 px, phones */
+  --text-headline-sm--line-height: 1.12;
+  --text-headline-sm--letter-spacing: -0.025em;
+  --text-fact: 2.5rem; /* fact chip figure */
+  --text-fact--line-height: 1;
+  --text-fact--letter-spacing: -0.03em;
+  --text-price: 1.5rem; /* prices on service cards: "Rp 250.000" and the duration share one line */
+  --text-price--line-height: 1;
+  --text-price--letter-spacing: -0.03em;
+  --text-title: 1.375rem; /* 22 px card titles */
+  --text-title--line-height: 1.25;
+  --text-title--letter-spacing: -0.015em;
+  --text-body-lg: 1.0625rem; /* 17 px landing lead */
+  --text-body-lg--line-height: 1.6;
+  --text-body: 0.9375rem; /* 15 px card and FAQ body */
+  --text-body--line-height: 1.55;
+  --text-eyebrow: 0.75rem; /* 12 px uppercase label, at most one per three sections */
+  --text-eyebrow--line-height: 1.2;
+  --text-eyebrow--letter-spacing: 0.1em;
+
   /* Spacing: a 4 px base (Tailwind's numeric scale) plus named layout values. */
   --spacing: 0.25rem;
   --spacing-gutter: 1rem; /* phone side gutter */
@@ -97,22 +163,32 @@
   --spacing-bottom-nav: 4rem; /* bottom navigation height, before the safe-area inset */
   --spacing-top-bar: 3.5rem; /* top bar height */
   --spacing-sidebar: 16rem; /* back-office sidebar width */
+  --spacing-gutter-landing: 5rem; /* redesign landing side margin from 1280 px */
+  --spacing-utility-bar: 2.75rem; /* redesign landing utility bar (44 px, so its link is a full target) */
 
   /* Content widths. Running text uses Tailwind's max-w-prose (65ch). */
   --container-page: 76rem; /* landing page */
   --container-content: 60rem; /* customer and cleaner pages */
   --container-dashboard: 76rem; /* agency and admin pages */
+  --container-landing: 80rem; /* redesign landing: 1280 px, which leaves 80 px gutters at 1440 px */
 
   /* Radii, one rule: interactive = pill (full), containers = xl (20 px), nested inside a
      container = md (12 px). No other radius exists. */
   --radius-md: 0.75rem;
   --radius-xl: 1.25rem;
   --radius-full: 9999px;
+  /* Redesign radii (markdown/design.md, Shapes): sm 8, md 14, lg 20, xl 28, full. sm and lg are new;
+     md and xl take their new sizes inside .theme-forest. */
+  --radius-sm: 0.5rem;
+  --radius-lg: 1.25rem;
 
   /* Elevation: few, soft, tinted with the ink hue. Never black. */
   --shadow-card: 0 1px 2px oklch(0.24 0.025 165 / 0.05), 0 2px 8px oklch(0.24 0.025 165 / 0.05);
   --shadow-raised: 0 1px 3px oklch(0.24 0.025 165 / 0.06), 0 12px 32px oklch(0.24 0.025 165 / 0.12);
   --shadow-nav: 0 -1px 12px oklch(0.24 0.025 165 / 0.06);
+  /* Redesign: the one floating fragment (the hero's sample job card) and a service card's hover lift. */
+  --shadow-float: 0 16px 40px rgb(20 39 28 / 0.1);
+  --shadow-card-hover: 0 10px 28px rgb(20 39 28 / 0.08);
 
   /* Layering, lowest to highest. Use as z-(--z-nav). */
   --z-sticky: 20;
@@ -177,6 +253,59 @@
     color: var(--color-ink-faint);
     opacity: 1;
   }
+}
+
+/*
+ * The redesign (markdown/design.md, 2026-10-19), scoped. A page opts in with class `theme-forest` on
+ * its outer wrapper (the landing page does, in src/app/(marketing)/layout.tsx). Inside it, the token
+ * names the redesign shares with T3b take their new values, so `bg-canvas` is cream and `rounded-xl`
+ * is 28 px there, while the customer, cleaner, agency and admin pages keep the T3b look until their
+ * own migration (design.md "Migration notes"). After that, these values move into @theme above.
+ */
+.theme-forest {
+  --color-canvas: #f3f2ea; /* warm cream page */
+  --color-ink: #14271c; /* 14.0:1 on canvas */
+  --color-ink-muted: #55625a; /* 5.7:1 on canvas, 5.35:1 on sunken */
+  --color-ink-faint: #55625a; /* merged with ink-muted in the redesign */
+  --color-border: #e2e2d8; /* decorative hairlines only */
+  --color-border-control: #7a877e; /* control edges: 3.7:1 on white */
+  --color-focus: var(--color-primary); /* 10.7:1 on canvas; dark bands set it to lime */
+  --color-success: #276b49;
+  --color-success-surface: #e4f3ea;
+  --color-live: var(--color-success); /* 5.6:1 on live-surface */
+  --color-live-surface: var(--color-success-surface);
+  --color-live-dot: var(--color-mint-bright);
+  --radius-md: 0.875rem; /* 14 px: status card, fact chips, FAQ rows, nested photos */
+  --radius-xl: 1.75rem; /* 28 px: hero photo, CTA shell, section bands */
+  /* The next/font variables are set on this same wrapper, so the font tokens must be declared here
+     too: a custom property that refers to another resolves where it is declared, and on :root the
+     --font-inter* variables do not exist. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter-tight), var(--font-inter), ui-sans-serif, sans-serif;
+  --font-accent: var(--font-instrument-serif), ui-serif, Georgia, serif;
+}
+
+/* Inside a dark band the focus ring turns lime, which keeps 3:1 or better against every dark green. */
+@utility on-dark-focus {
+  --color-focus: var(--color-lime);
+}
+
+/* The italic benefit words in a headline: Instrument Serif, about 10% larger so the x-heights match
+   the grotesk beside it. Always one to three words (design.md, Typography). */
+@utility serif-accent {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.1em;
+  letter-spacing: -0.01em;
+}
+
+/* The oversized footer wordmark, cropped by the footer's bottom edge. Sized to the viewport so it
+   always spans the footer; decorative and aria-hidden. */
+@utility text-ghost {
+  font-size: clamp(5rem, 21vw, 19rem);
+  line-height: 0.78;
+  letter-spacing: -0.05em;
 }
 
 /* Stagger for the hero entry: animate-rise plus animate-delay-80, animate-delay-160 (ms). */

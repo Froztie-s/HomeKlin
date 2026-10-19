@@ -1,8 +1,12 @@
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, Minus, Plus } from "lucide-react";
 import Link from "next/link";
+import { Eyebrow } from "./eyebrow";
+import { anchorOffset, landingContainer, landingSection } from "./landing-layout";
 
 const copy = {
-  title: "Pertanyaan umum",
+  eyebrow: "Pertanyaan umum",
+  titleStart: "Ada pertanyaan?",
+  titleAccent: "Ini jawabannya.",
   all: "Lihat semua pertanyaan",
   questions: [
     {
@@ -25,41 +29,52 @@ const copy = {
   ],
 };
 
-// Four native disclosures (keyboard and screen-reader support for free) and a link to the help page.
+// FAQ (markdown/design.md, Layout): the heading and the help link on 4 of 12 columns, four native
+// disclosures on 8 (keyboard and screen-reader support for free), 12 px apart. A lime-wash "+" marks
+// a closed question, a dark "-" the open one. Stacked on phones and tablets.
 export function FaqTeaser() {
   return (
     <section
       id="pertanyaan"
       aria-labelledby="pertanyaan-title"
-      className="mx-auto w-full max-w-page scroll-mt-16 px-safe pb-16 lg:px-gutter-wide lg:pb-24"
+      className={`${landingContainer} ${landingSection} ${anchorOffset}`}
     >
-      <div className="grid gap-8 lg:grid-cols-12 lg:gap-12">
+      <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
         <div className="lg:col-span-4">
+          <Eyebrow>{copy.eyebrow}</Eyebrow>
           <h2
             id="pertanyaan-title"
-            className="font-display text-3xl font-semibold tracking-display text-ink lg:text-4xl"
+            className="mt-4 font-display text-headline-sm font-semibold text-ink md:text-headline-md"
           >
-            {copy.title}
+            {copy.titleStart} <em className="serif-accent">{copy.titleAccent}</em>
           </h2>
           <Link
             href="/support"
-            className="-ml-1 mt-4 inline-flex min-h-touch items-center gap-1.5 rounded-full px-1 text-base font-semibold text-brand-700 transition-colors duration-150 ease-out-quart hover:text-brand-800 active:text-brand-900"
+            className="group mt-6 inline-flex min-h-touch items-center gap-2 rounded-full text-sm font-semibold text-ink"
           >
             {copy.all}
-            <ArrowRight className="size-4" aria-hidden="true" />
+            <span
+              aria-hidden="true"
+              className="flex size-8 items-center justify-center rounded-full bg-primary text-on-primary transition-transform duration-150 ease-out-quart group-hover:translate-x-0.5"
+            >
+              <ArrowRight className="size-4" />
+            </span>
           </Link>
         </div>
-        <div className="divide-y divide-border rounded-xl border border-border bg-surface lg:col-span-8">
+        <div className="flex flex-col gap-3 lg:col-span-8">
           {copy.questions.map((item) => (
-            <details key={item.question} className="group">
-              <summary className="flex min-h-touch cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-5 py-4 text-base font-semibold text-ink -outline-offset-2 transition-colors duration-150 ease-out-quart hover:text-brand-700 active:text-brand-800 md:px-6 [&::-webkit-details-marker]:hidden">
+            <details key={item.question} className="group rounded-md bg-card">
+              <summary className="flex min-h-touch cursor-pointer list-none items-center justify-between gap-4 rounded-md px-5 py-5 text-base font-semibold text-ink md:px-6 [&::-webkit-details-marker]:hidden">
                 {item.question}
-                <ChevronDown
-                  className="size-5 shrink-0 text-ink-faint transition-transform duration-200 ease-out-quart group-open:rotate-180 group-hover:text-brand-700"
+                <span
                   aria-hidden="true"
-                />
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full bg-lime-wash text-on-lime-wash transition-colors duration-150 ease-out-quart group-open:bg-band group-open:text-on-band"
+                >
+                  <Plus className="size-3.5 group-open:hidden" strokeWidth={2.5} />
+                  <Minus className="hidden size-3.5 group-open:block" strokeWidth={2.5} />
+                </span>
               </summary>
-              <p className="max-w-prose px-5 pb-5 text-base text-ink-muted md:px-6">{item.answer}</p>
+              <p className="max-w-prose px-5 pb-5 text-body text-ink-muted md:px-6">{item.answer}</p>
             </details>
           ))}
         </div>

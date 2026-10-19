@@ -83,8 +83,8 @@ typography:
     lineHeight: 1.0
     letterSpacing: -0.03em
   price:
-    fontFamily: "Inter Tight"     # Prices on the landing and service cards. Always tabular-nums and formatRupiah
-    fontSize: 32px
+    fontFamily: "Inter Tight"     # Prices on service cards. Always tabular-nums and formatRupiah. 24px (not 32) so "Rp 250.000" and the duration share one line in a 265px card
+    fontSize: 24px
     fontWeight: 600
     lineHeight: 1.0
     letterSpacing: -0.03em
@@ -165,7 +165,7 @@ spacing:
   grid-gap: 20px         # Card grid gap
   touch: 44px            # Minimum touch target
   bottom-nav: 64px       # Customer and cleaner bottom navigation, before the safe-area inset
-  top-bar: 36px          # Landing utility bar (desktop only)
+  top-bar: 44px          # Landing utility bar (desktop only). 44px, not the reference's 36px, so its link is a full touch target
   sidebar: 256px         # Back-office sidebar
 
 shadows:
@@ -179,7 +179,7 @@ components:
     backgroundColor: "{colors.inverse-surface}"
     textColor: "{colors.inverse-on-surface}"
     typography: "{typography.label-sm}"
-    height: 36px
+    height: 44px
   nav-link:
     textColor: "{colors.on-surface}"
     typography: "{typography.label-md}"
@@ -304,8 +304,8 @@ components:
     rounded: "{rounded.lg}"
     padding: 24px
   safety-panel:
-    backgroundColor: "{colors.secondary-container}"
-    textColor: "{colors.on-secondary-container}"
+    backgroundColor: "{colors.secondary}"           # Full lime, not the wash: lime-wash on cream is 1.08:1, so the panel vanished
+    textColor: "{colors.on-secondary}"
     rounded: "{rounded.lg}"
     padding: 32px
   review-card:
@@ -446,7 +446,7 @@ The palette is a tight three-part system: **green for trust, lime for action, cr
 - **Inverse Surface (`#132A1F`):** A slightly darker green for every full-bleed dark area: the "Cara kerja" band, the footer, the landing utility bar, the back-office sidebar, the dark fact chip. All dark areas share this hue, so the page never switches to neutral black.
 - **Primary Container (`#22513A`):** A lifted green for the CTA shell at the end of the landing and for the **order status card on the customer home**. A large, slightly darker circle bleeding off one corner adds depth (decorative, no blur).
 - **Secondary, Electric Lime (`#D8EF6B`):** The only high-energy colour. It appears on the main conversion button ("Pesan sekarang" in the hero and the CTA shell, "Tonton langsung" on the status card), the circle holding the arrow inside primary buttons, the hero's corner blob, icon wells on dark bands, the live dot on dark surfaces, and footer column headings. It always means "act here" or "this is the highlight". **Lime is a text colour only on dark green** (11.95:1 on `inverse-surface`); on cream or white it fails, so there it is a fill with dark text on it.
-- **Secondary Container, Lime Wash (`#E6EDC8`):** The safety panel, icon wells on light surfaces, the FAQ toggle, the active bottom-nav pill and the "Contoh" label.
+- **Secondary Container, Lime Wash (`#E6EDC8`):** Icon wells on light surfaces, the FAQ toggle, the active bottom-nav pill and the "Contoh" label. Never a large panel on cream: the two are 1.08:1 apart, so a lime-wash panel disappears (the safety panel uses full lime instead).
 - **Tertiary, Mint (`#2F7A55`):** Check icons, progress and status graphics. Darker than the reference's `#3C8A64` so white text on it passes. `tertiary-bright` (`#3C8A64`) exists only for the live dot, which is a graphic next to a word.
 - **Surface, Cream (`#F3F2EA`):** The page background. White cards stay visible on it without borders.
 - **Surface Container Lowest (`#FFFFFF`):** All light cards, FAQ rows, nav pills, tables and form panels.
@@ -488,13 +488,13 @@ The system pairs a **tight neo-grotesk** with an **italic display serif** and a 
 A **12-column fixed-width grid** inside a 1280 px container at a 1440 px canvas, with 80 px side gutters on the landing. Everything collapses to one column below 768 px.
 
 **Landing (`/`)**, in this order:
-1. **Utility bar** (desktop only, 36 px, `inverse-surface`): the language switch (ID | EN, required by SPEC) on the right and "Bantuan" on the left. It carries no promotion.
-2. **Header** (64 px): wordmark, in-page links (Layanan, Cara kerja, Keamanan, Bantuan), "Masuk", and the primary "Pesan sekarang" pill.
-3. **Hero:** asymmetric two-column split, 6/12 text and 6/12 photo (the reference's 5/7 is too narrow for Indonesian headlines). The photo is a tall `xl` frame with the lime quarter-circle blob bleeding off its top-right corner. The **status card** overlaps its left edge, top-left, labelled "Contoh". Text: the h1, one sentence (20 words or fewer), the lime **button-accent** "Pesan sekarang", and one quiet link "Lihat harga". No eyebrow, no announcement badge. On phones the card sits **below** the photo, full width, with no overlap.
+1. **Utility bar** (desktop only, 44 px, `inverse-surface`, scrolls away while the header row stays): a plain price promise on the left ("Bayar di muka. Harga tampil penuh, tanpa biaya tersembunyi.") and "Bantuan" on the right. The language switch (SPEC) joins it at T4, when there is a second language to switch to; a switch that does nothing would be a fake control. It carries no promotion.
+2. **Header** (64 px): wordmark, in-page links in the middle (Layanan, Cara kerja, Keamanan, Pertanyaan), and the forest **button-primary** "Pesan sekarang" with its lime arrow circle. "Masuk" joins at T5 (sign-in).
+3. **Hero:** asymmetric two-column split, 7/12 text and 5/12 photo (built and measured: at 6/6 the Indonesian headline took four lines). The photo is a tall `xl` frame with the lime quarter-circle and a sparkle in its top-right corner. The **status card** overlaps its left edge, **low on the photo**, labelled "Contoh": the cleaner in the hero photo stands on the left, so a high card covered her face. Text: the h1, one sentence (20 words or fewer), the lime **button-accent** "Pesan sekarang", and one quiet link "Lihat harga" behind a 44 px outlined arrow circle. No eyebrow, no announcement badge. On phones and tablets the card sits **below** the photo, with no overlap.
 4. **Trust row:** four equal facts in one band between hairlines (~40 px padding), each an icon well and one plain line: only you watch your job live, the cleaner checks in at your address, recordings kept 7 days then deleted, your consent is asked at booking. Every one is a `SPEC.md` fact.
-5. **Services** (`#layanan`): headline left, a segmented toggle right that filters by service type (SPEC: "filters by service type"), then a four-column card grid with 20 px gaps (two columns at 768, one on phones). Each card: inset photo, italic index numeral bottom-left, circular ↗ button, name, one line, duration and "mulai dari Rp ...". One note under the grid says the prices are samples.
-6. **Safety** (`#keamanan`), bento: a large photo (7/12) beside a lime-wash `safety-panel` (5/12) with the headline "Rumah Anda tetap dalam pantauan Anda" and two fact chips below it ("7 hari" with "rekaman dapat diputar ulang", and "Di alamat Anda" with "Petugas check-in sebelum bekerja"). Wording stays inside SPEC: the live view is for "Anda dan tim pemantau HomeKlin".
-7. **Cara kerja:** a full-bleed `inverse-surface` band, headline left and one supporting sentence right, then **five step cards** (Pesan, Bayar, Petugas check-in, Tonton langsung, Putar ulang 7 hari): five columns from 1280 px, three plus two at 768, one column on phones. Each has a lime icon well, a large low-opacity numeral top-right, a title and a muted line. The verb is the label; there is no "Langkah 1".
+5. **Services** (`#layanan`): eyebrow "Daftar harga", headline "Layanan dan harga, *tanpa kejutan*" left, an outline "Lihat semua layanan" link right (the service-type filter SPEC asks for lives on `/services`; four cards do not need a filter), then a four-column card grid from 1280 px with 20 px gaps (two columns from 640 px, one on phones; at 1024 px four cards were too narrow for the price and duration on one line). Each card: inset photo, italic index numeral, circular ↗, name, one line, duration and "mulai dari Rp ...". The whole card is one link; on hover or keyboard focus it inverts to forest with a lime numeral and arrow. One note under the grid says the prices are samples.
+6. **Safety** (`#keamanan`), bento: a large photo (7/12, two rows) beside a full-lime `safety-panel` (5/12) with the headline "Rumah Anda tetap dalam *pantauan Anda*" and one sentence, and two fact chips below it (dark: "7 hari", rekaman dapat diputar ulang; white: "Check-in", at the address before work). Wording stays inside SPEC: the live view is for "Anda dan tim pemantau HomeKlin".
+7. **Cara kerja:** a full-bleed `inverse-surface` band, headline with one supporting sentence stacked under it (the taste skill bans the left-headline, right-paragraph split header), then **five step cards** (Pesan, Bayar, Petugas check-in, Tonton langsung, Putar ulang 7 hari): five columns from 1280 px, three plus two at 768, one column on phones. Each has a lime icon well, a large low-opacity numeral top-right, a title and a muted line. The verb is the label; there is no "Langkah 1".
 8. **Pertanyaan umum** (`#pertanyaan`): 4/12 heading with a link to `/support`, 8/12 accordion of four native `<details>` rows, 12 px apart.
 9. **CTA shell:** a contained `primary-container` shell with one sentence ("Pilih jadwal yang masih kosong di area Anda") and the lime "Pesan sekarang". A large darker circle sits in the lower-left corner. It is not a form: the landing adds no inputs beyond SPEC.
 10. **Footer:** `inverse-surface`, wordmark and tagline left, link columns right (existing pages only), a legal line saying that prices and data on this site are samples, then a full-width ghost wordmark cropped by the bottom edge (`aria-hidden`).
@@ -709,13 +709,16 @@ Two renames are traps: **`surface` now means cream-versus-white the other way ro
 ## Migration notes
 
 For `homeklin-frontend`, in this order. After each step `npm run check` and `npm run test:e2e` pass and the site still works.
-1. **Fonts and tokens:** add Inter Tight, Instrument Serif (italic) and Inter through `next/font`; add the new tokens beside the old ones in `globals.css`; do not delete anything yet.
+
+**Done in T3c (2026-10-19): the landing page.** The new tokens sit beside the T3b ones in `src/app/globals.css`. The landing opts in with the class `theme-forest` on its layout wrapper, which gives the shared names (`canvas`, `ink`, `border`, `rounded-md`, `rounded-xl`, the font tokens) their new values inside the landing only; the three fonts load in `src/app/(marketing)/layout.tsx`, so the apps do not download them yet. `ButtonLink` has the redesign's `forest` and `accent` variants and `Wordmark` a `forest` palette, beside the T3b defaults. Steps 1 and 6 are done for the landing; the apps follow steps 2 to 5, after which the `.theme-forest` values move into `@theme` and the wrapper class goes away.
+
+1. **Fonts and tokens:** add Inter Tight, Instrument Serif (italic) and Inter through `next/font`; add the new tokens beside the old ones in `globals.css`; do not delete anything yet. (Done for the landing.)
 2. **Codemod the two traps** (`surface` → `card`, T3b radius names), then switch the old token names to the new values one family at a time (colours, radii, shadows). Screenshots after each.
 3. **Primitives:** `button-link` (primary with lime arrow circle, accent, outline, submit), `live-indicator`, segmented toggle, `empty-state`, inputs, new `badge-sample`, `fact-chip`, `icon-well`.
 4. **Shells:** `bottom-nav`, `top-nav`, `mobile-shell`; then `sidebar-shell` and the back-office top bar on the dark sidebar and white tables.
 5. **Customer app:** `job-status-card` as the forest-green hero card, `service-card`/`service-row`, `area-picker`.
-6. **Landing:** utility bar and header, hero (status card overlap, blob), trust row, services with the filter toggle, safety bento, dark "Cara kerja" band, FAQ, CTA shell, footer with ghost wordmark.
-7. **Tests that change:** `e2e/landing.desktop.spec.ts` (headline: three lines instead of two; header height 65 px stays), landing spec (new section names), a new screenshot spec for the redesign (`npm run screenshots -- <name>`; the name is to be agreed, for example `t3c`), `tests/navigation.test.ts` only if labels change. `e2e/no-agency-wording.spec.ts` and the horizontal-scroll test must keep passing unchanged.
+6. **Landing:** utility bar and header, hero (status card overlap, blob), trust row, services, safety bento, dark "Cara kerja" band, FAQ, CTA shell, footer with ghost wordmark. (Done in T3c.)
+7. **Tests that change:** done for the landing in T3c (`e2e/landing.spec.ts`, `landing.desktop.spec.ts` with three headline rows and a 44 + 64 px header, new `landing.mobile.spec.ts`, screenshots `npm run screenshots -- t3c`). For the apps: `tests/navigation.test.ts` only if labels change. `e2e/no-agency-wording.spec.ts` and the horizontal-scroll test must keep passing unchanged.
 8. **Docs:** update `markdown/Progress.md`, the `globals.css` header comment and the file references that point at `design-t3b.md` sections (for example the comment in `src/app/layout.tsx`).
 
 ## References
@@ -728,12 +731,13 @@ For `homeklin-frontend`, in this order. After each step `npm run check` and `npm
 ## Decisions to review
 
 1. **Fonts.** Inter Tight, Instrument Serif and Inter follow your reference, and reverse the T3b rule that banned Inter and Instrument Serif (that ban came from the taste skill's defaults, not from you). Say if you would rather keep Bricolage Grotesque and Figtree and use a different italic accent.
-2. **Hero type is 64 px, not the reference's 72 px, and the hero is 6/6 not 5/7.** Indonesian headlines are longer; at 72 px they take four lines. The hero spec's "max two lines" becomes "max three lines".
+2. **Hero type is 64 px, not the reference's 72 px, and the hero is 7/5, not the reference's 5/7.** Indonesian headlines are longer; measured in T3c, the headline takes three lines at 1024, 1280 and 1440 px this way (four at 6/6). The hero spec's "max two lines" becomes "max three lines", one more than the taste skill's rule.
 3. **Colours changed to pass AA.** Mint `#3C8A64` → `#2F7A55` for anything under text; `on-surface-variant` `#5E6A62` → `#55625A`; muted text on dark `#9DB0A4` → `#B3C4B8`; input borders use a new `outline-control` instead of the 1.2:1 hairline; `error` `#C2412D` → `#B5381F`. `#3C8A64` survives only as the live dot.
 4. **One floating card over the hero photo.** The old rule forbade labels over photos. It is kept for the status card only, labelled "Contoh", because it shows the product's core promise; the reference's second floating chip is dropped.
 5. **No reviews band, no stats, no "most popular".** They would need data HomeKlin does not have. The lime-wash band is reserved for real reviews at T30.
 6. **CTA shell has no form.** The reference's booking shell embeds a form. SPEC lists only one primary action on the landing, so the shell holds one sentence and one button. An area-and-date quick start would be new scope.
-7. **Utility bar.** The reference's announcement bar has no HomeKlin use, so it carries the language switch (SPEC requires a visible one) and "Bantuan", desktop only. On phones the switch moves into the header menu.
+7. **Utility bar.** The reference's announcement bar has no HomeKlin use, so it carries a plain price promise and "Bantuan", desktop only, 44 px tall. The language switch (SPEC) joins it at T4; on phones it will sit in the header.
 8. **Dark-green sidebar for agency and admin.** This changes the back office as well, because you asked for the whole page. It stays dense and undecorated.
 9. **Token renames.** `surface` and `rounded-xl` change meaning; see the traps under Token mapping. The migration does them in one codemod first.
-10. **Not verified:** the font pairing has not been rendered in a browser with Indonesian copy, the hero line counts are estimates until tested at 1024, 1280 and 1440 px, and the Instrument Serif size ratio (+10%) is the reference's, not measured here.
+10. **Checked in T3c on the landing:** the fonts render with Indonesian copy, the hero is three lines at 1024, 1280 and 1440 px (e2e), and no visible text has an em or en dash (e2e). Still not measured: the Instrument Serif size ratio (+10%) is the reference's.
+11. **Built differently from the first draft of this file (T3c):** the safety panel is full lime (lime wash vanished on cream); the services header has a link, not a filter toggle; prices on cards are 24 px; the hero card sits low on the photo; the utility bar is 44 px. Each is recorded where it applies above.
