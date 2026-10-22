@@ -16,6 +16,11 @@
 /test-results/
 /blob-report/
 /playwright/.cache/
+# Playwright sign-in states (they hold session tokens)
+/e2e/.auth/
+
+# Claude Code agent worktrees
+/.claude/worktrees/
 
 # next.js
 /.next/

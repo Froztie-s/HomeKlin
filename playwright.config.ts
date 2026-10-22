@@ -8,7 +8,9 @@ import { existsSync } from "node:fs";
 // Local runs read the test project's keys from .env; CI sets them from the repository secrets.
 if (existsSync(".env")) process.loadEnvFile(".env");
 
-const port = 3000;
+// PW_PORT lets two checkouts (git worktrees) run the suite at once; otherwise one would reuse the
+// other's server (reuseExistingServer below).
+const port = Number(process.env.PW_PORT ?? 3000);
 const baseURL = `http://localhost:${port}`;
 
 export default defineConfig({
