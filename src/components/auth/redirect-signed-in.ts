@@ -1,5 +1,4 @@
 import { getLocale } from "next-intl/server";
-import { connection } from "next/server";
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth/dal";
 import { safeNextPath } from "@/lib/auth/roles";
@@ -15,11 +14,9 @@ export function nextFrom(value: string | string[] | undefined): string | undefin
 /**
  * A visitor who is already signed in does not need the form: they go on to `next` when their role may
  * open it, otherwise to their own home (safeNextPath also refuses any address off this site). Reads the
- * session, so the caller sits behind <Suspense>; connection() first, because Supabase checks the
- * token's expiry against the clock, which Next.js only allows at request time.
+ * session, so the caller sits behind <Suspense>.
  */
 export async function redirectIfSignedIn(next: string | undefined): Promise<void> {
-  await connection();
   const user = await getCurrentUser();
   if (!user) return;
   const locale = await getLocale();

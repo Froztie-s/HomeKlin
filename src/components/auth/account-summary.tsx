@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { connection } from "next/server";
 import { getCurrentUser } from "@/lib/auth/dal";
 import { SignOutButton } from "./sign-out-button";
 import { UserAvatar } from "./user-avatar";
@@ -10,10 +9,8 @@ type AccountSummaryProps = {
 };
 
 // Who is signed in, and the way out (T5): the account area of every shell. Reads the session, so it
-// sits inside <Suspense>; on a protected page it sits inside <RoleGate> as well. connection() first,
-// because Supabase checks the token's expiry against the clock, which belongs to request time.
+// sits inside <Suspense>; on a protected page it sits inside <RoleGate> as well.
 export async function AccountSummary({ variant = "page" }: AccountSummaryProps) {
-  await connection();
   const [user, t] = await Promise.all([getCurrentUser(), getTranslations("AccountSummary")]);
   if (!user) return null;
   const name = user.fullName.trim() || t("noName");

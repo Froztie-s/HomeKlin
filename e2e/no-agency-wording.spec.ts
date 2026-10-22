@@ -9,7 +9,20 @@ const pageGroups = [
   {
     who: "a visitor",
     session: signedOut,
-    paths: ["/", "/home", "/services", "/support", "/en", "/en/home", "/en/services", "/en/support"],
+    paths: [
+      "/",
+      "/home",
+      "/services",
+      "/support",
+      "/login",
+      "/signup",
+      "/en",
+      "/en/home",
+      "/en/services",
+      "/en/support",
+      "/en/login",
+      "/en/signup",
+    ],
   },
   {
     who: "a signed-in customer",

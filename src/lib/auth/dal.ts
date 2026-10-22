@@ -1,4 +1,5 @@
 import { getLocale } from "next-intl/server";
+import { connection } from "next/server";
 import { cache } from "react";
 import { redirect } from "@/i18n/navigation";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
@@ -20,8 +21,12 @@ export type CurrentUser = {
  * The signed-in user, read once per request: the verified token (getClaims checks its signature and
  * expiry), then their own profile row, which row-level security lets each user read and nobody else.
  * Null for a visitor who is not signed in, and for a user without a valid profile.
+ * connection() first: Supabase checks the token's expiry against the clock, which Next.js allows only at
+ * request time (not in a prerender or a prefetched shell), and an auth check must always wait for the
+ * real request anyway (node_modules/next/dist/docs/01-app/03-api-reference/04-functions/connection.md).
  */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
+  await connection();
   const supabase = await createSupabaseServerClient({ writeCookies: false });
   const { data, error } = await supabase.auth.getClaims();
   const userId = data?.claims.sub;

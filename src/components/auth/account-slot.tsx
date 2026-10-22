@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import { connection } from "next/server";
 import { Link } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth/dal";
 import type { AppRole } from "@/lib/auth/roles";
@@ -38,11 +37,8 @@ const tones = {
 // The account corner of the customer app bar and the landing header (T5): "Masuk" for a visitor, and
 // for a signed-in user a chip with their initials (and first name where it fits) that opens their
 // account. It reads the session, so it always sits inside <Suspense>: the bar around it stays in the
-// prerendered shell and this part streams in. connection() first: Supabase checks the token's expiry
-// against the clock, which Next.js only allows at request time, not in a prerender or a prefetched
-// shell (node_modules/next/dist/docs/01-app/03-api-reference/04-functions/connection.md).
+// prerendered shell and this part streams in.
 export async function AccountSlot({ palette = "evergreen", showName = false }: AccountSlotProps) {
-  await connection();
   const [user, t] = await Promise.all([getCurrentUser(), getTranslations("AccountChip")]);
   const tone = tones[palette];
 
