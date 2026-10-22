@@ -488,8 +488,8 @@ The system pairs a **tight neo-grotesk** with an **italic display serif** and a 
 A **12-column fixed-width grid** inside a 1280 px container at a 1440 px canvas, with 80 px side gutters on the landing. Everything collapses to one column below 768 px.
 
 **Landing (`/`)**, in this order:
-1. **Utility bar** (desktop only, 44 px, `inverse-surface`, scrolls away while the header row stays): a plain price promise on the left ("Bayar di muka. Harga tampil penuh, tanpa biaya tersembunyi.") and "Bantuan" on the right. The language switch (SPEC) joins it at T4, when there is a second language to switch to; a switch that does nothing would be a fake control. It carries no promotion.
-2. **Header** (64 px): wordmark, in-page links in the middle (Layanan, Cara kerja, Keamanan, Pertanyaan), and the forest **button-primary** "Pesan sekarang" with its lime arrow circle. "Masuk" joins at T5 (sign-in).
+1. **Utility bar** (desktop only, 44 px, `inverse-surface`, scrolls away while the header row stays): a plain price promise on the left ("Bayar di muka. Harga tampil penuh, tanpa biaya tersembunyi.") and "Bantuan" on the right. The language switch (T4) sits on the right after "Bantuan", in its on-dark variant (a 36 px track inside the bar, 44 px targets, the current language a cream pill). It carries no promotion.
+2. **Header** (64 px): wordmark, in-page links in the middle (Layanan, Cara kerja, Keamanan, Pertanyaan), and the forest **button-primary** "Pesan sekarang" with its lime arrow circle. "Masuk" joins at T5 (sign-in). Below 1024 px the header row carries the language switch (the utility bar is hidden there): the full toggle from 640 px, and below 640 px a compact single 44 px link to the other language (a languages icon plus "EN" or "ID"). To keep the row on one line at 360 px (row 328 px: wordmark 126, button 174), the header button drops its lime arrow circle below 640 px; an e2e test checks the one-line row in both languages.
 3. **Hero:** asymmetric two-column split, 7/12 text and 5/12 photo (built and measured: at 6/6 the Indonesian headline took four lines). The photo is a tall `xl` frame with the lime quarter-circle and a sparkle in its top-right corner. The **status card** overlaps its left edge, **low on the photo**, labelled "Contoh": the cleaner in the hero photo stands on the left, so a high card covered her face. Text: the h1, one sentence (20 words or fewer), the lime **button-accent** "Pesan sekarang", and one quiet link "Lihat harga" behind a 44 px outlined arrow circle. No eyebrow, no announcement badge. On phones and tablets the card sits **below** the photo, with no overlap.
 4. **Trust row:** four equal facts in one band between hairlines (~40 px padding), each an icon well and one plain line: only you watch your job live, the cleaner checks in at your address, recordings kept 7 days then deleted, your consent is asked at booking. Every one is a `SPEC.md` fact.
 5. **Services** (`#layanan`): eyebrow "Daftar harga", headline "Layanan dan harga, *tanpa kejutan*" left, an outline "Lihat semua layanan" link right (the service-type filter SPEC asks for lives on `/services`; four cards do not need a filter), then a four-column card grid from 1280 px with 20 px gaps (two columns from 640 px, one on phones; at 1024 px four cards were too narrow for the price and duration on one line). Each card: inset photo, italic index numeral, circular ↗, name, one line, duration and "mulai dari Rp ...". The whole card is one link; on hover or keyboard focus it inverts to forest with a lime numeral and arrow. One note under the grid says the prices are samples.
@@ -501,7 +501,8 @@ A **12-column fixed-width grid** inside a 1280 px container at a 1440 px canvas,
 
 **Reviews band:** the reference's lime-wash testimonials band is **not built now**. Reviews are P2 (SPEC, T30) and must not be invented. When T30 lands, `review-card` goes in a lime-wash band between Services and Safety, with real submitted reviews only.
 
-**Customer app (mobile-first, `/home` and the rest of `src/app/(customer)`)**
+**Customer app (mobile-first, `/home` and the rest of `src/app/[locale]/(customer)`)**
+- **App bar** (T4, all customer and cleaner pages): 56 px, wordmark left (linking to the app home), language toggle right; on phones it is not sticky. From 768 px the five sections join it as the top bar; between 768 and 1023 px their icons are hidden so the toggle fits (measured slack at 768 px: 22 px).
 - **Bottom navigation** (below 768 px): Beranda, Layanan, Pesanan, Bantuan, Akun. 64 px plus the safe-area inset, white, `shadow-nav`, always-visible labels, the current item in a lime-wash pill with a dark-green label and `aria-current="page"`. From 768 px a top bar with the same five sections replaces it.
 - **`/home`** starts with the **hero status card** (`status-card-hero`): a forest-green card with a live badge, the state in plain words ("Petugas sudah check-in pukul 09.04"), the assigned "Petugas HomeKlin" with name and round photo, service and time, the privacy line, and the lime "Tonton langsung". Under it: the area picker, then service rows. With no active job the card becomes an empty state in `secondary-container` with one action.
 - **`/services`:** the segmented toggle filters by type; service cards as on the landing (no index numerals); the next free slot for the chosen area sits on each card. The **selected** service inverts to forest green.
@@ -555,7 +556,7 @@ All live in `src/components/`. Every interactive element has hover, `:focus-visi
 ### Navigation
 - **Utility bar, header, bottom navigation, top navigation, sidebar:** as in Layout. Logo: a forest-green rounded square with a house glyph plus "HomeKlin" in `title-lg` (20 px semibold), in `inverse-on-surface` on dark.
 - **Skip link:** first focusable element on every page, lime fill with dark text, `shadows.float`.
-- **Language switch:** a two-segment toggle ID | EN, remembers the choice.
+- **Language switch** (`shell/language-switch.tsx`, T4): a two-segment toggle ID | EN (see Segmented toggle) that remembers the choice for a year. The current language is plain text marked `aria-current="true"`, not a link (choosing it again would only reload the page); the other language is a real link to the same page in that language, so it works without JavaScript. Each option carries `lang` and `hrefLang`, and its accessible name starts with the visible code ("EN English", "ID Bahasa Indonesia", WCAG 2.5.3); the group is labelled "Bahasa" / "Language". The code dims while the other language loads. Variants: on-dark (landing utility bar), compact (one link, landing header below 640 px). Placement: landing utility bar from 1024 px and header below it; customer and cleaner app bar; back-office sidebar bottom, and inside the opened Menu below 1024 px (360 px leaves only 22 px beside the wordmark, role badge and Menu button). It keeps the path, not the query string.
 
 ### Badges and chips
 - **Live badge:** `success-container` pill, `success` text, a 2.4 s breathing `tertiary-bright` dot, **always with a word** ("Sedang berlangsung"). On dark surfaces the on-dark variant uses a lime dot and lime text. Static under reduced motion.
@@ -573,7 +574,7 @@ All live in `src/components/`. Every interactive element has hover, `:focus-visi
 ### Forms
 - **Inputs:** 44 px, `sm` radius, `surface-container-low` fill, 1 px `outline-control` border, a visible 12 px label above (never placeholder-only). Error: `error-container` fill, `error` border, an icon and a message below in `error`.
 - **Area picker:** a native `<select>` styled as a pill with a map-pin icon and a visible "Area layanan" label.
-- **Segmented toggle:** white track with a 1 px `outline-control` border and 4 px padding; the active segment is a forest-green pill with white text. Used for the language switch and the service-type filter (and, in booking, one-time or repeat).
+- **Segmented toggle:** white track with a 1 px `outline-control` border (drawn as an inset ring) and 4 px padding; the active segment is a forest-green pill with white text. Each segment is a full 44 px target, with its pill drawn inside a transparent border so the 4 px gap does not shrink the target. Used for the language switch and the service-type filter (and, in booking, one-time or repeat).
 - **Checkbox and consent toggle** (streaming consent at booking): 24 px visual, 44 px hit area, label beside it.
 
 ### FAQ accordion
@@ -654,8 +655,10 @@ Rules:
 - Use tokens only. A component must not contain a hex value, a pixel radius or a raw shadow.
 - Put the current job state first on `/home`, in plain words.
 - Use lime for one action per viewport and forest green for every other primary action.
-- Mark any illustrative content "Contoh" and keep one `copy` object of strings per component (T4 moves them into next-intl).
-- Show full prices with `formatRupiah`, prices marked as samples until admin sets them.
+- Mark any illustrative content "Contoh" / "Sample". Every visible string lives in `src/messages/id.json` and `src/messages/en.json` (next-intl, one namespace per component or page, ICU for plurals); add each key to both files (a unit test and the TypeScript types fail the build otherwise). Internal links use `Link` from `@/i18n/navigation` so English stays English.
+- English copy: plain and calm, "you", the typographic apostrophe (’), no em or en dashes; glossary in `src/messages/en.json` (e.g. "Petugas HomeKlin" = "HomeKlin cleaner", "Pesan sekarang" = "Book now").
+- Show full prices with `formatRupiah(amount, locale)`, prices marked as samples until admin sets them. English pages format numbers as `en-ID` ("Rp 85.000", "4,9", "08.00"), the Indonesian conventions, never "IDR 85,000".
+- On service cards the price moves to its own right-aligned row when it does not fit beside the duration (English at 1280 px).
 - Use the real component with sample data when the landing needs to show the product (the status card).
 - Keep the back office dense and plain: same palette and type, no accent serif, no photography.
 
@@ -710,7 +713,7 @@ Two renames are traps: **`surface` now means cream-versus-white the other way ro
 
 For `homeklin-frontend`, in this order. After each step `npm run check` and `npm run test:e2e` pass and the site still works.
 
-**Done in T3c (2026-10-19): the landing page.** The new tokens sit beside the T3b ones in `src/app/globals.css`. The landing opts in with the class `theme-forest` on its layout wrapper, which gives the shared names (`canvas`, `ink`, `border`, `rounded-md`, `rounded-xl`, the font tokens) their new values inside the landing only; the three fonts load in `src/app/(marketing)/layout.tsx`, so the apps do not download them yet. `ButtonLink` has the redesign's `forest` and `accent` variants and `Wordmark` a `forest` palette, beside the T3b defaults. Steps 1 and 6 are done for the landing; the apps follow steps 2 to 5, after which the `.theme-forest` values move into `@theme` and the wrapper class goes away.
+**Done in T3c (2026-10-19): the landing page.** The new tokens sit beside the T3b ones in `src/app/globals.css`. The landing opts in with the class `theme-forest` on its layout wrapper, which gives the shared names (`canvas`, `ink`, `border`, `rounded-md`, `rounded-xl`, the font tokens) their new values inside the landing only; the three fonts load in `src/app/[locale]/(marketing)/layout.tsx`, so the apps do not download them yet. `ButtonLink` has the redesign's `forest` and `accent` variants and `Wordmark` a `forest` palette, beside the T3b defaults. Steps 1 and 6 are done for the landing; the apps follow steps 2 to 5, after which the `.theme-forest` values move into `@theme` and the wrapper class goes away.
 
 1. **Fonts and tokens:** add Inter Tight, Instrument Serif (italic) and Inter through `next/font`; add the new tokens beside the old ones in `globals.css`; do not delete anything yet. (Done for the landing.)
 2. **Codemod the two traps** (`surface` → `card`, T3b radius names), then switch the old token names to the new values one family at a time (colours, radii, shadows). Screenshots after each.
@@ -719,7 +722,7 @@ For `homeklin-frontend`, in this order. After each step `npm run check` and `npm
 5. **Customer app:** `job-status-card` as the forest-green hero card, `service-card`/`service-row`, `area-picker`.
 6. **Landing:** utility bar and header, hero (status card overlap, blob), trust row, services, safety bento, dark "Cara kerja" band, FAQ, CTA shell, footer with ghost wordmark. (Done in T3c.)
 7. **Tests that change:** done for the landing in T3c (`e2e/landing.spec.ts`, `landing.desktop.spec.ts` with three headline rows and a 44 + 64 px header, new `landing.mobile.spec.ts`, screenshots `npm run screenshots -- t3c`). For the apps: `tests/navigation.test.ts` only if labels change. `e2e/no-agency-wording.spec.ts` and the horizontal-scroll test must keep passing unchanged.
-8. **Docs:** update `markdown/Progress.md`, the `globals.css` header comment and the code comments that mention the T3b tokens (for example in `src/app/layout.tsx` and `src/components/ui/button-link.tsx`).
+8. **Docs:** update `markdown/Progress.md`, the `globals.css` header comment and the code comments that mention the T3b tokens (for example in `src/app/fonts.ts`, `src/app/[locale]/layout.tsx` and `src/components/ui/button-link.tsx`).
 
 ## References
 
@@ -736,7 +739,7 @@ For `homeklin-frontend`, in this order. After each step `npm run check` and `npm
 4. **One floating card over the hero photo.** The old rule forbade labels over photos. It is kept for the status card only, labelled "Contoh", because it shows the product's core promise; the reference's second floating chip is dropped.
 5. **No reviews band, no stats, no "most popular".** They would need data HomeKlin does not have. The lime-wash band is reserved for real reviews at T30.
 6. **CTA shell has no form.** The reference's booking shell embeds a form. SPEC lists only one primary action on the landing, so the shell holds one sentence and one button. An area-and-date quick start would be new scope.
-7. **Utility bar.** The reference's announcement bar has no HomeKlin use, so it carries a plain price promise and "Bantuan", desktop only, 44 px tall. The language switch (SPEC) joins it at T4; on phones it will sit in the header.
+7. **Utility bar.** The reference's announcement bar has no HomeKlin use, so it carries a plain price promise and "Bantuan", desktop only, 44 px tall. The language switch joined it at T4; below 1024 px it sits in the header (see Layout, item 2).
 8. **Dark-green sidebar for agency and admin.** This changes the back office as well, because you asked for the whole page. It stays dense and undecorated.
 9. **Token renames.** `surface` and `rounded-xl` change meaning; see the traps under Token mapping. The migration does them in one codemod first.
 10. **Checked in T3c on the landing:** the fonts render with Indonesian copy, the hero is three lines at 1024, 1280 and 1440 px (e2e), and no visible text has an em or en dash (e2e). Still not measured: the Instrument Serif size ratio (+10%) is the reference's.

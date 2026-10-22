@@ -26,7 +26,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: the landing uses the redesign tokens through `.theme-forest` (apps unchanged); utility bar and one-row header; 7/5 hero with the sample job card over the photo (below it on phones); trust row of four SPEC facts; four service cards with sample prices; safety bento; dark "Cara kerja" band with five steps; FAQ; CTA shell; dark footer with ghost wordmark; one CTA label "Pesan sekarang"; no invented numbers, ratings or testimonials; no em or en dash in visible text; AA contrast (design.md table).
   - Verify: `npm run check`; `npm run test:e2e` (landing, landing.desktop, landing.mobile, no-agency-wording, no-horizontal-scroll); `npm run screenshots -- t3c`; taste-skill pre-flight.
   - Deps: T3b. Skills: `design-taste-frontend`, `frontend-ui-engineering`, `test-driven-development`.
-- [ ] **T4 Bilingual switch (ID default, EN)** (S)
+- [x] **T4 Bilingual switch (ID default, EN)** (S) — done 2026-10-22: next-intl, English under `/en`, Indonesian for every new visitor, choice remembered for a year; all current pages translated
   - Accept: language switch in both shells; choice persists; all shell text translated; missing-key test fails the build.
   - Verify: Playwright toggles language and checks text.
   - Deps: T3. Skills: `source-driven-development` (next-intl docs).
@@ -45,7 +45,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 ## Phase 2: Catalog and order
 
 - [ ] **T7 Catalog data and API** (M)
-  - Accept: tables for HomeKlin services (type, one price set by admin), service areas, partner agencies and the areas they serve, and agency availability slots per area; an "available slots" query returns, per area, the combined free slots of the agencies serving it (a slot appears only if at least one agency there has it free); seed includes at least 6 services and 2 agencies covering overlapping areas; list endpoint supports area/type filters and keyword search; RLS: public read of active services and of aggregated availability only, never of agency identity.
+  - Accept: tables for HomeKlin services (type, one price set by admin), service areas, partner agencies and the areas they serve, and agency availability slots per area; an "available slots" query returns, per area, the combined free slots of the agencies serving it (a slot appears only if at least one agency there has it free); seed includes at least 6 services and 2 agencies covering overlapping areas; list endpoint supports area/type filters and keyword search (in both languages); service names and descriptions are stored in Indonesian and English (since T4 every page is bilingual); RLS: public read of active services and of aggregated availability only, never of agency identity.
   - Verify: Vitest for filters, slot aggregation (incl. an area with no free agency) and RLS.
   - Deps: T6. Skills: `api-and-interface-design`.
 - [ ] **T7b Admin services and price list** (S)

@@ -84,12 +84,15 @@ Seed DB:    npm run db:seed
 ## Project Structure
 
 ```
-src/app/(marketing)/   landing page at / (no app navigation)
-src/app/(customer)/    customer app pages (mobile-first), home at /home
-src/app/(cleaner)/     cleaner pages (mobile-first)
-src/app/(agency)/      agency back office (desktop-first)
-src/app/(admin)/       admin console (desktop-first)
+src/app/[locale]/      every page, per language (Indonesian at /..., English at /en/...; T4)
+  (marketing)/         landing page at / (no app navigation)
+  (customer)/          customer app pages (mobile-first), home at /home
+  (cleaner)/           cleaner pages (mobile-first)
+  (agency)/            agency back office (desktop-first)
+  (admin)/             admin console (desktop-first)
 src/app/api/           route handlers (Midtrans webhook, LiveKit token)
+src/i18n/              next-intl routing, navigation and request config
+src/proxy.ts           language routing in front of every page (Next.js 16 "proxy", formerly middleware)
 src/components/        shared UI components
 src/lib/               supabase client, auth/role guards, midtrans, livekit helpers
 src/lib/validation/    Zod schemas
