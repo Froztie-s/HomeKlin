@@ -112,6 +112,7 @@ One answer was ambiguous and I interpreted it: the user said replay "should not 
 - The `.docx` client documents are git-ignored (they hold names and signatures), so they stay local.
 - **npm version mismatch:** CI uses Node 24.22 with npm 11.19.1. The local npm 11.6.1 on Windows left `@emnapi/*` entries out of `package-lock.json`, which broke `npm ci` in CI. Until the user upgrades npm, add dependencies with `npx npm@11.19.1 install ...` so the lockfile stays valid.
 - Pushing works over HTTPS through Git Credential Manager (no SSH key on GitHub). `gh` CLI is not installed; the public GitHub REST API (curl) is enough to read CI run status.
+- **Agent worktrees start from `main`, not the current branch** (seen 2026-10-22 with `isolation: "worktree"`): an agent working on a feature branch must first run `git merge --ff-only <branch>` in its worktree. A worktree whose agent changed nothing is deleted automatically when the agent ends. They live in `.claude/worktrees/` (git- and ESLint-ignored).
 - Windows OpenSSH here is too old for GitHub's key exchange. Git for Windows' `ssh-keyscan` works. The GitHub host key has already been added to `~/.ssh/known_hosts`. The `agent-skills` plugin is installed.
 
 ## Files in this folder
