@@ -1,4 +1,6 @@
 import { useTranslations } from "next-intl";
+import { Suspense } from "react";
+import { AccountSlot } from "@/components/auth/account-slot";
 import { Wordmark } from "@/components/brand/wordmark";
 import { LanguageSwitch } from "@/components/shell/language-switch";
 import { ButtonLink } from "@/components/ui/button-link";
@@ -22,6 +24,10 @@ const linkClass =
 // "Pesan sekarang". Below 1024 px the switch joins that row: the full ID | EN toggle from 640 px,
 // and on phones one link to the other language, measured to fit a 360 px row beside the wordmark
 // and the button (which drops its arrow circle there). The footer carries the help link on phones.
+// T5: from 640 px "Masuk" (or, once signed in, the account chip with the first name) sits before
+// "Pesan sekarang". The 360 px row has no room for it; on phones signing in starts from the app bar
+// that "Pesan sekarang" opens. It reads the session, so it streams in behind <Suspense> and the rest
+// of the header stays prerendered.
 export function MarketingHeader() {
   const t = useTranslations("MarketingHeader");
   return (
@@ -62,6 +68,11 @@ export function MarketingHeader() {
             </div>
             <div className="hidden sm:flex lg:hidden">
               <LanguageSwitch palette="forest" />
+            </div>
+            <div className="hidden sm:flex">
+              <Suspense fallback={null}>
+                <AccountSlot palette="forest" showName />
+              </Suspense>
             </div>
             <ButtonLink href="/home" variant="forest" hideArrowOnPhones>
               {t("cta")}

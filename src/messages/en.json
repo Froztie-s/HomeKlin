@@ -208,9 +208,7 @@
     "emptyBody": "You can search for answers by keyword. If the answer is not there, you can chat with an admin from this page."
   },
   "AccountPage": {
-    "title": "Account",
-    "emptyTitle": "You are not signed in",
-    "emptyBody": "Once you sign in, your account details, home address and language choice appear here."
+    "title": "Account"
   },
   "AreaPicker": {
     "label": "Service area"
@@ -264,9 +262,7 @@
     "emptyBody": "Jobs your agency assigns to you appear here, with the address and working hours. When you arrive, you check in from this page."
   },
   "CleanerAccountPage": {
-    "title": "Account",
-    "emptyTitle": "You are not signed in",
-    "emptyBody": "Once you sign in, your account details and the agency you work for appear here."
+    "title": "Account"
   },
   "AgencyDashboardPage": {
     "title": "Dashboard",
@@ -322,5 +318,70 @@
     "title": "FAQ",
     "emptyTitle": "No questions yet",
     "emptyBody": "The common questions shown on the customer Help page appear here. You can add and edit them."
+  },
+  "LoginPage": {
+    "metaTitle": "Log in",
+    "title": "Log in to HomeKlin",
+    "lead": "Use the email and password of your HomeKlin account."
+  },
+  "SignupPage": {
+    "metaTitle": "Sign up",
+    "title": "Create a HomeKlin account",
+    "lead": "With an account you can book, pay, and watch the work in your home live."
+  },
+  "Auth": {
+    "fields": {
+      "fullName": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "passwordHint": "At least 8 characters.",
+      "showPassword": "Show password"
+    },
+    "login": {
+      "submit": "Log in",
+      "pending": "Logging in…",
+      "switchPrompt": "No account yet?",
+      "switchLink": "Sign up"
+    },
+    "signup": {
+      "submit": "Create account",
+      "pending": "Creating your account…",
+      "switchPrompt": "Already have an account?",
+      "switchLink": "Log in"
+    },
+    "errors": {
+      "emailRequired": "Enter your email.",
+      "emailInvalid": "Check your email address, for example name@domain.com.",
+      "passwordRequired": "Enter your password.",
+      "passwordTooShort": "Use at least 8 characters for your password.",
+      "passwordTooLong": "This password is too long. Use at most 72 characters.",
+      "nameRequired": "Enter your full name.",
+      "nameTooLong": "This name is too long. Use at most 120 characters.",
+      "invalidCredentials": "The email or password is not correct. Check them and try again.",
+      "emailTaken": "This email already has an account. Log in with it instead.",
+      "rateLimited": "Too many attempts. Wait a few minutes, then try again.",
+      "weakPassword": "This password is too easy to guess. Choose another one.",
+      "emailRejected": "This email address cannot be used. Use another one.",
+      "confirmEmail": "Your account is created. Open the email from HomeKlin to activate it, then log in.",
+      "unavailable": "We could not process this right now. Try again in a moment."
+    }
+  },
+  "AccountChip": {
+    "signIn": "Log in",
+    "account": "{name}, your account",
+    "accountNoName": "Your account",
+    "dashboard": "{name}, your dashboard",
+    "dashboardNoName": "Your dashboard"
+  },
+  "AccountSummary": {
+    "signedInAs": "Signed in as",
+    "noName": "HomeKlin account"
+  },
+  "SignOut": {
+    "submit": "Log out",
+    "pending": "Logging out…"
+  },
+  "GateFallback": {
+    "loading": "Loading…"
   }
 }

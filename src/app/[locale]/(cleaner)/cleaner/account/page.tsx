@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
-import { UserRound } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import { EmptyState } from "@/components/ui/empty-state";
+import { Suspense } from "react";
+import { AccountSummary } from "@/components/auth/account-summary";
+import { GateFallback } from "@/components/auth/gate-fallback";
+import { RoleGate } from "@/components/auth/role-gate";
 import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
 
@@ -11,15 +13,18 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("title") };
 }
 
-// Placeholder until the feature is built; the empty state says what will appear here.
+// Cleaners only (T5): the cleaner's name and signing out, one tap from the bottom bar. The title is
+// prerendered; the rest renders inside the page's own role check.
 export default function CleanerAccountPage() {
   const t = useTranslations("CleanerAccountPage");
   return (
     <PageContainer>
       <PageHeader title={t("title")} />
-      <EmptyState icon={UserRound} title={t("emptyTitle")}>
-        {t("emptyBody")}
-      </EmptyState>
+      <Suspense fallback={<GateFallback />}>
+        <RoleGate roles={["cleaner"]}>
+          <AccountSummary />
+        </RoleGate>
+      </Suspense>
     </PageContainer>
   );
 }

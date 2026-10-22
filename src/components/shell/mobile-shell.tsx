@@ -13,11 +13,11 @@ type MobileShellProps = {
 };
 
 // Customer and cleaner shell: mobile-first with a bottom bar; the sections move into the top bar from
-// tablet width up. The menus are client components, so this shell sends them the AppNavigation
-// messages (customer and cleaner labels only, never the back office's).
+// tablet width up. The menus and the sign-out button are client components, so this shell sends them
+// their messages (customer and cleaner labels only, never the back office's).
 export function MobileShell({ nav, roleLabel, children }: MobileShellProps) {
   return (
-    <ClientMessages namespaces={["AppNavigation"]}>
+    <ClientMessages namespaces={["AppNavigation", "SignOut"]}>
       <SkipLink />
       <AppHeader nav={nav} roleLabel={roleLabel} />
       <main id="konten" tabIndex={-1} className="flex flex-1 flex-col pb-clear-nav outline-none md:pb-12">

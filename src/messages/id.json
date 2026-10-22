@@ -208,9 +208,7 @@
     "emptyBody": "Anda dapat mencari jawaban dengan kata kunci. Jika jawabannya tidak ada, Anda dapat menghubungi admin lewat chat dari halaman ini."
   },
   "AccountPage": {
-    "title": "Akun",
-    "emptyTitle": "Anda belum masuk",
-    "emptyBody": "Setelah masuk, data akun, alamat rumah, dan pilihan bahasa Anda muncul di sini."
+    "title": "Akun"
   },
   "AreaPicker": {
     "label": "Area layanan"
@@ -264,9 +262,7 @@
     "emptyBody": "Pekerjaan yang ditugaskan agensi Anda muncul di sini, lengkap dengan alamat dan jam kerja. Saat tiba di lokasi, Anda check-in dari halaman ini."
   },
   "CleanerAccountPage": {
-    "title": "Akun",
-    "emptyTitle": "Anda belum masuk",
-    "emptyBody": "Setelah masuk, data akun Anda dan agensi tempat Anda bekerja muncul di sini."
+    "title": "Akun"
   },
   "AgencyDashboardPage": {
     "title": "Dasbor",
@@ -322,5 +318,70 @@
     "title": "FAQ",
     "emptyTitle": "Belum ada pertanyaan",
     "emptyBody": "Pertanyaan umum yang tampil di halaman Bantuan pelanggan muncul di sini. Anda dapat menambah dan mengubahnya."
+  },
+  "LoginPage": {
+    "metaTitle": "Masuk",
+    "title": "Masuk ke HomeKlin",
+    "lead": "Gunakan email dan kata sandi akun HomeKlin Anda."
+  },
+  "SignupPage": {
+    "metaTitle": "Daftar",
+    "title": "Buat akun HomeKlin",
+    "lead": "Dengan akun, Anda dapat memesan, membayar, dan menonton pekerjaan di rumah Anda secara langsung."
+  },
+  "Auth": {
+    "fields": {
+      "fullName": "Nama lengkap",
+      "email": "Email",
+      "password": "Kata sandi",
+      "passwordHint": "Minimal 8 karakter.",
+      "showPassword": "Tampilkan kata sandi"
+    },
+    "login": {
+      "submit": "Masuk",
+      "pending": "Sedang masuk…",
+      "switchPrompt": "Belum punya akun?",
+      "switchLink": "Daftar"
+    },
+    "signup": {
+      "submit": "Buat akun",
+      "pending": "Sedang membuat akun…",
+      "switchPrompt": "Sudah punya akun?",
+      "switchLink": "Masuk"
+    },
+    "errors": {
+      "emailRequired": "Masukkan email Anda.",
+      "emailInvalid": "Periksa penulisan email Anda, misalnya nama@domain.com.",
+      "passwordRequired": "Masukkan kata sandi Anda.",
+      "passwordTooShort": "Kata sandi minimal 8 karakter.",
+      "passwordTooLong": "Kata sandi terlalu panjang. Gunakan paling banyak 72 karakter.",
+      "nameRequired": "Masukkan nama lengkap Anda.",
+      "nameTooLong": "Nama terlalu panjang. Gunakan paling banyak 120 karakter.",
+      "invalidCredentials": "Email atau kata sandi salah. Periksa lagi, lalu coba masuk kembali.",
+      "emailTaken": "Email ini sudah terdaftar. Silakan masuk dengan email tersebut.",
+      "rateLimited": "Terlalu banyak percobaan. Tunggu beberapa menit, lalu coba lagi.",
+      "weakPassword": "Kata sandi ini terlalu mudah ditebak. Pilih kata sandi lain.",
+      "emailRejected": "Email ini tidak dapat digunakan. Gunakan alamat email lain.",
+      "confirmEmail": "Akun Anda sudah dibuat. Buka email dari HomeKlin untuk mengaktifkannya, lalu masuk.",
+      "unavailable": "Permintaan Anda belum dapat diproses. Coba lagi sebentar lagi."
+    }
+  },
+  "AccountChip": {
+    "signIn": "Masuk",
+    "account": "{name}, akun Anda",
+    "accountNoName": "Akun Anda",
+    "dashboard": "{name}, dasbor Anda",
+    "dashboardNoName": "Dasbor Anda"
+  },
+  "AccountSummary": {
+    "signedInAs": "Masuk sebagai",
+    "noName": "Akun HomeKlin"
+  },
+  "SignOut": {
+    "submit": "Keluar",
+    "pending": "Sedang keluar…"
+  },
+  "GateFallback": {
+    "loading": "Memuat…"
   }
 }

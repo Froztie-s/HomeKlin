@@ -1,4 +1,6 @@
 import { useTranslations } from "next-intl";
+import { Suspense } from "react";
+import { AccountSlot } from "@/components/auth/account-slot";
 import { Wordmark } from "@/components/brand/wordmark";
 import { Link } from "@/i18n/navigation";
 import { appNavigation } from "./app-navigation";
@@ -13,10 +15,21 @@ type AppHeaderProps = {
   roleLabel?: string;
 };
 
+// Where the account corner ("Masuk", or the signed-in user's chip) shows, by the room the bar has.
+// Customer: on phones the sections sit in the bottom bar, so there is room; between 768 and 1023 px
+// the five sections fill the bar (22 px left at 768 px) and their "Akun" leads to the same place;
+// from 1024 px it returns. Cleaner: on phones the role badge fills the bar, so the account page (the
+// "Akun" tab) carries the name and sign-out; from 768 px the two sections leave room.
+const accountSlotPlacement: Record<AppNavKey, string> = {
+  customer: "flex md:hidden lg:flex",
+  cleaner: "hidden md:flex",
+};
+
 // The customer and cleaner app bar. On phones a slim 56 px bar: the wordmark (home link) on the left,
-// the language switch on the right, and the sections stay in the bottom bar; it scrolls away so the
-// small screen keeps its height. From 768 px it becomes the 64 px sticky top bar with the sections
-// between the brand and the switch.
+// the language switch and the account corner on the right, and the sections stay in the bottom bar; it
+// scrolls away so the small screen keeps its height. From 768 px it becomes the 64 px sticky top bar
+// with the sections between the brand and the switch. The account corner reads the session, so it
+// streams in behind <Suspense> while the rest of the bar stays prerendered.
 export function AppHeader({ nav, roleLabel }: AppHeaderProps) {
   const t = useTranslations("AppShell");
   const home = appNavigation[nav].items[0];
@@ -30,9 +43,14 @@ export function AppHeader({ nav, roleLabel }: AppHeaderProps) {
           </Link>
           {roleLabel ? <RoleBadge label={roleLabel} /> : null}
         </span>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <TopNav nav={nav} />
           <LanguageSwitch />
+          <div className={accountSlotPlacement[nav]}>
+            <Suspense fallback={null}>
+              <AccountSlot />
+            </Suspense>
+          </div>
         </div>
       </div>
     </header>
