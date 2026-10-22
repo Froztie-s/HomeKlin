@@ -1,19 +1,11 @@
 import { ArrowUpRight, Clock } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
 import { previewServices, type PreviewService } from "@/components/customer/home-preview-data";
+import { Link } from "@/i18n/navigation";
 import { formatRupiah } from "@/lib/format";
 import { Eyebrow } from "./eyebrow";
 import { anchorOffset, landingContainer, landingSection } from "./landing-layout";
-
-const copy = {
-  eyebrow: "Daftar harga",
-  titleStart: "Layanan dan harga,",
-  titleAccent: "tanpa kejutan",
-  from: "mulai dari",
-  note: "Harga contoh selama masa pratinjau. Harga resmi diatur HomeKlin dan selalu tampil penuh sebelum Anda membayar.",
-  all: "Lihat semua layanan",
-};
 
 // Services (markdown/design.md, Layout): the heading with the link to the full price list beside it,
 // then four soft-bento cards in a row from 1280 px (two from 640 px, one on phones; at 1024 px four
@@ -21,6 +13,7 @@ const copy = {
 // link to /services; on hover or keyboard focus it inverts to forest green, which is the feedback for
 // "this is clickable" (the service filter lives on /services, where SPEC puts it).
 export function ServicesGrid() {
+  const t = useTranslations("ServicesGrid");
   return (
     <section
       id="layanan"
@@ -29,19 +22,19 @@ export function ServicesGrid() {
     >
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
-          <Eyebrow>{copy.eyebrow}</Eyebrow>
+          <Eyebrow>{t("eyebrow")}</Eyebrow>
           <h2
             id="layanan-title"
             className="mt-4 font-display text-headline-sm font-semibold text-ink md:text-headline-md xl:text-headline"
           >
-            {copy.titleStart} <em className="serif-accent">{copy.titleAccent}</em>
+            {t.rich("title", { accent: (chunks) => <em className="serif-accent">{chunks}</em> })}
           </h2>
         </div>
         <Link
           href="/services"
           className="inline-flex min-h-touch shrink-0 items-center gap-2 self-start rounded-full border-[1.5px] border-outline px-5 text-sm font-semibold text-ink transition-[background-color,color,transform] duration-150 ease-out-quart hover:bg-primary hover:text-on-primary active:scale-[0.98] md:self-auto"
         >
-          {copy.all}
+          {t("all")}
           <ArrowUpRight className="size-4" aria-hidden="true" />
         </Link>
       </div>
@@ -54,7 +47,7 @@ export function ServicesGrid() {
         ))}
       </ul>
 
-      <p className="mt-8 max-w-prose text-sm text-ink-muted">{copy.note}</p>
+      <p className="mt-8 max-w-prose text-sm text-ink-muted">{t("note")}</p>
     </section>
   );
 }
@@ -62,14 +55,19 @@ export function ServicesGrid() {
 // White card, photo inset 10 px with its own radius (a card within a card), an italic index numeral
 // and an arrow circle, then the facts in the same place on every card. The name's link is stretched
 // over the whole card. Text colours flip with the card so every pair keeps AA (design.md table).
+// The duration and the price share a row while they fit; a longer duration (English runs about 30%
+// longer) moves the price to its own row, still right-aligned, instead of overflowing the card.
 function ServiceCard({ service, index }: { service: PreviewService; index: number }) {
+  const t = useTranslations("Service");
+  const preview = useTranslations("PreviewData");
+  const locale = useLocale();
   const { photo } = service;
   return (
     <article className="group relative flex h-full flex-col rounded-lg bg-card p-2.5 text-ink transition-[background-color,color,box-shadow] duration-200 ease-out-quart focus-within:bg-primary focus-within:text-on-primary hover:bg-primary hover:text-on-primary hover:shadow-card-hover">
       <div className="relative aspect-4/3 overflow-hidden rounded-md bg-sunken">
         <Image
           src={photo.src}
-          alt={photo.alt}
+          alt={preview(`services.${service.id}.photoAlt`)}
           fill
           sizes="(min-width: 1280px) 270px, (min-width: 640px) 46vw, 100vw"
           style={{ objectPosition: photo.focus }}
@@ -96,23 +94,23 @@ function ServiceCard({ service, index }: { service: PreviewService; index: numbe
             href="/services"
             className="rounded-sm after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:-outline-offset-4 focus-visible:after:outline-lime"
           >
-            {service.name}
+            {preview(`services.${service.id}.name`)}
           </Link>
         </h3>
         <p className="mt-2 text-body text-ink-muted transition-colors duration-200 group-focus-within:text-on-band-muted group-hover:text-on-band-muted">
-          {service.description}
+          {preview(`services.${service.id}.description`)}
         </p>
-        <div className="mt-auto flex items-end justify-between gap-3 pt-6">
+        <div className="mt-auto flex flex-wrap items-end justify-between gap-x-3 gap-y-2 pt-6">
           <p className="flex items-center gap-1.5 text-sm whitespace-nowrap text-ink-muted transition-colors duration-200 group-focus-within:text-on-band-muted group-hover:text-on-band-muted">
             <Clock className="size-4 shrink-0" aria-hidden="true" />
-            {service.duration}
+            {t("duration", { hours: service.hours })}
           </p>
-          <p className="flex flex-col items-end">
+          <p className="ml-auto flex flex-col items-end">
             <span className="text-xs text-ink-muted transition-colors duration-200 group-focus-within:text-on-band-muted group-hover:text-on-band-muted">
-              {copy.from}
+              {t("from")}
             </span>
             <span className="font-display text-price font-semibold whitespace-nowrap tabular-nums">
-              {formatRupiah(service.startingPrice)}
+              {formatRupiah(service.startingPrice, locale)}
             </span>
           </p>
         </div>

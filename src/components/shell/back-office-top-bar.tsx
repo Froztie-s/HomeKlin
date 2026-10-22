@@ -1,24 +1,30 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Wordmark } from "@/components/brand/wordmark";
-import type { NavKey } from "./navigation";
+import { LanguageSwitch } from "./language-switch";
+import type { BackOfficeNavKey } from "./navigation";
 import { RoleBadge } from "./role-badge";
 import { SideNavList } from "./side-nav-list";
 
 type BackOfficeTopBarProps = {
-  nav: Extract<NavKey, "agency" | "admin">;
+  nav: BackOfficeNavKey;
   roleLabel: string;
 };
 
-const copy = { menu: "Menu" };
 const menuId = "back-office-menu";
 
 // Below desktop width the sidebar collapses into this bar. The menu opens in the page flow
-// (pushing content down), so nothing is covered and no focus trap is needed.
+// (pushing content down), so nothing is covered and no focus trap is needed. The language switch
+// sits in the menu, under the sections: at 360 px the bar has no room next to the wordmark, the role
+// and the Menu button.
 export function BackOfficeTopBar({ nav, roleLabel }: BackOfficeTopBarProps) {
+  const t = useTranslations("BackOfficeShell");
+  // The address as the browser shows it (with /en), so switching the language also counts as
+  // navigating; next-intl's usePathname would return the same path in both languages.
   const pathname = usePathname();
   const button = useRef<HTMLButtonElement>(null);
   // Remember which page the menu was opened on: any navigation (link, back button) closes it.
@@ -54,11 +60,14 @@ export function BackOfficeTopBar({ nav, roleLabel }: BackOfficeTopBarProps) {
           className="-mr-2 inline-flex min-h-touch items-center gap-2 rounded-full px-4 text-sm font-semibold text-ink transition-colors duration-150 ease-out-quart hover:bg-surface-sunken active:bg-brand-50 aria-expanded:bg-surface-sunken"
         >
           {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
-          {copy.menu}
+          {t("menu")}
         </button>
       </div>
       <div id={menuId} hidden={!open} className="border-t border-border px-safe py-3">
         <SideNavList nav={nav} onNavigate={() => setOpenedOn(null)} />
+        <div className="mt-3 border-t border-border px-1 pt-3">
+          <LanguageSwitch />
+        </div>
       </div>
     </header>
   );

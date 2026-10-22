@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { isActivePath } from "./is-active-path";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
 import { backOfficeNavigation } from "./back-office-navigation";
+import { isActivePath } from "./is-active-path";
 import type { BackOfficeNavKey } from "./navigation";
 
 type SideNavListProps = {
@@ -14,11 +14,12 @@ type SideNavListProps = {
 
 // The back-office sections, used by the desktop sidebar and by the narrow-screen menu.
 export function SideNavList({ nav, onNavigate }: SideNavListProps) {
+  const t = useTranslations("BackOfficeNavigation");
   const pathname = usePathname();
-  const { label, items } = backOfficeNavigation[nav];
+  const { labelKey, items } = backOfficeNavigation[nav];
 
   return (
-    <nav aria-label={label}>
+    <nav aria-label={t(labelKey)}>
       <ul className="flex flex-col gap-0.5">
         {items.map((item) => {
           const Icon = item.icon;
@@ -34,7 +35,7 @@ export function SideNavList({ nav, onNavigate }: SideNavListProps) {
                   className="size-4.5 shrink-0 text-ink-faint transition-colors duration-150 group-hover:text-ink-muted group-aria-[current=page]:text-brand-700"
                   aria-hidden="true"
                 />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             </li>
           );

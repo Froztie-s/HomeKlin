@@ -1,0 +1,326 @@
+{
+  "Metadata": {
+    "description": "Jasa kebersihan rumah yang bisa Anda tonton langsung."
+  },
+  "LanguageSwitch": {
+    "label": "Bahasa",
+    "id": "Bahasa Indonesia",
+    "en": "English"
+  },
+  "SkipLink": {
+    "label": "Langsung ke konten utama"
+  },
+  "NotFound": {
+    "title": "Halaman tidak ditemukan",
+    "body": "Alamat ini tidak ada di HomeKlin. Periksa kembali tautannya, atau mulai lagi dari halaman utama.",
+    "home": "Ke halaman utama"
+  },
+  "AppNavigation": {
+    "customer": {
+      "label": "Navigasi utama",
+      "home": "Beranda",
+      "services": "Layanan",
+      "orders": "Pesanan",
+      "support": "Bantuan",
+      "account": "Akun"
+    },
+    "cleaner": {
+      "label": "Navigasi petugas",
+      "jobs": "Pekerjaan",
+      "account": "Akun"
+    }
+  },
+  "AppShell": {
+    "homeLink": "HomeKlin, ke beranda",
+    "cleanerRole": "Petugas"
+  },
+  "BackOfficeNavigation": {
+    "agency": {
+      "label": "Navigasi agensi",
+      "dashboard": "Dasbor",
+      "schedule": "Jadwal",
+      "cleaners": "Petugas",
+      "orders": "Pesanan",
+      "recordings": "Rekaman"
+    },
+    "admin": {
+      "label": "Navigasi admin",
+      "dashboard": "Dasbor",
+      "monitor": "Monitor Langsung",
+      "tickets": "Tiket",
+      "recordings": "Rekaman",
+      "services": "Layanan & Harga",
+      "faq": "FAQ"
+    }
+  },
+  "BackOfficeShell": {
+    "menu": "Menu",
+    "agencyRole": "Agensi",
+    "adminRole": "Admin"
+  },
+  "MarketingHeader": {
+    "nav": "Navigasi situs",
+    "cta": "Pesan sekarang",
+    "promise": "Bayar di muka. Harga tampil penuh, tanpa biaya tersembunyi.",
+    "help": "Bantuan",
+    "links": {
+      "services": "Layanan",
+      "howItWorks": "Cara kerja",
+      "safety": "Keamanan",
+      "questions": "Pertanyaan"
+    }
+  },
+  "Hero": {
+    "title": "Jasa kebersihan rumah yang bisa Anda <accent>tonton langsung</accent>",
+    "lead": "Pilih layanan dan jadwal di area Anda, bayar di muka, lalu pantau Petugas HomeKlin bekerja dari ponsel.",
+    "cta": "Pesan sekarang",
+    "prices": "Lihat harga",
+    "photoAlt": "Petugas kebersihan mengelap meja dapur"
+  },
+  "HeroJobCard": {
+    "label": "Contoh pesanan berjalan",
+    "sample": "Contoh"
+  },
+  "JobStatus": {
+    "live": "Sedang berlangsung",
+    "checkedIn": "Petugas sudah check-in pukul {time}",
+    "cleanerRole": "Petugas HomeKlin"
+  },
+  "TrustRow": {
+    "title": "Di setiap pesanan",
+    "facts": {
+      "stream": "Siaran hanya untuk Anda dan tim pemantau HomeKlin",
+      "checkIn": "Petugas check-in di alamat Anda sebelum bekerja",
+      "recordings": "Rekaman disimpan 7 hari, lalu dihapus",
+      "consent": "Persetujuan siaran ditanyakan saat memesan"
+    }
+  },
+  "ServicesGrid": {
+    "eyebrow": "Daftar harga",
+    "title": "Layanan dan harga, <accent>tanpa kejutan</accent>",
+    "note": "Harga contoh selama masa pratinjau. Harga resmi diatur HomeKlin dan selalu tampil penuh sebelum Anda membayar.",
+    "all": "Lihat semua layanan"
+  },
+  "Service": {
+    "from": "mulai dari",
+    "duration": "± {hours, plural, other {# jam}}",
+    "nextSlot": "Jadwal terdekat: <nowrap>{slot}</nowrap>"
+  },
+  "Safety": {
+    "title": "Rumah Anda tetap dalam <accent>pantauan Anda</accent>",
+    "body": "Tonton pekerjaan secara langsung dari ponsel Anda. Siaran hanya untuk Anda dan tim pemantau HomeKlin, dan persetujuan Anda ditanyakan saat memesan.",
+    "replayFigure": "7 hari",
+    "replayCaption": "Rekaman dapat Anda putar ulang, lalu dihapus otomatis.",
+    "checkInFigure": "Check-in",
+    "checkInCaption": "Petugas HomeKlin check-in di alamat Anda sebelum mulai bekerja.",
+    "photoAlt": "Petugas kebersihan merapikan bantal sofa"
+  },
+  "HowItWorks": {
+    "title": "Cara kerjanya, dalam <accent>lima langkah</accent>",
+    "lead": "Dari memesan sampai memutar ulang rekaman, semuanya dari ponsel Anda.",
+    "steps": {
+      "book": {
+        "title": "Pesan",
+        "body": "Pilih layanan, area, dan jadwal yang masih kosong."
+      },
+      "pay": {
+        "title": "Bayar",
+        "body": "Bayar di muka. Harga tampil penuh sebelum Anda membayar."
+      },
+      "checkIn": {
+        "title": "Petugas check-in",
+        "body": "Petugas HomeKlin check-in di alamat Anda. Waktu dan lokasinya tercatat."
+      },
+      "watch": {
+        "title": "Tonton langsung",
+        "body": "Saat pekerjaan berjalan, Anda dapat menontonnya dari ponsel."
+      },
+      "replay": {
+        "title": "Putar ulang 7 hari",
+        "body": "Rekaman dapat Anda putar ulang selama 7 hari, lalu dihapus."
+      }
+    }
+  },
+  "FaqTeaser": {
+    "eyebrow": "Pertanyaan umum",
+    "title": "Ada pertanyaan? <accent>Ini jawabannya.</accent>",
+    "all": "Lihat semua pertanyaan",
+    "questions": {
+      "cleaner": {
+        "question": "Siapa yang datang ke rumah saya?",
+        "answer": "Petugas HomeKlin. Setelah petugas ditugaskan, nama dan fotonya tampil di pesanan Anda."
+      },
+      "stream": {
+        "question": "Siapa yang dapat menonton siaran langsungnya?",
+        "answer": "Anda, selama pekerjaan berlangsung, dan tim pemantau HomeKlin. Pelanggan lain tidak dapat menontonnya."
+      },
+      "recordings": {
+        "question": "Berapa lama rekaman disimpan?",
+        "answer": "7 hari setelah pekerjaan selesai. Setelah itu rekaman dihapus dan tidak dapat dibuka lagi."
+      },
+      "payment": {
+        "question": "Kapan saya membayar?",
+        "answer": "Saat memesan. Status pesanan Anda berubah begitu pembayaran berhasil."
+      }
+    }
+  },
+  "CtaShell": {
+    "title": "Pilih jadwal yang masih kosong di area <accent>Anda</accent>",
+    "body": "Harga tampil penuh sebelum Anda membayar.",
+    "cta": "Pesan sekarang"
+  },
+  "MarketingFooter": {
+    "tagline": "Jasa kebersihan rumah yang bisa Anda tonton langsung.",
+    "columns": {
+      "app": "Aplikasi",
+      "help": "Bantuan"
+    },
+    "links": {
+      "home": "Beranda",
+      "services": "Layanan",
+      "orders": "Pesanan",
+      "helpCenter": "Pusat bantuan",
+      "account": "Akun"
+    },
+    "preview": "Situs pratinjau proyek universitas. Harga dan data di situs ini adalah contoh.",
+    "copyright": "© 2026 HomeKlin"
+  },
+  "HomePage": {
+    "metaTitle": "Beranda",
+    "title": "Pesan kebersihan rumah",
+    "services": "Layanan HomeKlin",
+    "seeAll": "Semua layanan",
+    "previewNote": "Pratinjau tampilan: layanan, harga, jadwal, dan pesanan di halaman ini adalah data contoh."
+  },
+  "ServicesPage": {
+    "title": "Layanan",
+    "description": "Satu daftar harga dari HomeKlin. Jadwal terdekat untuk {area}.",
+    "previewNote": "Pratinjau tampilan: layanan, harga, dan jadwal di halaman ini adalah data contoh."
+  },
+  "OrdersPage": {
+    "title": "Pesanan",
+    "emptyTitle": "Belum ada pesanan",
+    "emptyBody": "Pesanan Anda muncul di sini dengan statusnya, dari dibayar sampai selesai. Saat petugas bekerja, Anda dapat menonton siaran langsung dari halaman ini."
+  },
+  "SupportPage": {
+    "title": "Bantuan",
+    "emptyTitle": "Pertanyaan umum muncul di sini",
+    "emptyBody": "Anda dapat mencari jawaban dengan kata kunci. Jika jawabannya tidak ada, Anda dapat menghubungi admin lewat chat dari halaman ini."
+  },
+  "AccountPage": {
+    "title": "Akun",
+    "emptyTitle": "Anda belum masuk",
+    "emptyBody": "Setelah masuk, data akun, alamat rumah, dan pilihan bahasa Anda muncul di sini."
+  },
+  "AreaPicker": {
+    "label": "Area layanan"
+  },
+  "JobStatusCard": {
+    "region": "Pesanan berjalan",
+    "detail": "{service}, selesai sekitar {time}",
+    "privacy": "Hanya Anda dan tim pemantau HomeKlin yang dapat menonton. Rekaman tersimpan 7 hari.",
+    "watch": "Tonton langsung"
+  },
+  "PreviewData": {
+    "areas": {
+      "jakarta-selatan": "Jakarta Selatan",
+      "jakarta-pusat": "Jakarta Pusat",
+      "jakarta-barat": "Jakarta Barat",
+      "jakarta-timur": "Jakarta Timur",
+      "jakarta-utara": "Jakarta Utara"
+    },
+    "services": {
+      "regular": {
+        "name": "Pembersihan Rutin",
+        "description": "Lantai, debu, dapur, dan kamar mandi untuk perawatan rutin.",
+        "nextSlot": "Besok, 08.00",
+        "photoAlt": "Petugas kebersihan mengepel lantai ruang tamu yang terang"
+      },
+      "deep": {
+        "name": "Deep Cleaning",
+        "description": "Pembersihan menyeluruh sampai sudut, perabot, dan peralatan dapur.",
+        "nextSlot": "Sab, 09.00",
+        "photoAlt": "Petugas kebersihan mengelap mesin kopi di meja dapur"
+      },
+      "sofa-carpet": {
+        "name": "Sofa & Karpet",
+        "description": "Penyedotan dan pembersihan kain sofa dan karpet.",
+        "nextSlot": "Hari ini, 15.00",
+        "photoAlt": "Petugas kebersihan bersarung tangan menyedot debu dudukan sofa"
+      },
+      "kitchen-bathroom": {
+        "name": "Dapur & Kamar Mandi",
+        "description": "Kerak, lemak, dan noda air di dapur serta kamar mandi.",
+        "nextSlot": "Besok, 10.00",
+        "photoAlt": "Petugas kebersihan memakai sarung tangan karet di dekat wastafel dapur"
+      }
+    },
+    "cleanerPhotoAlt": "Foto {name}",
+    "jobScheduled": "Hari ini, 09.00"
+  },
+  "CleanerJobsPage": {
+    "title": "Pekerjaan hari ini",
+    "emptyTitle": "Belum ada pekerjaan hari ini",
+    "emptyBody": "Pekerjaan yang ditugaskan agensi Anda muncul di sini, lengkap dengan alamat dan jam kerja. Saat tiba di lokasi, Anda check-in dari halaman ini."
+  },
+  "CleanerAccountPage": {
+    "title": "Akun",
+    "emptyTitle": "Anda belum masuk",
+    "emptyBody": "Setelah masuk, data akun Anda dan agensi tempat Anda bekerja muncul di sini."
+  },
+  "AgencyDashboardPage": {
+    "title": "Dasbor",
+    "emptyTitle": "Ringkasan agensi muncul di sini",
+    "emptyBody": "Pesanan baru, jadwal petugas hari ini, dan pekerjaan yang sedang berlangsung tampil di halaman ini."
+  },
+  "AgencySchedulePage": {
+    "title": "Jadwal",
+    "emptyTitle": "Belum ada ketersediaan",
+    "emptyBody": "Ketersediaan agensi Anda per area muncul di sini. Pelanggan hanya ditawari slot yang masih kosong."
+  },
+  "AgencyCleanersPage": {
+    "title": "Petugas",
+    "emptyTitle": "Belum ada petugas",
+    "emptyBody": "Petugas agensi Anda muncul di sini, beserta status check-in mereka pada pekerjaan hari ini."
+  },
+  "AgencyOrdersPage": {
+    "title": "Pesanan",
+    "emptyTitle": "Belum ada pesanan",
+    "emptyBody": "Pesanan yang sudah dibayar muncul di sini. Dari halaman ini Anda menugaskan petugas untuk setiap pesanan."
+  },
+  "AgencyRecordingsPage": {
+    "title": "Rekaman",
+    "emptyTitle": "Belum ada rekaman",
+    "emptyBody": "Rekaman pekerjaan petugas Anda muncul di sini selama 7 hari setelah pekerjaan selesai, lalu dihapus otomatis."
+  },
+  "AdminDashboardPage": {
+    "title": "Dasbor",
+    "emptyTitle": "Ringkasan platform muncul di sini",
+    "emptyBody": "Pekerjaan yang sedang berlangsung, tiket bantuan yang menunggu jawaban, dan rekaman terbaru tampil di halaman ini."
+  },
+  "AdminMonitorPage": {
+    "title": "Monitor Langsung",
+    "emptyTitle": "Tidak ada pekerjaan yang sedang berlangsung",
+    "emptyBody": "Siaran langsung semua pekerjaan yang sedang berlangsung muncul di sini dalam satu tampilan."
+  },
+  "AdminTicketsPage": {
+    "title": "Tiket",
+    "emptyTitle": "Belum ada tiket",
+    "emptyBody": "Pertanyaan pelanggan yang diteruskan dari halaman Bantuan muncul di sini, diurutkan dari yang paling mendesak."
+  },
+  "AdminRecordingsPage": {
+    "title": "Rekaman",
+    "emptyTitle": "Belum ada rekaman",
+    "emptyBody": "Rekaman semua pekerjaan yang masih dalam masa simpan 7 hari muncul di sini."
+  },
+  "AdminServicesPage": {
+    "title": "Layanan & Harga",
+    "emptyTitle": "Belum ada layanan",
+    "emptyBody": "Daftar layanan dan harga HomeKlin muncul di sini. Pelanggan melihat harga ini apa adanya, tanpa biaya tambahan."
+  },
+  "AdminFaqPage": {
+    "title": "FAQ",
+    "emptyTitle": "Belum ada pertanyaan",
+    "emptyBody": "Pertanyaan umum yang tampil di halaman Bantuan pelanggan muncul di sini. Anda dapat menambah dan mengubahnya."
+  }
+}

@@ -6,27 +6,28 @@ import {
   House,
   UserRound,
 } from "lucide-react";
-import type { AppNavKey, Navigation } from "./navigation";
+import type { AppNavKey, MessageKeyIn, Navigation } from "./navigation";
 
 // Customer and cleaner menus. Kept apart from the back-office menus so the pages customers
 // download never carry agency menu labels or routes (markdown/PRODUCT.md principle 6).
-// The first item of each list is its home: the desktop wordmark links there.
-export const appNavigation: Record<AppNavKey, Navigation> = {
+// The first item of each list is its home: the wordmark links there.
+// Labels: the AppNavigation namespace of src/messages/*.json, which the app shells send to the browser.
+export const appNavigation = {
   customer: {
-    label: "Navigasi utama",
+    labelKey: "customer.label",
     items: [
-      { href: "/home", exact: true, label: "Beranda", icon: House },
-      { href: "/services", label: "Layanan", icon: BrushCleaning },
-      { href: "/orders", label: "Pesanan", icon: ClipboardList },
-      { href: "/support", label: "Bantuan", icon: CircleQuestionMark },
-      { href: "/account", label: "Akun", icon: UserRound },
+      { href: "/home", exact: true, labelKey: "customer.home", icon: House },
+      { href: "/services", labelKey: "customer.services", icon: BrushCleaning },
+      { href: "/orders", labelKey: "customer.orders", icon: ClipboardList },
+      { href: "/support", labelKey: "customer.support", icon: CircleQuestionMark },
+      { href: "/account", labelKey: "customer.account", icon: UserRound },
     ],
   },
   cleaner: {
-    label: "Navigasi petugas",
+    labelKey: "cleaner.label",
     items: [
-      { href: "/cleaner", exact: true, label: "Pekerjaan", icon: ClipboardCheck },
-      { href: "/cleaner/account", label: "Akun", icon: UserRound },
+      { href: "/cleaner", exact: true, labelKey: "cleaner.jobs", icon: ClipboardCheck },
+      { href: "/cleaner/account", labelKey: "cleaner.account", icon: UserRound },
     ],
   },
-};
+} satisfies Record<AppNavKey, Navigation<MessageKeyIn<"AppNavigation">>>;

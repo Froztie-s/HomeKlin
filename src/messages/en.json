@@ -1,0 +1,326 @@
+{
+  "Metadata": {
+    "description": "A home cleaning service you can watch live."
+  },
+  "LanguageSwitch": {
+    "label": "Language",
+    "id": "Bahasa Indonesia",
+    "en": "English"
+  },
+  "SkipLink": {
+    "label": "Skip to main content"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "body": "This address does not exist on HomeKlin. Check the link, or start again from the home page.",
+    "home": "Go to the home page"
+  },
+  "AppNavigation": {
+    "customer": {
+      "label": "Main navigation",
+      "home": "Home",
+      "services": "Services",
+      "orders": "Orders",
+      "support": "Help",
+      "account": "Account"
+    },
+    "cleaner": {
+      "label": "Cleaner navigation",
+      "jobs": "Jobs",
+      "account": "Account"
+    }
+  },
+  "AppShell": {
+    "homeLink": "HomeKlin, go to Home",
+    "cleanerRole": "Cleaner"
+  },
+  "BackOfficeNavigation": {
+    "agency": {
+      "label": "Agency navigation",
+      "dashboard": "Dashboard",
+      "schedule": "Schedule",
+      "cleaners": "Cleaners",
+      "orders": "Orders",
+      "recordings": "Recordings"
+    },
+    "admin": {
+      "label": "Admin navigation",
+      "dashboard": "Dashboard",
+      "monitor": "Live monitor",
+      "tickets": "Tickets",
+      "recordings": "Recordings",
+      "services": "Services & prices",
+      "faq": "FAQ"
+    }
+  },
+  "BackOfficeShell": {
+    "menu": "Menu",
+    "agencyRole": "Agency",
+    "adminRole": "Admin"
+  },
+  "MarketingHeader": {
+    "nav": "Site navigation",
+    "cta": "Book now",
+    "promise": "Pay upfront. Full prices shown, no hidden fees.",
+    "help": "Help",
+    "links": {
+      "services": "Services",
+      "howItWorks": "How it works",
+      "safety": "Safety",
+      "questions": "Questions"
+    }
+  },
+  "Hero": {
+    "title": "A home cleaning service you can <accent>watch live</accent>",
+    "lead": "Choose a service and a time in your area, pay upfront, then watch your HomeKlin cleaner work from your phone.",
+    "cta": "Book now",
+    "prices": "See prices",
+    "photoAlt": "A cleaner wiping a kitchen counter"
+  },
+  "HeroJobCard": {
+    "label": "Sample job in progress",
+    "sample": "Sample"
+  },
+  "JobStatus": {
+    "live": "In progress",
+    "checkedIn": "Your cleaner checked in at {time}",
+    "cleanerRole": "HomeKlin cleaner"
+  },
+  "TrustRow": {
+    "title": "With every order",
+    "facts": {
+      "stream": "The live stream is only for you and the HomeKlin monitoring team",
+      "checkIn": "Your cleaner checks in at your address before starting",
+      "recordings": "Recordings are kept for 7 days, then deleted",
+      "consent": "We ask for your consent to stream when you book"
+    }
+  },
+  "ServicesGrid": {
+    "eyebrow": "Price list",
+    "title": "Services and prices, <accent>no surprises</accent>",
+    "note": "Sample prices during the preview. HomeKlin sets the real prices and always shows them in full before you pay.",
+    "all": "See all services"
+  },
+  "Service": {
+    "from": "from",
+    "duration": "About {hours, plural, one {# hour} other {# hours}}",
+    "nextSlot": "Next free slot: <nowrap>{slot}</nowrap>"
+  },
+  "Safety": {
+    "title": "Your home stays under <accent>your watch</accent>",
+    "body": "Watch the work live from your phone. The stream is only for you and the HomeKlin monitoring team, and we ask for your consent when you book.",
+    "replayFigure": "7 days",
+    "replayCaption": "You can replay the recording, then it is deleted automatically.",
+    "checkInFigure": "Check-in",
+    "checkInCaption": "Your HomeKlin cleaner checks in at your address before starting work.",
+    "photoAlt": "A cleaner arranging sofa cushions"
+  },
+  "HowItWorks": {
+    "title": "How it works, in <accent>five steps</accent>",
+    "lead": "From booking to replaying the recording, all from your phone.",
+    "steps": {
+      "book": {
+        "title": "Book",
+        "body": "Choose a service, your area and a free time slot."
+      },
+      "pay": {
+        "title": "Pay",
+        "body": "Pay upfront. You see the full price before you pay."
+      },
+      "checkIn": {
+        "title": "Cleaner checks in",
+        "body": "Your HomeKlin cleaner checks in at your address. The time and place are recorded."
+      },
+      "watch": {
+        "title": "Watch live",
+        "body": "While the work is in progress, you can watch it from your phone."
+      },
+      "replay": {
+        "title": "Replay for 7 days",
+        "body": "You can replay the recording for 7 days, then it is deleted."
+      }
+    }
+  },
+  "FaqTeaser": {
+    "eyebrow": "Common questions",
+    "title": "Have a question? Here are the <accent>answers.</accent>",
+    "all": "See all questions",
+    "questions": {
+      "cleaner": {
+        "question": "Who comes to my home?",
+        "answer": "A HomeKlin cleaner. Once a cleaner is assigned, their name and photo appear in your order."
+      },
+      "stream": {
+        "question": "Who can watch the live stream?",
+        "answer": "You, while the work is in progress, and the HomeKlin monitoring team. Other customers cannot watch it."
+      },
+      "recordings": {
+        "question": "How long are recordings kept?",
+        "answer": "7 days after the work is done. After that, the recording is deleted and cannot be opened again."
+      },
+      "payment": {
+        "question": "When do I pay?",
+        "answer": "When you book. Your order status changes as soon as the payment goes through."
+      }
+    }
+  },
+  "CtaShell": {
+    "title": "Choose a free time slot in <accent>your area</accent>",
+    "body": "You see the full price before you pay.",
+    "cta": "Book now"
+  },
+  "MarketingFooter": {
+    "tagline": "A home cleaning service you can watch live.",
+    "columns": {
+      "app": "App",
+      "help": "Help"
+    },
+    "links": {
+      "home": "Home",
+      "services": "Services",
+      "orders": "Orders",
+      "helpCenter": "Help center",
+      "account": "Account"
+    },
+    "preview": "A university project preview site. Prices and data on this site are samples.",
+    "copyright": "© 2026 HomeKlin"
+  },
+  "HomePage": {
+    "metaTitle": "Home",
+    "title": "Book a home cleaning",
+    "services": "HomeKlin services",
+    "seeAll": "All services",
+    "previewNote": "Design preview: the services, prices, times and order on this page are sample data."
+  },
+  "ServicesPage": {
+    "title": "Services",
+    "description": "One price list from HomeKlin. Next free slots for {area}.",
+    "previewNote": "Design preview: the services, prices and times on this page are sample data."
+  },
+  "OrdersPage": {
+    "title": "Orders",
+    "emptyTitle": "No orders yet",
+    "emptyBody": "Your orders appear here with their status, from paid to done. While your cleaner works, you can watch the live stream from this page."
+  },
+  "SupportPage": {
+    "title": "Help",
+    "emptyTitle": "Common questions appear here",
+    "emptyBody": "You can search for answers by keyword. If the answer is not there, you can chat with an admin from this page."
+  },
+  "AccountPage": {
+    "title": "Account",
+    "emptyTitle": "You are not signed in",
+    "emptyBody": "Once you sign in, your account details, home address and language choice appear here."
+  },
+  "AreaPicker": {
+    "label": "Service area"
+  },
+  "JobStatusCard": {
+    "region": "Current order",
+    "detail": "{service}, finishing around {time}",
+    "privacy": "Only you and the HomeKlin monitoring team can watch. The recording is kept for 7 days.",
+    "watch": "Watch live"
+  },
+  "PreviewData": {
+    "areas": {
+      "jakarta-selatan": "South Jakarta",
+      "jakarta-pusat": "Central Jakarta",
+      "jakarta-barat": "West Jakarta",
+      "jakarta-timur": "East Jakarta",
+      "jakarta-utara": "North Jakarta"
+    },
+    "services": {
+      "regular": {
+        "name": "Regular Cleaning",
+        "description": "Floors, dust, kitchen and bathroom, for regular upkeep.",
+        "nextSlot": "Tomorrow, 08.00",
+        "photoAlt": "A cleaner mopping the floor of a bright living room"
+      },
+      "deep": {
+        "name": "Deep Cleaning",
+        "description": "A thorough clean, down to the corners, furniture and kitchen appliances.",
+        "nextSlot": "Sat, 09.00",
+        "photoAlt": "A cleaner wiping a coffee machine on a kitchen counter"
+      },
+      "sofa-carpet": {
+        "name": "Sofa & Carpet",
+        "description": "Vacuuming and cleaning of sofa fabric and carpets.",
+        "nextSlot": "Today, 15.00",
+        "photoAlt": "A cleaner in gloves vacuuming a sofa seat"
+      },
+      "kitchen-bathroom": {
+        "name": "Kitchen & Bathroom",
+        "description": "Limescale, grease and water stains in the kitchen and bathroom.",
+        "nextSlot": "Tomorrow, 10.00",
+        "photoAlt": "A cleaner in rubber gloves next to a kitchen sink"
+      }
+    },
+    "cleanerPhotoAlt": "Photo of {name}",
+    "jobScheduled": "Today, 09.00"
+  },
+  "CleanerJobsPage": {
+    "title": "Today’s jobs",
+    "emptyTitle": "No jobs for today yet",
+    "emptyBody": "Jobs your agency assigns to you appear here, with the address and working hours. When you arrive, you check in from this page."
+  },
+  "CleanerAccountPage": {
+    "title": "Account",
+    "emptyTitle": "You are not signed in",
+    "emptyBody": "Once you sign in, your account details and the agency you work for appear here."
+  },
+  "AgencyDashboardPage": {
+    "title": "Dashboard",
+    "emptyTitle": "Your agency overview appears here",
+    "emptyBody": "New orders, today’s cleaner schedule and jobs in progress appear on this page."
+  },
+  "AgencySchedulePage": {
+    "title": "Schedule",
+    "emptyTitle": "No availability yet",
+    "emptyBody": "Your agency’s availability per area appears here. Customers are only offered slots that are still free."
+  },
+  "AgencyCleanersPage": {
+    "title": "Cleaners",
+    "emptyTitle": "No cleaners yet",
+    "emptyBody": "Your agency’s cleaners appear here, with their check-in status for today’s jobs."
+  },
+  "AgencyOrdersPage": {
+    "title": "Orders",
+    "emptyTitle": "No orders yet",
+    "emptyBody": "Paid orders appear here. From this page you assign a cleaner to each order."
+  },
+  "AgencyRecordingsPage": {
+    "title": "Recordings",
+    "emptyTitle": "No recordings yet",
+    "emptyBody": "Recordings of your cleaners’ jobs appear here for 7 days after the job is done, then they are deleted automatically."
+  },
+  "AdminDashboardPage": {
+    "title": "Dashboard",
+    "emptyTitle": "The platform overview appears here",
+    "emptyBody": "Jobs in progress, help tickets waiting for an answer and the latest recordings appear on this page."
+  },
+  "AdminMonitorPage": {
+    "title": "Live monitor",
+    "emptyTitle": "No jobs in progress",
+    "emptyBody": "Live streams of all jobs in progress appear here in one view."
+  },
+  "AdminTicketsPage": {
+    "title": "Tickets",
+    "emptyTitle": "No tickets yet",
+    "emptyBody": "Customer questions passed on from the Help page appear here, most urgent first."
+  },
+  "AdminRecordingsPage": {
+    "title": "Recordings",
+    "emptyTitle": "No recordings yet",
+    "emptyBody": "Recordings of all jobs still within the 7-day storage period appear here."
+  },
+  "AdminServicesPage": {
+    "title": "Services & prices",
+    "emptyTitle": "No services yet",
+    "emptyBody": "HomeKlin’s list of services and prices appears here. Customers see these prices as they are, with no extra fees."
+  },
+  "AdminFaqPage": {
+    "title": "FAQ",
+    "emptyTitle": "No questions yet",
+    "emptyBody": "The common questions shown on the customer Help page appear here. You can add and edit them."
+  }
+}

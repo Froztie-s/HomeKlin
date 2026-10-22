@@ -47,3 +47,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# next-intl: generated types of the Indonesian messages (next.config.ts, createMessagesDeclaration)
+src/messages/*.d.json.ts

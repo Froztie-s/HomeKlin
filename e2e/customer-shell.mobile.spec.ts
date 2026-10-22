@@ -58,11 +58,17 @@ test.describe("customer bottom navigation", () => {
     }
   });
 
-  test("shows the wordmark at the top of the home screen", async ({ page }) => {
-    await page.goto("/home");
-    const wordmark = page.getByRole("main").getByText("HomeKlin", { exact: true });
-    await expect(wordmark).toBeVisible();
-    const box = await wordmark.boundingBox();
-    expect(box?.y).toBeLessThan(80);
-  });
+  // T4: the brand moved from the home page's own header into the app bar, which every customer page
+  // shares on phones (with the language switch on its right).
+  for (const path of ["/home", "/services"]) {
+    test(`shows the wordmark at the top of ${path}, linking to the booking home`, async ({ page }) => {
+      await page.goto(path);
+      const wordmark = page.getByRole("banner").getByRole("link", { name: "HomeKlin, ke beranda" });
+      await expect(wordmark).toBeVisible();
+      await expect(wordmark).toHaveAttribute("href", "/home");
+      const box = await wordmark.boundingBox();
+      expect(box?.y).toBeLessThan(80);
+      await expect(page.getByRole("main").getByText("HomeKlin", { exact: true })).toHaveCount(0);
+    });
+  }
 });

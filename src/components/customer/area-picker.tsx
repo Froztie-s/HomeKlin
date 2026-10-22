@@ -1,20 +1,21 @@
 import { ChevronDown, MapPin } from "lucide-react";
-import type { ServiceArea } from "./home-preview-data";
-
-const copy = { label: "Area layanan" };
+import { useTranslations } from "next-intl";
+import type { ServiceAreaId } from "./home-preview-data";
 
 type AreaPickerProps = {
-  areas: readonly ServiceArea[];
-  defaultArea: string;
+  areas: readonly ServiceAreaId[];
+  defaultArea: ServiceAreaId;
 };
 
 // Where the cleaning happens. Booking starts with the area because it decides which free slots
 // exist (SPEC "slots aggregated per area"). Display only until T8 wires it to the catalog.
 export function AreaPicker({ areas, defaultArea }: AreaPickerProps) {
+  const t = useTranslations("AreaPicker");
+  const preview = useTranslations("PreviewData");
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
       <label htmlFor="area-layanan" className="text-sm font-medium text-ink-muted">
-        {copy.label}
+        {t("label")}
       </label>
       <span className="relative inline-flex">
         <MapPin
@@ -28,8 +29,8 @@ export function AreaPicker({ areas, defaultArea }: AreaPickerProps) {
           className="min-h-touch cursor-pointer appearance-none rounded-full border border-border-control bg-surface pr-11 pl-10 text-sm font-semibold text-ink transition-colors duration-150 ease-out-quart hover:border-brand-600 hover:bg-brand-50 active:bg-brand-100 disabled:cursor-not-allowed disabled:border-border disabled:text-ink-faint"
         >
           {areas.map((area) => (
-            <option key={area.id} value={area.id}>
-              {area.label}
+            <option key={area} value={area}>
+              {preview(`areas.${area}`)}
             </option>
           ))}
         </select>

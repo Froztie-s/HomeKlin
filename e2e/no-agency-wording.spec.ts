@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
 
 // One brand to the customer (markdown/PRODUCT.md principle 6): customer pages never name or hint at a
-// partner agency. Checked in what people read, what screen readers announce, and the raw HTML.
-const customerPages = ["/", "/home", "/services", "/orders", "/support", "/account"];
-const agencyWording = /agensi|agency|mitra/i;
+// partner agency, in Indonesian or in English. Checked in what people read, what screen readers
+// announce, and the raw HTML (which includes the messages sent to the browser).
+const indonesianPages = ["/", "/home", "/services", "/orders", "/support", "/account"];
+const englishPages = ["/en", "/en/home", "/en/services", "/en/orders", "/en/support", "/en/account"];
+const agencyWording = /agensi|agency|mitra|partner/i;
 
-for (const path of customerPages) {
+for (const path of [...indonesianPages, ...englishPages]) {
   test(`${path} never mentions a partner agency`, async ({ page }) => {
     await page.goto(path);
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
@@ -20,13 +22,16 @@ for (const path of customerPages) {
         title: document.title,
         description: document.querySelector('meta[name="description"]')?.getAttribute("content") ?? "",
         attributes: attributes.join("\n"),
+        lang: document.documentElement.lang,
       };
     });
 
-    // Guard against a vacuous pass: there is real text, a title and a description to check.
+    // Guard against a vacuous pass: there is real text, a title and a description to check, in the
+    // language of the address.
     expect(found.text.length).toBeGreaterThan(50);
     expect(found.title).toContain("HomeKlin");
     expect(found.description).not.toBe("");
+    expect(found.lang).toBe(path.startsWith("/en") ? "en" : "id");
 
     expect(found.text).not.toMatch(agencyWording);
     expect(found.title).not.toMatch(agencyWording);

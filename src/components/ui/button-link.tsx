@@ -1,8 +1,9 @@
 import { ArrowRight, type LucideIcon } from "lucide-react";
-import Link from "next/link";
 import type { ReactNode } from "react";
+import { Link } from "@/i18n/navigation";
 
 type ButtonLinkProps = {
+  /** A path without the language ("/home"); the link adds /en on English pages. */
   href: string;
   icon?: LucideIcon;
   /**
@@ -15,6 +16,11 @@ type ButtonLinkProps = {
   variant?: "primary" | "secondary" | "forest" | "accent";
   /** md (44 px) in the app; lg (52 px) for the landing hero and CTA band. */
   size?: "md" | "lg";
+  /**
+   * forest only: below 640 px the label stands alone, without the arrow circle, so the landing
+   * header fits the wordmark, the language link and this button on one 360 px row.
+   */
+  hideArrowOnPhones?: boolean;
   /** Layout only (width, alignment); colours and shape come from the variant. */
   className?: string;
   children: ReactNode;
@@ -46,21 +52,25 @@ export function ButtonLink({
   icon: Icon,
   variant = "primary",
   size = "md",
+  hideArrowOnPhones = false,
   className = "",
   children,
 }: ButtonLinkProps) {
   const forest = variant === "forest";
+  const sizing = forest
+    ? `${forestSizes[size]} ${hideArrowOnPhones ? "max-sm:pr-3.5 max-sm:pl-3.5" : ""}`
+    : sizes[size];
   return (
     <Link
       href={href}
-      className={`inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[background-color,color,filter,transform] duration-150 ease-out-quart active:scale-[0.98] ${variants[variant]} ${forest ? forestSizes[size] : sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 rounded-full font-semibold whitespace-nowrap transition-[background-color,color,filter,transform] duration-150 ease-out-quart active:scale-[0.98] ${variants[variant]} ${sizing} ${className}`}
     >
       {Icon ? <Icon className="size-4.5 shrink-0" aria-hidden="true" /> : null}
       {children}
       {forest ? (
         <span
           aria-hidden="true"
-          className="ml-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-lime text-on-lime"
+          className={`ml-1 size-6 shrink-0 items-center justify-center rounded-full bg-lime text-on-lime ${hideArrowOnPhones ? "hidden sm:flex" : "flex"}`}
         >
           <ArrowRight className="size-3.5" strokeWidth={2.5} />
         </span>

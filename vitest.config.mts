@@ -9,5 +9,9 @@ export default defineConfig({
   test: {
     include: ["tests/**/*.test.{ts,tsx}"],
     environment: "node",
+    // next-intl is ESM and imports "next/server" without a file extension, which Node's own loader
+    // cannot resolve; inlining lets Vite resolve it (tests/proxy.test.ts runs the next-intl middleware).
+    // Source: https://next-intl.dev/docs/environments/testing
+    server: { deps: { inline: ["next-intl"] } },
   },
 });

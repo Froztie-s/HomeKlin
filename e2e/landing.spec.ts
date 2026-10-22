@@ -170,28 +170,32 @@ test.describe("landing page", () => {
     await expect(page.getByRole("contentinfo")).toContainText("Harga dan data di situs ini adalah contoh");
   });
 
-  test("uses no em dash or en dash in visible text", async ({ page }) => {
-    await page.goto("/");
-    const text = await page.evaluate(() => document.body.innerText);
-    expect(text.length).toBeGreaterThan(500);
-    expect(text).not.toMatch(/[–—]/);
-  });
+  // Both languages (T4): English is checked with the same rules as the Indonesian default.
+  for (const path of ["/", "/en"]) {
+    test(`uses no em dash or en dash in visible text at ${path}`, async ({ page }) => {
+      await page.goto(path);
+      const text = await page.evaluate(() => document.body.innerText);
+      expect(text.length).toBeGreaterThan(500);
+      expect(text).not.toMatch(/[–—]/);
+    });
 
-  test("has no dead links", async ({ page, request }) => {
-    await page.goto("/");
-    const hrefs = await page
-      .locator("a[href]")
-      .evaluateAll((links) => links.map((link) => link.getAttribute("href") ?? ""));
-    expect(hrefs.length).toBeGreaterThan(10);
+    test(`has no dead links at ${path}`, async ({ page, request }) => {
+      await page.goto(path);
+      const hrefs = await page
+        .locator("a[href]")
+        .evaluateAll((links) => links.map((link) => link.getAttribute("href") ?? ""));
+      expect(hrefs.length).toBeGreaterThan(10);
 
-    for (const href of new Set(hrefs)) {
-      if (href.startsWith("#")) {
-        await expect(page.locator(`[id="${href.slice(1)}"]`), href).toHaveCount(1);
-      } else {
-        expect(href, "links stay inside the site").toMatch(/^\/(?!\/)/);
-        const response = await request.get(href);
-        expect(response.status(), href).toBe(200);
+      for (const href of new Set(hrefs)) {
+        if (href.startsWith("#")) {
+          await expect(page.locator(`[id="${href.slice(1)}"]`), href).toHaveCount(1);
+        } else {
+          expect(href, "links stay inside the site").toMatch(/^\/(?!\/)/);
+          // The language switch links to /id/..., which redirects to the plain address: follow it.
+          const response = await request.get(href);
+          expect(response.status(), href).toBe(200);
+        }
       }
-    }
-  });
+    });
+  }
 });

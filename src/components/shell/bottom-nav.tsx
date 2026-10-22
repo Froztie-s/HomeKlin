@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { isActivePath } from "./is-active-path";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/navigation";
 import { appNavigation } from "./app-navigation";
+import { isActivePath } from "./is-active-path";
 import type { AppNavKey } from "./navigation";
 
 type BottomNavProps = {
@@ -11,13 +11,16 @@ type BottomNavProps = {
 };
 
 // Phone navigation: fixed to the bottom, labels always visible, 44 px+ targets, clears the home indicator.
+// usePathname comes without the language prefix ("/home" on /en/home), so the current item matches
+// in both languages.
 export function BottomNav({ nav }: BottomNavProps) {
+  const t = useTranslations("AppNavigation");
   const pathname = usePathname();
-  const { label, items } = appNavigation[nav];
+  const { labelKey, items } = appNavigation[nav];
 
   return (
     <nav
-      aria-label={label}
+      aria-label={t(labelKey)}
       className="fixed inset-x-0 bottom-0 z-(--z-nav) border-t border-border bg-surface pb-safe shadow-nav md:hidden"
     >
       <ul className="mx-auto flex max-w-content px-safe">
@@ -34,7 +37,7 @@ export function BottomNav({ nav }: BottomNavProps) {
                 <span className="flex h-7 w-12 items-center justify-center rounded-full transition-colors duration-150 ease-out-quart group-hover:bg-surface-sunken group-aria-[current=page]:bg-brand-100">
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             </li>
           );

@@ -9,30 +9,32 @@ import {
   Tags,
   UsersRound,
 } from "lucide-react";
-import type { BackOfficeNavKey, Navigation } from "./navigation";
+import type { BackOfficeNavKey, MessageKeyIn, Navigation } from "./navigation";
 
 // Agency and admin menus. Partner agencies run cleaners, availability and assignment;
 // HomeKlin admin owns the services and the one price list.
-export const backOfficeNavigation: Record<BackOfficeNavKey, Navigation> = {
+// Labels: the BackOfficeNavigation namespace of src/messages/*.json, sent to the browser by the
+// back-office shell only.
+export const backOfficeNavigation = {
   agency: {
-    label: "Navigasi agensi",
+    labelKey: "agency.label",
     items: [
-      { href: "/agency", exact: true, label: "Dasbor", icon: LayoutDashboard },
-      { href: "/agency/schedule", label: "Jadwal", icon: CalendarDays },
-      { href: "/agency/cleaners", label: "Petugas", icon: UsersRound },
-      { href: "/agency/orders", label: "Pesanan", icon: ClipboardList },
-      { href: "/agency/recordings", label: "Rekaman", icon: CirclePlay },
+      { href: "/agency", exact: true, labelKey: "agency.dashboard", icon: LayoutDashboard },
+      { href: "/agency/schedule", labelKey: "agency.schedule", icon: CalendarDays },
+      { href: "/agency/cleaners", labelKey: "agency.cleaners", icon: UsersRound },
+      { href: "/agency/orders", labelKey: "agency.orders", icon: ClipboardList },
+      { href: "/agency/recordings", labelKey: "agency.recordings", icon: CirclePlay },
     ],
   },
   admin: {
-    label: "Navigasi admin",
+    labelKey: "admin.label",
     items: [
-      { href: "/admin", exact: true, label: "Dasbor", icon: LayoutDashboard },
-      { href: "/admin/monitor", label: "Monitor Langsung", icon: MonitorPlay },
-      { href: "/admin/tickets", label: "Tiket", icon: MessagesSquare },
-      { href: "/admin/recordings", label: "Rekaman", icon: CirclePlay },
-      { href: "/admin/services", label: "Layanan & Harga", icon: Tags },
-      { href: "/admin/faq", label: "FAQ", icon: BookOpen },
+      { href: "/admin", exact: true, labelKey: "admin.dashboard", icon: LayoutDashboard },
+      { href: "/admin/monitor", labelKey: "admin.monitor", icon: MonitorPlay },
+      { href: "/admin/tickets", labelKey: "admin.tickets", icon: MessagesSquare },
+      { href: "/admin/recordings", labelKey: "admin.recordings", icon: CirclePlay },
+      { href: "/admin/services", labelKey: "admin.services", icon: Tags },
+      { href: "/admin/faq", labelKey: "admin.faq", icon: BookOpen },
     ],
   },
-};
+} satisfies Record<BackOfficeNavKey, Navigation<MessageKeyIn<"BackOfficeNavigation">>>;

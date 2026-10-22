@@ -258,7 +258,7 @@
 
 /*
  * The redesign (markdown/design.md, 2026-10-19), scoped. A page opts in with class `theme-forest` on
- * its outer wrapper (the landing page does, in src/app/(marketing)/layout.tsx). Inside it, the token
+ * its outer wrapper (the landing page does, in src/app/[locale]/(marketing)/layout.tsx). Inside it, the token
  * names the redesign shares with T3b take their new values, so `bg-canvas` is cream and `rounded-xl`
  * is 28 px there, while the customer, cleaner, agency and admin pages keep the T3b look until their
  * own migration (design.md "Migration notes"). After that, these values move into @theme above.

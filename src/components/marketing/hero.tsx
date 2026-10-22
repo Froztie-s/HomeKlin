@@ -1,35 +1,29 @@
 import { ArrowDown, Sparkle } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { ButtonLink } from "@/components/ui/button-link";
 import { HeroJobCard } from "./hero-job-card";
 import { landingContainer } from "./landing-layout";
 
-const copy = {
-  // The headline states what HomeKlin is (T3b decision); the serif marks the benefit words.
-  titleStart: "Jasa kebersihan rumah yang bisa Anda",
-  titleAccent: "tonton langsung",
-  lead: "Pilih layanan dan jadwal di area Anda, bayar di muka, lalu pantau Petugas HomeKlin bekerja dari ponsel.",
-  cta: "Pesan sekarang",
-  prices: "Lihat harga",
-};
-
-// Pexels photo, credited in markdown/image-sources.md.
+// Pexels photo, credited in markdown/image-sources.md. The alt text is Hero.photoAlt.
 const photo = {
   src: "/images/hero-wiping-counter.jpg",
   width: 1600,
   height: 1067,
-  alt: "Petugas kebersihan mengelap meja dapur",
 };
 
 // Asymmetric split (markdown/design.md, Layout): text on 7 of 12 columns, a tall photo frame on 5,
 // with a lime quarter-circle in its top corner and the sample job card floating over its left edge.
 // The card sits low on the photo: the cleaner stands on the photo's left, so a high card would cover
 // her face.
-// The headline is three lines at most from 1024 px: about 20 characters fit a line at 52 px in the
-// 543 px column at 1024 px, and at 64 px in the 637 px column from 1280 px.
+// The headline states what HomeKlin is (T3b decision); the serif marks the benefit words, which the
+// message wraps in <accent> so each language puts them where its sentence has them. It is three lines
+// at most from 1024 px: about 20 characters fit a line at 52 px in the 543 px column at 1024 px, and
+// at 64 px in the 637 px column from 1280 px.
 // Phones and tablets read the text and see the button first, then the photo, then the card.
 // Only the text rises in (reading order); the photo is preloaded and never animated.
 export function Hero() {
+  const t = useTranslations("Hero");
   return (
     <section
       aria-labelledby="hero-title"
@@ -40,14 +34,14 @@ export function Hero() {
           id="hero-title"
           className="animate-rise font-display text-display-sm font-semibold text-ink md:text-display-md xl:text-display"
         >
-          {copy.titleStart} <em className="serif-accent">{copy.titleAccent}</em>
+          {t.rich("title", { accent: (chunks) => <em className="serif-accent">{chunks}</em> })}
         </h1>
         <p className="mt-6 max-w-prose animate-rise text-body-lg text-ink-muted animate-delay-80 lg:mt-7 lg:max-w-[34rem]">
-          {copy.lead}
+          {t("lead")}
         </p>
         <div className="mt-8 flex animate-rise flex-wrap items-center gap-x-6 gap-y-4 animate-delay-160 lg:mt-10">
           <ButtonLink href="/home" variant="accent" size="lg">
-            {copy.cta}
+            {t("cta")}
           </ButtonLink>
           <a
             href="#layanan"
@@ -59,7 +53,7 @@ export function Hero() {
             >
               <ArrowDown className="size-4" />
             </span>
-            {copy.prices}
+            {t("prices")}
           </a>
         </div>
       </div>
@@ -70,7 +64,7 @@ export function Hero() {
             src={photo.src}
             width={photo.width}
             height={photo.height}
-            alt={photo.alt}
+            alt={t("photoAlt")}
             preload
             sizes="(min-width: 1280px) 445px, (min-width: 1024px) 38vw, 100vw"
             className="aspect-4/3 w-full object-cover object-[30%_50%] md:aspect-16/10 lg:aspect-4/5 lg:max-h-[calc(100dvh-10rem)]"
