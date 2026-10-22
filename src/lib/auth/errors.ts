@@ -26,7 +26,7 @@ const byCode: Record<string, AuthFailureKey> = {
 };
 
 export function authFailureKey(error: AuthErrorLike): AuthFailureKey {
-  if (error?.code && error.code in byCode) return byCode[error.code];
+  if (error?.code && Object.hasOwn(byCode, error.code)) return byCode[error.code];
   if (error?.status === 429) return "rateLimited";
   return "unavailable";
 }

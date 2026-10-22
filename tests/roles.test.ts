@@ -106,8 +106,26 @@ describe("safeNextPath", () => {
       "evil.example",
       "/%2F%2Fevil.example",
       " /orders",
+      // Paths that only turn into //evil.example after parsing: dot segments ("." and "..", also
+      // percent-encoded) and a language prefix that is stripped off (found in the T5 security review).
+      "/.//evil.example",
+      "/x/..//evil.example",
+      "/%2e//evil.example",
+      "/%2e%2e//evil.example",
+      "/en//evil.example",
+      "/id//evil.example",
+      "/en//evil.example/",
+      "/en/..//evil.example",
+      "/en///evil.example",
     ]) {
       expect(safeNextPath(next, "customer")).toBe("/home");
+    }
+  });
+
+  it("only ever returns an address on this site", () => {
+    const site = "https://homeklin.example";
+    for (const next of ["/orders", "/en/services?area=x", "/./orders", "/a/../services", "/en//evil.example"]) {
+      expect(new URL(safeNextPath(next, "customer"), site).origin).toBe(site);
     }
   });
 

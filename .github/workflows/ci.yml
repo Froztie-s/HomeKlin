@@ -21,11 +21,9 @@ jobs:
     timeout-minutes: 20
     # The separate Supabase test project (markdown/SPEC.md, "Testing Strategy"): the integration tests
     # use it directly, and the end-to-end build points the app at it (playwright.config.ts), so CI never
-    # touches the live project. Set these three repository secrets from the TEST_ lines in your .env.
-    env:
-      TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
-      TEST_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.TEST_SUPABASE_PUBLISHABLE_KEY }}
-      TEST_SUPABASE_SECRET_KEY: ${{ secrets.TEST_SUPABASE_SECRET_KEY }}
+    # touches the live project. Set the three repository secrets from the TEST_ lines in your .env.
+    # They are given only to the two test steps, so no other step (such as the install scripts that
+    # `npm ci` runs) can read the secret key.
     steps:
       - uses: actions/checkout@v7
 
@@ -42,8 +40,12 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Unit tests
+      - name: Unit and integration tests
         run: npm test
+        env:
+          TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          TEST_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.TEST_SUPABASE_PUBLISHABLE_KEY }}
+          TEST_SUPABASE_SECRET_KEY: ${{ secrets.TEST_SUPABASE_SECRET_KEY }}
 
       - name: Production dependency audit
         run: npm audit --omit=dev --audit-level=high
@@ -53,6 +55,10 @@ jobs:
 
       - name: End-to-end tests (builds the app first)
         run: npm run test:e2e
+        env:
+          TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+          TEST_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.TEST_SUPABASE_PUBLISHABLE_KEY }}
+          TEST_SUPABASE_SECRET_KEY: ${{ secrets.TEST_SUPABASE_SECRET_KEY }}
 
       - name: Upload Playwright report on failure
         if: failure()

@@ -1,6 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import type { NextRequest, NextResponse } from "next/server";
-import { getSupabaseConfig } from "./config";
+import { getSupabaseConfig, isSessionCookieName } from "./config";
 
 type SessionCookie = { name: string; value: string; options: CookieOptions };
 
@@ -15,9 +15,8 @@ export type ProxySession = {
 
 const signedOut: ProxySession = { claims: null, cookies: [], headers: {} };
 
-/** Supabase's session cookie: sb-<project ref>-auth-token, split into .0, .1 ... when large. */
 function hasSessionCookie(request: NextRequest): boolean {
-  return request.cookies.getAll().some(({ name }) => name.startsWith("sb-") && name.includes("-auth-token"));
+  return request.cookies.getAll().some(({ name }) => isSessionCookieName(name));
 }
 
 /**

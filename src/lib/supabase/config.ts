@@ -12,6 +12,11 @@ export function getSupabaseConfig(): SupabaseConfig | null {
   return url && publishableKey ? { url, publishableKey } : null;
 }
 
+/** Supabase's session cookies: sb-<project ref>-auth-token, split into .0, .1 ... when large, and its PKCE code verifier. */
+export function isSessionCookieName(name: string): boolean {
+  return name.startsWith("sb-") && name.includes("-auth-token");
+}
+
 /** Like getSupabaseConfig, for code that cannot work without Supabase (signing in, reading a profile). */
 export function requireSupabaseConfig(): SupabaseConfig {
   const config = getSupabaseConfig();

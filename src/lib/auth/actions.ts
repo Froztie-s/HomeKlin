@@ -1,14 +1,18 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "@/i18n/navigation";
+import { isSessionCookieName } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { parseLocale, parseSignIn, parseSignUp, type AuthErrorKey } from "@/lib/validation/auth";
 import { authFailureKey, type AuthFailureKey } from "./errors";
 import { isAppRole, safeNextPath } from "./roles";
 
 // Signing in, signing up and signing out (T5). Server Actions, so the password goes straight to the
-// server and Supabase Auth, and the session lands in httpOnly cookies set by @supabase/ssr. Next.js
-// checks the Origin of every Server Action call (CSRF protection). Every input is parsed with Zod first.
+// server and Supabase Auth, and the session lands in cookies set by @supabase/ssr (SameSite=Lax; not
+// httpOnly, which is the library's default so that a browser Supabase client can read the session).
+// Next.js checks the Origin of every Server Action call (CSRF protection). Every input is parsed with
+// Zod first.
 // The language comes from a hidden field (root params do not reach Server Actions), so redirects keep
 // the visitor's language.
 // Sources: https://supabase.com/docs/guides/auth/passwords and
@@ -71,6 +75,14 @@ export async function signOut(formData: FormData): Promise<void> {
   const locale = parseLocale(formData.get("locale"));
   const supabase = await createSupabaseServerClient({ writeCookies: true });
   // This browser only; other devices stay signed in.
-  await supabase.auth.signOut({ scope: "local" });
+  const { error } = await supabase.auth.signOut({ scope: "local" });
+  if (error) {
+    // Supabase could not end the session (for example an expired token while it was unreachable), and
+    // then it leaves the cookies in place. Delete them here, so this browser is signed out anyway.
+    const cookieStore = await cookies();
+    for (const { name } of cookieStore.getAll()) {
+      if (isSessionCookieName(name)) cookieStore.delete(name);
+    }
+  }
   redirect({ href: "/", locale });
 }

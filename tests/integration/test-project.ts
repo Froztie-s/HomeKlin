@@ -26,6 +26,11 @@ export const testProject = {
   secretKey: required("TEST_SUPABASE_SECRET_KEY"),
 };
 
+// Tests create and delete users with the secret key: never let them run against the live project.
+if (testProject.url === process.env.NEXT_PUBLIC_SUPABASE_URL) {
+  throw new Error("TEST_SUPABASE_URL is the live project's URL. Tests must use the separate test project.");
+}
+
 const noSession = { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } };
 
 /** Acts with the secret key: bypasses row-level security. Only for setting up and cleaning up. */

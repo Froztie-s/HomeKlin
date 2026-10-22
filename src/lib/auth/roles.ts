@@ -81,9 +81,13 @@ export function safeNextPath(next: unknown, role: AppRole): string {
   } catch {
     return home;
   }
-  if (url.origin !== parseBase) return home;
+  // Parsing removes "." and ".." segments, and stripLocale removes "/en", so "/.//evil.example" and
+  // "/en//evil.example" both become "//evil.example", which a browser reads as another site. No page of
+  // ours has an empty path segment, so any "//" is refused.
+  if (url.origin !== parseBase || url.pathname.includes("//")) return home;
 
   const path = stripLocale(trimTrailingSlash(url.pathname));
+  if (!path.startsWith("/") || path.startsWith("//")) return home;
   if ((authPaths as readonly string[]).includes(path) || !isAllowed(role, path)) return home;
   return `${path}${url.search}`;
 }
