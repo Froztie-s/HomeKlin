@@ -19,6 +19,13 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # The separate Supabase test project (markdown/SPEC.md, "Testing Strategy"): the integration tests
+    # use it directly, and the end-to-end build points the app at it (playwright.config.ts), so CI never
+    # touches the live project. Set these three repository secrets from the TEST_ lines in your .env.
+    env:
+      TEST_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+      TEST_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.TEST_SUPABASE_PUBLISHABLE_KEY }}
+      TEST_SUPABASE_SECRET_KEY: ${{ secrets.TEST_SUPABASE_SECRET_KEY }}
     steps:
       - uses: actions/checkout@v7
 

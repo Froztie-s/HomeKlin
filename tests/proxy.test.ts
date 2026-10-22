@@ -25,7 +25,7 @@ function pageRequest(path: string, { acceptLanguage, cookie, method, body }: Req
 }
 
 describe("routing", () => {
-  it("has Indonesian as the default and English as the second language, unprefixed for Indonesian", () => {
+  it("has Indonesian as the default and English as the second language, unprefixed for Indonesian", async () => {
     expect(routing.locales).toEqual(["id", "en"]);
     expect(routing.defaultLocale).toBe("id");
     expect(routing.localePrefix).toBe("as-needed");
@@ -33,39 +33,39 @@ describe("routing", () => {
 });
 
 describe("proxy", () => {
-  it("serves Indonesian to a new visitor whose browser prefers English, and sets no cookie", () => {
-    const response = proxy(pageRequest("/", { acceptLanguage: "en-US,en;q=0.9" }));
+  it("serves Indonesian to a new visitor whose browser prefers English, and sets no cookie", async () => {
+    const response = await proxy(pageRequest("/", { acceptLanguage: "en-US,en;q=0.9" }));
 
     expect(getRedirectUrl(response)).toBeNull();
     expect(getRewrittenUrl(response)).toBe(`${origin}/id`);
     expect(response.cookies.get("NEXT_LOCALE")).toBeUndefined();
   });
 
-  it("serves an Indonesian app page at its unprefixed address", () => {
-    const response = proxy(pageRequest("/home", { acceptLanguage: "en" }));
+  it("serves an Indonesian app page at its unprefixed address", async () => {
+    const response = await proxy(pageRequest("/home", { acceptLanguage: "en" }));
 
     expect(getRewrittenUrl(response)).toBe(`${origin}/id/home`);
   });
 
-  it("sends a visitor who chose English to the English page", () => {
-    expect(getRedirectUrl(proxy(pageRequest("/", { cookie: "NEXT_LOCALE=en" })))).toBe(`${origin}/en`);
-    expect(getRedirectUrl(proxy(pageRequest("/home", { cookie: "NEXT_LOCALE=en" })))).toBe(`${origin}/en/home`);
+  it("sends a visitor who chose English to the English page", async () => {
+    expect(getRedirectUrl(await proxy(pageRequest("/", { cookie: "NEXT_LOCALE=en" })))).toBe(`${origin}/en`);
+    expect(getRedirectUrl(await proxy(pageRequest("/home", { cookie: "NEXT_LOCALE=en" })))).toBe(`${origin}/en/home`);
   });
 
-  it("keeps a visitor who chose Indonesian on the unprefixed address", () => {
-    const response = proxy(pageRequest("/home", { acceptLanguage: "en", cookie: "NEXT_LOCALE=id" }));
+  it("keeps a visitor who chose Indonesian on the unprefixed address", async () => {
+    const response = await proxy(pageRequest("/home", { acceptLanguage: "en", cookie: "NEXT_LOCALE=id" }));
 
     expect(getRewrittenUrl(response)).toBe(`${origin}/id/home`);
   });
 
-  it("drops the Indonesian prefix from the address", () => {
-    expect(getRedirectUrl(proxy(pageRequest("/id/home")))).toBe(`${origin}/home`);
-    expect(getRedirectUrl(proxy(pageRequest("/id")))).toBe(`${origin}/`);
+  it("drops the Indonesian prefix from the address", async () => {
+    expect(getRedirectUrl(await proxy(pageRequest("/id/home")))).toBe(`${origin}/home`);
+    expect(getRedirectUrl(await proxy(pageRequest("/id")))).toBe(`${origin}/`);
   });
 
-  it("remembers a switch to English for a year", () => {
+  it("remembers a switch to English for a year", async () => {
     // The switch links to /en/...; without JavaScript the proxy is what updates the cookie.
-    const response = proxy(pageRequest("/en/home", { cookie: "NEXT_LOCALE=id" }));
+    const response = await proxy(pageRequest("/en/home", { cookie: "NEXT_LOCALE=id" }));
 
     expect(getRedirectUrl(response)).toBeNull();
     const cookie = response.cookies.get("NEXT_LOCALE");
@@ -76,13 +76,42 @@ describe("proxy", () => {
   it("leaves the request body alone, so server actions can still read it", async () => {
     const request = pageRequest("/home", { method: "POST", body: "form-data" });
 
-    proxy(request);
+    await proxy(request);
 
     expect(request.bodyUsed).toBe(false);
     expect(await request.text()).toBe("form-data");
   });
 
-  it("runs on pages only, not on the API, Next.js files or public files", () => {
+  it("sends a visitor without a session from a protected page to sign-in, keeping the page as next", async () => {
+    expect(getRedirectUrl(await proxy(pageRequest("/orders")))).toBe(`${origin}/login?next=%2Forders`);
+    expect(getRedirectUrl(await proxy(pageRequest("/agency/schedule")))).toBe(
+      `${origin}/login?next=%2Fagency%2Fschedule`,
+    );
+  });
+
+  it("keeps the language and the query string on the way to sign-in", async () => {
+    expect(getRedirectUrl(await proxy(pageRequest("/en/admin/monitor?view=grid")))).toBe(
+      `${origin}/en/login?next=%2Fadmin%2Fmonitor%3Fview%3Dgrid`,
+    );
+  });
+
+  it("lets a visitor without a session open public pages and the sign-in pages", async () => {
+    for (const path of ["/", "/home", "/services", "/support", "/login", "/signup", "/en/login"]) {
+      expect(getRedirectUrl(await proxy(pageRequest(path))), path).toBeNull();
+    }
+  });
+
+  it("applies a remembered language before the sign-in check", async () => {
+    // /orders with an English cookie goes to /en/orders first; that request then goes to sign-in.
+    expect(getRedirectUrl(await proxy(pageRequest("/orders", { cookie: "NEXT_LOCALE=en" })))).toBe(
+      `${origin}/en/orders`,
+    );
+    expect(getRedirectUrl(await proxy(pageRequest("/en/orders", { cookie: "NEXT_LOCALE=en" })))).toBe(
+      `${origin}/en/login?next=%2Forders`,
+    );
+  });
+
+  it("runs on pages only, not on the API, Next.js files or public files", async () => {
     for (const url of ["/", "/home", "/en", "/en/services", "/agency/schedule", "/id/home"]) {
       expect(unstable_doesMiddlewareMatch({ config, url }), url).toBe(true);
     }

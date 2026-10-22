@@ -1,8 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
+import { existsSync } from "node:fs";
 
 // Source: https://playwright.dev/docs/test-configuration and https://playwright.dev/docs/test-webserver
 // Next.js recommends testing against a production build:
 // node_modules/next/dist/docs/01-app/02-guides/testing/playwright.md
+
+// Local runs read the test project's keys from .env; CI sets them from the repository secrets.
+if (existsSync(".env")) process.loadEnvFile(".env");
+
 const port = 3000;
 const baseURL = `http://localhost:${port}`;
 
@@ -27,5 +32,12 @@ export default defineConfig({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
+    // The app under test talks to the separate Supabase test project, never the live one
+    // (markdown/SPEC.md, "Testing Strategy"). NEXT_PUBLIC_ values are baked in at build time, which is
+    // why they are set for this command (it builds, then starts). Playwright merges this over process.env.
+    env: {
+      NEXT_PUBLIC_SUPABASE_URL: process.env.TEST_SUPABASE_URL ?? "",
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.TEST_SUPABASE_PUBLISHABLE_KEY ?? "",
+    },
   },
 });

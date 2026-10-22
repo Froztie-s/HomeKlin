@@ -1,0 +1,24 @@
+// The Supabase project the app talks to. Both values are public by design: the publishable key
+// (sb_publishable_...) is safe in the browser, and row-level security decides what it may read.
+// The secret key never appears in app code; only scripts and tests use it.
+// Source: https://supabase.com/docs/guides/api/api-keys
+
+export type SupabaseConfig = { url: string; publishableKey: string };
+
+/** The project's URL and publishable key, or null when they are not set (for example in CI builds). */
+export function getSupabaseConfig(): SupabaseConfig | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  return url && publishableKey ? { url, publishableKey } : null;
+}
+
+/** Like getSupabaseConfig, for code that cannot work without Supabase (signing in, reading a profile). */
+export function requireSupabaseConfig(): SupabaseConfig {
+  const config = getSupabaseConfig();
+  if (!config) {
+    throw new Error(
+      "Supabase is not configured: set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
+    );
+  }
+  return config;
+}
