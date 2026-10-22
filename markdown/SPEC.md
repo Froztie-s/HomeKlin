@@ -78,7 +78,7 @@ Typecheck:  npm run typecheck        # tsc --noEmit
 Lint:       npm run lint
 Unit tests: npm test                 # vitest run
 E2E tests:  npm run test:e2e         # playwright test
-Seed DB:    npm run db:seed
+Seed DB:    npm run db:seed -- <live|test>
 ```
 
 ## Project Structure

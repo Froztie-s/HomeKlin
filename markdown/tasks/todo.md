@@ -34,7 +34,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: sign up/in/out for customer; `profiles` table with role (customer, cleaner, agency, admin); server `requireRole()` helper; RLS tests show a user cannot read another user's profile; role-based redirect after login.
   - Verify: Vitest RLS tests; Playwright login per role.
   - Deps: T4. Skills: `security-and-hardening`, `api-and-interface-design`.
-- [ ] **T6 Seed script (base)** (S)
+- [x] **T6 Seed script (base)** (S) — done 2026-10-23: `npm run db:seed -- <live|test>`, 8 fictional demo users; run twice on live (8 created, then 8 updated); every seeded user signs in on live and reads only its own profile; refuses demo e-mails registered by anyone else
   - Accept: `npm run db:seed` is repeatable and creates one demo user per role, two agencies, cleaners; all fictional.
   - Verify: run twice, no duplicates; log in as each seeded user.
   - Deps: T5.
