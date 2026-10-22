@@ -5,6 +5,7 @@
 //   projects               list the projects (ref, name, region, status)
 //   create-test-project    create the separate test project (markdown/SPEC.md "Testing Strategy"),
 //                          wait until it is up, and write its URL and keys into .env
+//   adopt-test-project     the same for a test project made by hand in the dashboard ("homeklin-test")
 //   keys <live|test>       write the project's secret key into .env (SUPABASE_SECRET_KEY / TEST_...)
 //   autoconfirm <live|test> switch off email confirmation: sign-up signs the user in at once
 //                          (Supabase's built-in email reaches only the project team, 2 per hour)
@@ -108,9 +109,10 @@ const commands = {
     if (process.env.TEST_SUPABASE_URL) fail("TEST_SUPABASE_URL is already set; the test project exists.");
     const live = (await api("GET", "/projects")).find((project) => (project.ref ?? project.id) === projectRef("live"));
     if (!live) fail("The live project was not found with this token.");
-    const orgs = await api("GET", "/organizations");
-    const org = orgs.find((candidate) => candidate.id === live.organization_id) ?? (orgs.length === 1 ? orgs[0] : null);
-    if (!org) fail("Could not tell which organization owns the live project.");
+    // The project record names its organization; the organizations endpoint can be empty for a token
+    // without organization rights.
+    const org = { slug: live.organization_slug ?? live.organization_id };
+    if (!org.slug) fail("Could not tell which organization owns the live project.");
 
     const dbPassword = randomBytes(24).toString("base64url");
     const created = await api("POST", "/projects", {
@@ -125,6 +127,22 @@ const commands = {
     const { publishable, secret } = await apiKeys(ref);
     writeEnv({ TEST_SUPABASE_PUBLISHABLE_KEY: publishable, TEST_SUPABASE_SECRET_KEY: secret });
     console.log(`Test project ${ref} is ready in ${live.region}.`);
+  },
+
+  // For a token that may not create projects: the test project was made in the dashboard with the
+  // name "homeklin-test"; this finds it and writes its URL and keys into .env.
+  async "adopt-test-project"() {
+    const test = (await api("GET", "/projects")).find((project) => project.name === "homeklin-test");
+    if (!test) fail('No project named "homeklin-test" is visible to this token.');
+    const ref = test.ref ?? test.id;
+    await waitUntilHealthy(ref);
+    const { publishable, secret } = await apiKeys(ref);
+    writeEnv({
+      TEST_SUPABASE_URL: `https://${ref}.supabase.co`,
+      TEST_SUPABASE_PUBLISHABLE_KEY: publishable,
+      TEST_SUPABASE_SECRET_KEY: secret,
+    });
+    console.log(`Test project ${ref} adopted (${test.region}).`);
   },
 
   async keys(argument) {
