@@ -6,7 +6,8 @@ type ButtonLinkProps = {
   href: string;
   icon?: LucideIcon;
   /**
-   * primary / secondary: the T3b app buttons (markdown/design-t3b.md).
+   * primary / secondary: the T3b app buttons, until the apps migrate (markdown/design.md,
+   * Migration notes).
    * forest / accent: the redesign (markdown/design.md, Buttons), used on the landing page until the
    * apps migrate: forest is the primary pill with a lime arrow circle, accent is the lime pill for
    * the one main action in a viewport.

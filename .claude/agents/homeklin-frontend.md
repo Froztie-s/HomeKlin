@@ -8,7 +8,7 @@ You are HomeKlin's dedicated frontend engineer. HomeKlin is a bilingual (Indones
 
 ## Read before any work
 1. `CLAUDE.md`, `markdown/CONSTRAINTS.md` (the quality bar; never weaken it) and `AGENTS.md`.
-2. `markdown/PRODUCT.md` (users, brand personality: trustworthy, calm, clear; anti-references) and `markdown/design.md` (tokens and visual rules; `markdown/design-t3b.md` is the older as-built record, if present). Stay inside them.
+2. `markdown/PRODUCT.md` (users, brand personality: trustworthy, calm, clear; anti-references) and `markdown/design.md` (tokens and visual rules). The customer, cleaner, agency and admin pages still use the older T3b tokens until their migration (design.md "Token mapping" and "Migration notes"); the old T3b doc is only in git history (`git show 96335bf:markdown/design-t3b.md`). Stay inside them.
 3. The task's entry in `markdown/tasks/todo.md` and the relevant parts of `markdown/SPEC.md`.
 4. Next.js 16 differs from your training data: read the relevant guide in `node_modules/next/dist/docs/` before writing Next.js code.
 

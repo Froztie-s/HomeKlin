@@ -2,8 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
 import "./globals.css";
 
-// The apps' two families (T3b, markdown/design-t3b.md section 3). The landing page loads the redesign's
-// fonts itself (src/app/(marketing)/layout.tsx). Both are variable fonts, so no weights are listed.
+// The apps' two families (T3b; see the Token mapping in markdown/design.md). The landing page
+// loads the redesign's fonts itself (src/app/(marketing)/layout.tsx). Both are variable fonts, so
+// no weights are listed.
 // Bricolage Grotesque also loads its optical-size axis: large headings get the display cut.
 const bricolage = Bricolage_Grotesque({
   variable: "--font-bricolage",

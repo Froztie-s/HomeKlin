@@ -2,8 +2,9 @@
 
 /*
  * HomeKlin design tokens: the single source for colour, type, spacing, radii, elevation,
- * layering and motion. The T3b rules are in markdown/design-t3b.md; the redesign (T3c) is in
- * markdown/design.md and is live on the landing page through `.theme-forest` (see below).
+ * layering and motion. The apps still use the T3b tokens (their old doc is in git history, commit
+ * 96335bf); the redesign (T3c) is in markdown/design.md and is live on the landing page through
+ * `.theme-forest` (see below).
  *
  * Tailwind's default palette, radii, shadows, font sizes and fonts are cleared below, so a
  * component can only use these tokens (a stray `text-zinc-600` simply does not exist).

@@ -2,6 +2,8 @@
 
 Conventions for every task: tests written first; `npm run typecheck`, `npm run lint`, `npm test` pass before commit; UI tasks are checked in a mobile viewport (customer/cleaner) or desktop viewport (agency/admin) and in both languages once T4 exists. Sizes: XS=1 file, S=1-2, M=3-5.
 
+> The hold of 2026-10-19 (the user re-editing user flows) was lifted by the user on 2026-10-22: "just work through the build". If changed flows arrive later, update `markdown/SPEC.md` and the affected tasks below first.
+
 ## Phase 1: Foundation
 
 - [x] **T1 Scaffold project and quality gates** (S)
@@ -13,14 +15,14 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Verify: open the URL; trigger CI; health endpoint returns 200.
   - Deps: T1, human accounts. Skills: `ci-cd-and-automation`, `source-driven-development`.
 - [x] **T3 Design direction and layout shells** (M) — plus a static customer home preview with sample data (user approved)
-  - Accept: design tokens (colour, type, spacing); mobile shell with bottom navigation for customer/cleaner; desktop shell with sidebar for agency/admin; one chosen design skill documented in `markdown/design-t3b.md`.
+  - Accept: design tokens (colour, type, spacing); mobile shell with bottom navigation for customer/cleaner; desktop shell with sidebar for agency/admin; one chosen design skill documented in the T3 design doc (since replaced; in git history).
   - Verify: Playwright screenshots at phone and desktop widths; no horizontal scroll at 360 px.
   - Deps: T2. Skills: `design-taste-frontend` or `impeccable`, `ui-ux-pro-max`, `frontend-ui-engineering`.
 - [x] **T3b Redesign: one brand to the customer, landing page** (M) — user request after the T3 review (2026-10-18); prompt in `markdown/prompts/t3b-redesign.md`. Done 2026-10-18: live at `/` and `/home`, CI green; awaiting the user's review
-  - Accept: `markdown/PRODUCT.md`, `markdown/SPEC.md` and the tasks describe the one-brand model; `markdown/design-t3b.md` rewritten with a design read, dials and researched references (taste skill); landing page at `/` (own layout, one CTA "Pesan sekarang", real photos); customer app home at `/home`; customer nav Beranda, Layanan, Pesanan, Bantuan, Akun; no customer page contains "agensi", "agency" or "mitra"; `/agencies` and the agency "Layanan" page removed; admin "Layanan & Harga" placeholder at `/admin/services`; photos credited in `markdown/image-sources.md`.
+  - Accept: `markdown/PRODUCT.md`, `markdown/SPEC.md` and the tasks describe the one-brand model; the design doc rewritten with a design read (the T3b version, deleted 2026-10-19, is in git history: `git show 96335bf:markdown/design-t3b.md`), dials and researched references (taste skill); landing page at `/` (own layout, one CTA "Pesan sekarang", real photos); customer app home at `/home`; customer nav Beranda, Layanan, Pesanan, Bantuan, Akun; no customer page contains "agensi", "agency" or "mitra"; `/agencies` and the agency "Layanan" page removed; admin "Layanan & Harga" placeholder at `/admin/services`; photos credited in `markdown/image-sources.md`.
   - Verify: `npm run check`; `npm run test:e2e` (incl. the no-agency-wording test); `npm run screenshots -- t3b`; taste-skill pre-flight; the live URL serves `/` and `/home`.
   - Deps: T3. Skills: `design-taste-frontend`, `frontend-ui-engineering`, `test-driven-development`.
-- [x] **T3c Landing page on the redesign system** (M) — user request (2026-10-19): build `/` from `markdown/design.md` (Brightnest-style: forest green, lime, cream; Inter Tight + Instrument Serif italic + Inter) with the user's reference screenshot as the layout. Done 2026-10-19; awaiting the user's review
+- [x] **T3c Landing page on the redesign system** (M) — user request (2026-10-19): build `/` from `markdown/design.md` (Brightnest-style: forest green, lime, cream; Inter Tight + Instrument Serif italic + Inter) with the user's reference screenshot as the layout. Done 2026-10-19; pushed (commit 96335bf), CI green, live
   - Accept: the landing uses the redesign tokens through `.theme-forest` (apps unchanged); utility bar and one-row header; 7/5 hero with the sample job card over the photo (below it on phones); trust row of four SPEC facts; four service cards with sample prices; safety bento; dark "Cara kerja" band with five steps; FAQ; CTA shell; dark footer with ghost wordmark; one CTA label "Pesan sekarang"; no invented numbers, ratings or testimonials; no em or en dash in visible text; AA contrast (design.md table).
   - Verify: `npm run check`; `npm run test:e2e` (landing, landing.desktop, landing.mobile, no-agency-wording, no-horizontal-scroll); `npm run screenshots -- t3c`; taste-skill pre-flight.
   - Deps: T3b. Skills: `design-taste-frontend`, `frontend-ui-engineering`, `test-driven-development`.

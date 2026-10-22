@@ -408,7 +408,7 @@ components:
 
 # HomeKlin Design System (redesign, October 2026)
 
-Written 2026-10-19 as the specification for redesigning the whole site. It follows the Stitch `DESIGN.md` format of the user's reference (`markdown/references/brightnest-design.md`) and replaces the T3b system, which is kept as the record of what is built today in `markdown/design-t3b.md`. Brand brief: `markdown/PRODUCT.md`. Business rules: `markdown/SPEC.md`. Until the migration below is done, `src/app/globals.css` still holds the T3b tokens.
+Written 2026-10-19 as the specification for redesigning the whole site. It follows the Stitch `DESIGN.md` format of the user's reference (`markdown/references/brightnest-design.md`) and replaces the T3b system. The T3b doc was deleted on 2026-10-19 (user request); read it with `git show 96335bf:markdown/design-t3b.md`. The Token mapping table below lists every T3b token and what replaces it. Brand brief: `markdown/PRODUCT.md`. Business rules: `markdown/SPEC.md`. Until the migration below is done, `src/app/globals.css` still holds the T3b tokens.
 
 ## Brand & Style
 
@@ -719,12 +719,12 @@ For `homeklin-frontend`, in this order. After each step `npm run check` and `npm
 5. **Customer app:** `job-status-card` as the forest-green hero card, `service-card`/`service-row`, `area-picker`.
 6. **Landing:** utility bar and header, hero (status card overlap, blob), trust row, services, safety bento, dark "Cara kerja" band, FAQ, CTA shell, footer with ghost wordmark. (Done in T3c.)
 7. **Tests that change:** done for the landing in T3c (`e2e/landing.spec.ts`, `landing.desktop.spec.ts` with three headline rows and a 44 + 64 px header, new `landing.mobile.spec.ts`, screenshots `npm run screenshots -- t3c`). For the apps: `tests/navigation.test.ts` only if labels change. `e2e/no-agency-wording.spec.ts` and the horizontal-scroll test must keep passing unchanged.
-8. **Docs:** update `markdown/Progress.md`, the `globals.css` header comment and the file references that point at `design-t3b.md` sections (for example the comment in `src/app/layout.tsx`).
+8. **Docs:** update `markdown/Progress.md`, the `globals.css` header comment and the code comments that mention the T3b tokens (for example in `src/app/layout.tsx` and `src/components/ui/button-link.tsx`).
 
 ## References
 
 - **Brightnest** (`markdown/references/brightnest-design.md`): the format and the whole mood: forest green, lime accent, cream canvas, grotesk with serif-italic accent, soft-bento, dark bands, pill buttons, floating product fragment, ghost wordmark.
-- **T3b research** (`markdown/design-t3b.md`, section 8: MyClean, Fantastic Services, KliknClean, Justlife, Wise) still informs the content decisions: full upfront "mulai dari" prices, the customer never choosing a provider, short verb-led steps, the "Pesan Sekarang" label Indonesian customers know. No new research was done for this redesign.
+- **T3b research** (section 8 of the deleted T3b doc, `git show 96335bf:markdown/design-t3b.md`: MyClean, Fantastic Services, KliknClean, Justlife, Wise) still informs the content decisions: full upfront "mulai dari" prices, the customer never choosing a provider, short verb-led steps, the "Pesan Sekarang" label Indonesian customers know. No new research was done for this redesign.
 
 **What was left out of the reference, and why:** stat chips with invented numbers, the "4.9 rating / 2k+" avatar cluster, named testimonials (reviews are P2), "NEW" announcement badge, pricing tiers with "Most popular" (HomeKlin has a service list, not subscriptions), the newsletter input, the "Get an instant quote" form, "For business" toggle (HomeKlin serves households only), the Brightnest wordmark and copy.
 
