@@ -9,7 +9,8 @@ import { existsSync } from "node:fs";
 if (existsSync(".env")) process.loadEnvFile(".env");
 
 // The suite signs up and signs in, so it must run against the test project, never the live one
-// (markdown/SPEC.md, "Testing Strategy"). Missing keys fail the run instead of skipping it.
+// (markdown/SPEC.md, "Testing Strategy"). Missing keys fail the run instead of skipping it. The setup
+// project also needs TEST_SUPABASE_SECRET_KEY to create its users (tests/integration/test-project.ts).
 const testSupabaseUrl = process.env.TEST_SUPABASE_URL;
 if (!testSupabaseUrl || !process.env.TEST_SUPABASE_PUBLISHABLE_KEY) {
   throw new Error("End-to-end tests need TEST_SUPABASE_URL and TEST_SUPABASE_PUBLISHABLE_KEY (see .env.example).");
@@ -32,11 +33,29 @@ export default defineConfig({
     baseURL,
     trace: "on-first-retry",
   },
-  // Customer and cleaner pages are mobile-first; agency and admin pages are desktop-first.
-  // `*.spec.ts` runs in both projects; `*.mobile.spec.ts` and `*.desktop.spec.ts` run only in theirs.
   projects: [
-    { name: "mobile", use: { ...devices["Pixel 9"] }, testIgnore: /\.desktop\.spec\.ts$/ },
-    { name: "desktop", use: { ...devices["Desktop Chrome"] }, testIgnore: /\.mobile\.spec\.ts$/ },
+    // Before the suite, "setup" signs in one test user per role and saves each session; after it,
+    // "teardown" deletes those users (e2e/setup/). No project has a default storageState: a spec opens
+    // protected pages with test.use(signedInAs.<role>) from e2e/setup/auth-state.ts, and every other
+    // spec, such as the sign-in specs, starts signed out. Their own testDir keeps them out of the
+    // device projects and lets another config reuse them.
+    // Source: https://playwright.dev/docs/test-global-setup-teardown ("Option 1: Project Dependencies")
+    { name: "setup", testDir: "./e2e/setup", testMatch: /auth\.setup\.ts$/, teardown: "teardown" },
+    { name: "teardown", testDir: "./e2e/setup", testMatch: /auth\.teardown\.ts$/ },
+    // Customer and cleaner pages are mobile-first; agency and admin pages are desktop-first.
+    // `*.spec.ts` runs in both projects; `*.mobile.spec.ts` and `*.desktop.spec.ts` run only in theirs.
+    {
+      name: "mobile",
+      use: { ...devices["Pixel 9"] },
+      testIgnore: /\.desktop\.spec\.ts$/,
+      dependencies: ["setup"],
+    },
+    {
+      name: "desktop",
+      use: { ...devices["Desktop Chrome"] },
+      testIgnore: /\.mobile\.spec\.ts$/,
+      dependencies: ["setup"],
+    },
   ],
   webServer: {
     command: `npm run build && npm run start -- --port ${port}`,

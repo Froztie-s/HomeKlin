@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
+import { signedInAs } from "./setup/auth-state";
 
 // Cleaners work one-handed on a phone: a minimal bottom bar with two items.
 test.describe("cleaner bottom navigation", () => {
+  test.use(signedInAs.cleaner);
+
   test("sits at the bottom with two items and marks the current page", async ({ page }) => {
     await page.goto("/cleaner");
     const nav = page.getByRole("navigation", { name: "Navigasi petugas" });

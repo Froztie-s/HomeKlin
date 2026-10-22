@@ -1,9 +1,12 @@
 import { expect, test, type Locator } from "@playwright/test";
+import { signedInAs, signedOut } from "./setup/auth-state";
 
 // T4 on a 360 px phone: the language switch fits the existing bars without a second row
 // (markdown/design.md, Layout). The landing header keeps one 64 px row with the wordmark, a compact
 // link to the other language and "Pesan sekarang"; the app bars carry the full ID | EN toggle; the
 // back office puts it in its menu, under the sections.
+// Public pages are checked signed out; the cleaner app and the back office by a signed-in user with
+// their role (T5).
 test.use({ viewport: { width: 360, height: 740 } });
 
 async function box(locator: Locator) {
@@ -50,51 +53,59 @@ for (const { path, cta, other, group } of [
   });
 }
 
-for (const { path, group, role } of [
-  { path: "/home", group: "Bahasa", role: null },
-  { path: "/en/home", group: "Language", role: null },
-  { path: "/cleaner", group: "Bahasa", role: "Petugas" },
-  { path: "/en/cleaner", group: "Language", role: "Cleaner" },
+for (const { path, group, role, session } of [
+  { path: "/home", group: "Bahasa", role: null, session: signedOut },
+  { path: "/en/home", group: "Language", role: null, session: signedOut },
+  { path: "/cleaner", group: "Bahasa", role: "Petugas", session: signedInAs.cleaner },
+  { path: "/en/cleaner", group: "Language", role: "Cleaner", session: signedInAs.cleaner },
 ]) {
-  test(`gives the app bar on ${path} the wordmark and the full language toggle`, async ({ page }) => {
-    await page.goto(path);
-    const banner = page.getByRole("banner");
-    const toggle = banner.getByRole("group", { name: group });
-    await expect(toggle.getByRole("link")).toHaveCount(1);
-    await expect(toggle.locator('[aria-current="true"]')).toHaveCount(1);
+  test.describe(`app bar on ${path}`, () => {
+    test.use(session);
 
-    const row = [banner.getByText("HomeKlin", { exact: true })];
-    if (role) row.push(banner.getByText(role, { exact: true }));
-    row.push(toggle);
-    await expectOneRow(row);
+    test(`gives the app bar on ${path} the wordmark and the full language toggle`, async ({ page }) => {
+      await page.goto(path);
+      const banner = page.getByRole("banner");
+      const toggle = banner.getByRole("group", { name: group });
+      await expect(toggle.getByRole("link")).toHaveCount(1);
+      await expect(toggle.locator('[aria-current="true"]')).toHaveCount(1);
 
-    const link = await box(toggle.getByRole("link"));
-    expect(link.width).toBeGreaterThanOrEqual(44);
-    expect(link.height).toBeGreaterThanOrEqual(44);
+      const row = [banner.getByText("HomeKlin", { exact: true })];
+      if (role) row.push(banner.getByText(role, { exact: true }));
+      row.push(toggle);
+      await expectOneRow(row);
+
+      const link = await box(toggle.getByRole("link"));
+      expect(link.width).toBeGreaterThanOrEqual(44);
+      expect(link.height).toBeGreaterThanOrEqual(44);
+    });
   });
 }
 
-test("puts the back office's language switch in the menu, under the sections", async ({ page }) => {
-  await page.goto("/agency");
-  const menu = page.getByRole("button", { name: "Menu" });
-  await expect(page.getByRole("group", { name: "Bahasa" })).toBeHidden();
+test.describe("back office", () => {
+  test.use(signedInAs.agency);
 
-  await menu.click();
-  const sections = await box(page.getByRole("navigation", { name: "Navigasi agensi" }));
-  const toggle = page.getByRole("group", { name: "Bahasa" });
-  expect((await box(toggle)).y).toBeGreaterThanOrEqual(sections.y + sections.height);
+  test("puts the back office's language switch in the menu, under the sections", async ({ page }) => {
+    await page.goto("/agency");
+    const menu = page.getByRole("button", { name: "Menu" });
+    await expect(page.getByRole("group", { name: "Bahasa" })).toBeHidden();
 
-  await toggle.getByRole("link", { name: "EN English" }).click();
-  await expect(page).toHaveURL("/en/agency");
-  await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
-  await expect(menu).toHaveAttribute("aria-expanded", "false");
+    await menu.click();
+    const sections = await box(page.getByRole("navigation", { name: "Navigasi agensi" }));
+    const toggle = page.getByRole("group", { name: "Bahasa" });
+    expect((await box(toggle)).y).toBeGreaterThanOrEqual(sections.y + sections.height);
 
-  await menu.click();
-  await expect(page.getByRole("navigation", { name: "Agency navigation" }).getByRole("link")).toHaveText([
-    "Dashboard",
-    "Schedule",
-    "Cleaners",
-    "Orders",
-    "Recordings",
-  ]);
+    await toggle.getByRole("link", { name: "EN English" }).click();
+    await expect(page).toHaveURL("/en/agency");
+    await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
+    await expect(menu).toHaveAttribute("aria-expanded", "false");
+
+    await menu.click();
+    await expect(page.getByRole("navigation", { name: "Agency navigation" }).getByRole("link")).toHaveText([
+      "Dashboard",
+      "Schedule",
+      "Cleaners",
+      "Orders",
+      "Recordings",
+    ]);
+  });
 });

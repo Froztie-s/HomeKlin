@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
+import { signedInAs } from "./setup/auth-state";
 
 // Customer pages are mobile-first: on a phone the main navigation is a bottom bar.
+// A signed-in customer, because Pesanan (/orders) and Akun (/account) are theirs only (T5).
 const sections = [
   { label: "Beranda", path: "/home", heading: "Pesan kebersihan rumah" },
   { label: "Layanan", path: "/services", heading: "Layanan" },
@@ -10,6 +12,8 @@ const sections = [
 ];
 
 test.describe("customer bottom navigation", () => {
+  test.use(signedInAs.customer);
+
   test("sits at the bottom of the screen with five labelled items", async ({ page }) => {
     await page.goto("/home");
     const nav = page.getByRole("navigation", { name: "Navigasi utama" });

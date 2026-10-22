@@ -1,7 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { signedInAs } from "./setup/auth-state";
 
 // On a desktop screen the same customer sections move from the bottom bar into a top bar.
+// A signed-in customer, because Pesanan (/orders) is theirs only (T5).
 test.describe("customer navigation on desktop", () => {
+  test.use(signedInAs.customer);
+
   test("shows the sections in a top bar and marks the current page", async ({ page }) => {
     await page.goto("/home");
     const nav = page.getByRole("navigation", { name: "Navigasi utama" });

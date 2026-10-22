@@ -1,9 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { signedInAs } from "./setup/auth-state";
 
 // Agency and admin pages are desktop-first: a sidebar on the left, always visible.
+// Each shell is opened by a signed-in user with its role (T5).
 const shells = [
   {
-    name: "agency",
+    name: "agency" as const,
     root: "/agency",
     navLabel: "Navigasi agensi",
     items: [
@@ -15,7 +17,7 @@ const shells = [
     ],
   },
   {
-    name: "admin",
+    name: "admin" as const,
     root: "/admin",
     navLabel: "Navigasi admin",
     items: [
@@ -31,6 +33,8 @@ const shells = [
 
 for (const shell of shells) {
   test.describe(`${shell.name} sidebar`, () => {
+    test.use(signedInAs[shell.name]);
+
     test("is a full-height sidebar on the left with every section", async ({ page }) => {
       await page.goto(shell.root);
       const nav = page.getByRole("navigation", { name: shell.navLabel });

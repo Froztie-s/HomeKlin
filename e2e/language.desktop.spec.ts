@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { signedInAs } from "./setup/auth-state";
 
 // T4 on desktop screens: the landing page's switch sits in the dark utility bar next to "Bantuan", and
 // the back office has it in the sidebar, under the sections (markdown/design.md, Layout).
+// The landing page is checked signed out; each back office by a signed-in user with its role (T5).
 test("puts the landing page's language switch in the utility bar, beside Bantuan", async ({ page }) => {
   await page.goto("/");
   const group = page.getByRole("group", { name: "Bahasa" });
@@ -30,13 +32,13 @@ test("keeps every link of the English landing page in English", async ({ page })
 
 const backOffices = [
   {
-    name: "agency",
+    name: "agency" as const,
     root: "/agency",
     nav: "Agency navigation",
     labels: ["Dashboard", "Schedule", "Cleaners", "Orders", "Recordings"],
   },
   {
-    name: "admin",
+    name: "admin" as const,
     root: "/admin",
     nav: "Admin navigation",
     labels: ["Dashboard", "Live monitor", "Tickets", "Recordings", "Services & prices", "FAQ"],
@@ -44,20 +46,24 @@ const backOffices = [
 ];
 
 for (const office of backOffices) {
-  test(`switches the ${office.name} back office to English from the sidebar`, async ({ page }) => {
-    await page.goto(office.root);
-    const sidebar = page.getByRole("complementary");
-    await sidebar.getByRole("group", { name: "Bahasa" }).getByRole("link", { name: "EN English" }).click();
+  test.describe(`${office.name} back office`, () => {
+    test.use(signedInAs[office.name]);
 
-    await expect(page).toHaveURL(`/en${office.root}`);
-    await expect(page.locator("html")).toHaveAttribute("lang", "en");
-    const nav = page.getByRole("navigation", { name: office.nav });
-    await expect(nav.getByRole("link")).toHaveText(office.labels);
-    await expect(nav.getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");
-    await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
+    test(`switches the ${office.name} back office to English from the sidebar`, async ({ page }) => {
+      await page.goto(office.root);
+      const sidebar = page.getByRole("complementary");
+      await sidebar.getByRole("group", { name: "Bahasa" }).getByRole("link", { name: "EN English" }).click();
 
-    await nav.getByRole("link", { name: office.labels[1] }).click();
-    await expect(page).toHaveURL(`/en${office.root}/${office.name === "agency" ? "schedule" : "monitor"}`);
-    await expect(page.getByRole("heading", { level: 1, name: office.labels[1] })).toBeVisible();
+      await expect(page).toHaveURL(`/en${office.root}`);
+      await expect(page.locator("html")).toHaveAttribute("lang", "en");
+      const nav = page.getByRole("navigation", { name: office.nav });
+      await expect(nav.getByRole("link")).toHaveText(office.labels);
+      await expect(nav.getByRole("link", { name: "Dashboard" })).toHaveAttribute("aria-current", "page");
+      await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
+
+      await nav.getByRole("link", { name: office.labels[1] }).click();
+      await expect(page).toHaveURL(`/en${office.root}/${office.name === "agency" ? "schedule" : "monitor"}`);
+      await expect(page.getByRole("heading", { level: 1, name: office.labels[1] })).toBeVisible();
+    });
   });
 }
