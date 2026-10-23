@@ -107,10 +107,17 @@ setup("signs in one test user per role", async ({ baseURL, playwright }) => {
     const { storageState } = signedInAs[role];
     writeFileSync(storageState, `${JSON.stringify(state, null, 2)}\n`);
 
-    // A signed-out visitor of a protected page is redirected to /login by the proxy (src/proxy.ts).
+    // Two checks on the role's own page. The proxy redirects a request without a valid session to /login
+    // (status 307, so 200 means the session is accepted). The page's RoleGate redirects a wrong role
+    // from inside the streamed page instead, with status 200 and a <meta id="__next-page-redirect">
+    // that Next.js inserts (next/dist/server/app-render/make-get-server-inserted-html.js); without that
+    // tag, the role is accepted too.
     const app = await playwright.request.newContext({ baseURL, storageState });
-    const status = (await app.get(ownPage[role], { maxRedirects: 0 })).status();
+    const response = await app.get(ownPage[role], { maxRedirects: 0 });
+    const status = response.status();
+    const html = await response.text();
     await app.dispose();
-    expect(status, `the app accepts the ${role} session at ${ownPage[role]}`).toBe(200);
+    expect(status, `the proxy accepts the ${role} session at ${ownPage[role]}`).toBe(200);
+    expect(html, `RoleGate lets the ${role} in at ${ownPage[role]}`).not.toContain("__next-page-redirect");
   }
 });

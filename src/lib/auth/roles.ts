@@ -2,7 +2,8 @@ import { routing } from "@/i18n/routing";
 
 // Who may open which page (T5). The roles are the database enum public.app_role
 // (supabase/migrations/20261022120000_profiles_and_roles.sql) and markdown/SPEC.md "Users and roles".
-// Pure functions, shared by the proxy (sign-in redirect) and the server-side role check.
+// Pure functions, shared by the proxy (sign-in redirect), safeNextPath (where to go after signing in)
+// and tests/protected-pages.test.ts (which pages need a RoleGate, and with which roles).
 
 export const appRoles = ["customer", "cleaner", "agency", "admin"] as const;
 export type AppRole = (typeof appRoles)[number];

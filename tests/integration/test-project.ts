@@ -27,7 +27,9 @@ export const testProject = {
 };
 
 // Tests create and delete users with the secret key: never let them run against the live project.
-if (testProject.url === process.env.NEXT_PUBLIC_SUPABASE_URL) {
+// The hosts are compared, so a trailing slash or different capitals cannot hide the same project.
+const liveUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+if (liveUrl && new URL(testProject.url).host.toLowerCase() === new URL(liveUrl).host.toLowerCase()) {
   throw new Error("TEST_SUPABASE_URL is the live project's URL. Tests must use the separate test project.");
 }
 

@@ -15,7 +15,9 @@ const testSupabaseUrl = process.env.TEST_SUPABASE_URL;
 if (!testSupabaseUrl || !process.env.TEST_SUPABASE_PUBLISHABLE_KEY) {
   throw new Error("End-to-end tests need TEST_SUPABASE_URL and TEST_SUPABASE_PUBLISHABLE_KEY (see .env.example).");
 }
-if (testSupabaseUrl === process.env.NEXT_PUBLIC_SUPABASE_URL) {
+// Hosts compared, so a trailing slash or different capitals cannot hide the same project.
+const liveSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+if (liveSupabaseUrl && new URL(testSupabaseUrl).host.toLowerCase() === new URL(liveSupabaseUrl).host.toLowerCase()) {
   throw new Error("TEST_SUPABASE_URL is the live project's URL. End-to-end tests must use the test project.");
 }
 

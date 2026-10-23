@@ -30,7 +30,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: language switch in both shells; choice persists; all shell text translated; missing-key test fails the build.
   - Verify: Playwright toggles language and checks text.
   - Deps: T3. Skills: `source-driven-development` (next-intl docs).
-- [x] **T5 Auth, roles and RLS base** (M) — done 2026-10-23 on branch `t5-auth`: `/login`, `/signup`, sign-out, role check on all 15 protected pages (in each page, since a layout's check does not protect its pages), RLS on `profiles` (7 integration tests on the test project), e2e signed in per role; `npm run check` 150 tests, e2e 214 passed
+- [x] **T5 Auth, roles and RLS base** (M) — done 2026-10-23, live: `/login`, `/signup`, sign-out, role check on all 15 protected pages (in each page, since a layout's check does not protect its pages), RLS on `profiles` (7 integration tests on the test project), e2e signed in per role; `npm run check` 150 tests, e2e 214 passed
   - Accept: sign up/in/out for customer; `profiles` table with role (customer, cleaner, agency, admin); server `requireRole()` helper; RLS tests show a user cannot read another user's profile; role-based redirect after login.
   - Verify: Vitest RLS tests; Playwright login per role.
   - Deps: T4. Skills: `security-and-hardening`, `api-and-interface-design`.
@@ -40,7 +40,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Deps: T5.
 
 ### Checkpoint 1: Foundation
-- [ ] Build, tests, CI green; deployed URL works; login works for all four roles; `code-review-and-quality` run; review with human.
+- [ ] Build, tests, CI green; deployed URL works; login works for all four roles; `code-review-and-quality` run; review with human. — 2026-10-23: all done except the user's review (CI green, live login checked for all four demo roles, review findings fixed; see `markdown/Progress.md`)
 
 ## Phase 2: Catalog and order
 

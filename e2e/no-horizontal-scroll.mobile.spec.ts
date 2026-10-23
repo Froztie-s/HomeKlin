@@ -32,9 +32,12 @@ for (const { who, session, paths: indonesianPages } of pageGroups) {
     for (const path of pages) {
       test(`${path} has no horizontal scroll at 360 px`, async ({ page }) => {
         await page.goto(path);
-        // Still at this address: not redirected to the sign-in page or to another role's home.
-        await expect(page).toHaveURL(path);
+        // A protected page's role check streams in after the shell (status 200) and redirects a wrong
+        // role from there, so first wait until it has finished, then check this is still the address:
+        // not redirected to the sign-in page or to another role's home.
+        await expect(page.getByText(/^(Memuat…|Loading…)$/)).toHaveCount(0);
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+        await expect(page).toHaveURL(path);
         const overflow = await page.evaluate(() => ({
           scrollWidth: document.documentElement.scrollWidth,
           innerWidth: window.innerWidth,

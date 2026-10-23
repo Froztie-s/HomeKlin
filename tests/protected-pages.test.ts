@@ -8,18 +8,27 @@ import { rolesFor } from "@/lib/auth/roles";
 // it: Next.js renders route segments itself, so a layout "does not stop them from running or from
 // appearing in the RSC Payload" (node_modules/next/dist/docs/01-app/02-guides/authentication.md,
 // "Layouts and auth checks"). So every page of a protected section renders its own
-// <Suspense><RoleGate roles={[...]}> with exactly the roles src/lib/auth/roles.ts gives its address.
-// The pages are read as source code (the TypeScript parser), so a new page that forgets the gate, or
-// names the wrong role, fails here before it ships.
+// <Suspense><RoleGate roles={[...]}> with exactly the roles src/lib/auth/roles.ts gives its address,
+// and nothing but page chrome outside it.
+// The pages are read as source code (the TypeScript parser), so a new page that forgets the gate,
+// names the wrong role, or renders data beside the gate fails here before it ships. The check fails
+// closed: a new page that is neither in a protected section nor on the public list below fails too,
+// until someone decides which it is.
 
 const appDir = join("src", "app", "[locale]");
 
-/** Every page.tsx under src/app/[locale], as paths relative to the repository root. */
-function pageFiles(dir: string): string[] {
+/** The pages anyone may open. Every other page must belong to a protected section (roles.ts). */
+const publicPaths = ["/", "/home", "/services", "/support", "/login", "/signup", "/[...rest]"];
+
+/** What a protected page may render outside its RoleGate: page chrome only, never data. */
+const chromeOutsideGate = new Set(["PageContainer", "PageHeader", "Suspense", "GateFallback", "RoleGate"]);
+
+/** Every file under `dir` whose name matches, as paths relative to the repository root. */
+function filesNamed(dir: string, name: RegExp): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const path = join(dir, entry.name);
-    if (entry.isDirectory()) return pageFiles(path);
-    return entry.name === "page.tsx" ? [path] : [];
+    if (entry.isDirectory()) return filesNamed(path, name);
+    return name.test(entry.name) ? [path] : [];
   });
 }
 
@@ -35,6 +44,10 @@ type Gate = { roles: string[] | null; insideSuspense: boolean; insideDefaultExpo
 
 function tagName(node: ts.JsxOpeningLikeElement): string {
   return node.tagName.getText();
+}
+
+function isJsxTag(node: ts.Node): node is ts.JsxOpeningElement | ts.JsxSelfClosingElement {
+  return ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node);
 }
 
 /** The roles={["..."]} of a RoleGate element, or null when it is not a plain list of strings. */
@@ -57,20 +70,43 @@ function isDefaultExport(node: ts.Node): boolean {
   return kinds.includes(ts.SyntaxKind.ExportKeyword) && kinds.includes(ts.SyntaxKind.DefaultKeyword);
 }
 
-/** Every <RoleGate> in a page's source code, with its roles and what it sits inside. */
-function gates(code: string): { gates: Gate[]; importsRoleGate: boolean } {
+/** Whether a JSX tag sits inside an element named `name` (not counting itself). */
+function insideElement(node: ts.JsxOpeningElement | ts.JsxSelfClosingElement, name: string): boolean {
+  // An opening tag's parent is its own element, so the search starts one level higher; a
+  // self-closing tag's parent is already the element around it.
+  const start = ts.isJsxOpeningElement(node) ? node.parent.parent : node.parent;
+  for (let parent: ts.Node | undefined = start; parent; parent = parent.parent) {
+    if (ts.isJsxElement(parent) && tagName(parent.openingElement) === name) return true;
+  }
+  return false;
+}
+
+function insideDefaultExport(node: ts.Node): boolean {
+  for (let parent = node.parent; parent; parent = parent.parent) {
+    if (ts.isFunctionDeclaration(parent) && isDefaultExport(parent)) return true;
+  }
+  return false;
+}
+
+type PageSource = { gates: Gate[]; importsRoleGate: boolean; outsideGate: string[] };
+
+/** A page's source code: its <RoleGate>s, and every element its component renders outside a gate. */
+function readPage(code: string): PageSource {
   const source = ts.createSourceFile("page.tsx", code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const found: Gate[] = [];
+  const gates: Gate[] = [];
+  const outsideGate: string[] = [];
 
   function visit(node: ts.Node) {
-    if ((ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) && tagName(node) === "RoleGate") {
-      let insideSuspense = false;
-      let insideDefaultExport = false;
-      for (let parent = node.parent.parent; parent; parent = parent.parent) {
-        if (ts.isJsxElement(parent) && tagName(parent.openingElement) === "Suspense") insideSuspense = true;
-        if (ts.isFunctionDeclaration(parent) && isDefaultExport(parent)) insideDefaultExport = true;
+    if (isJsxTag(node)) {
+      const name = tagName(node);
+      if (name === "RoleGate") {
+        gates.push({
+          roles: rolesAttribute(node),
+          insideSuspense: insideElement(node, "Suspense"),
+          insideDefaultExport: insideDefaultExport(node),
+        });
       }
-      found.push({ roles: rolesAttribute(node), insideSuspense, insideDefaultExport });
+      if (insideDefaultExport(node) && !insideElement(node, "RoleGate")) outsideGate.push(name);
     }
     ts.forEachChild(node, visit);
   }
@@ -83,14 +119,15 @@ function gates(code: string): { gates: Gate[]; importsRoleGate: boolean } {
       statement.moduleSpecifier.text === "@/components/auth/role-gate" &&
       /\bRoleGate\b/.test(statement.importClause?.getText() ?? ""),
   );
-  return { gates: found, importsRoleGate };
+  return { gates, importsRoleGate, outsideGate };
 }
 
-const pages = pageFiles(appDir).map((file) => ({ file, path: urlPath(file) }));
+const pages = filesNamed(appDir, /^page\.(tsx|ts|jsx|js|mdx)$/).map((file) => ({ file, path: urlPath(file) }));
 const protectedPages = pages.flatMap(({ file, path }) => {
   const roles = rolesFor(path);
   return roles ? [{ file, path, roles: [...roles] }] : [];
 });
+const routeHandlers = filesNamed(appDir, /^route\.(tsx|ts|jsx|js)$/).map((file) => ({ file, path: urlPath(file) }));
 
 describe("the page finder (the test's own helpers)", () => {
   it("turns page files into addresses without the language or the route groups", () => {
@@ -120,44 +157,80 @@ describe("the page finder (the test's own helpers)", () => {
         "/admin/faq",
       ]),
     );
-    expect(pages.map(({ path }) => path)).toEqual(expect.arrayContaining(["/", "/home", "/services", "/support"]));
+    expect(pages.map(({ path }) => path)).toEqual(expect.arrayContaining(publicPaths));
   });
 });
 
-describe("the gate reader (the test's own helpers)", () => {
+describe("the page reader (the test's own helpers)", () => {
   const importLine = 'import { RoleGate } from "@/components/auth/role-gate";\n';
 
   it("reads the roles of a gate inside Suspense in the page component", () => {
     const code = `${importLine}export default function Page() {
-      return <Suspense fallback={null}><RoleGate roles={["admin"]}><p>x</p></RoleGate></Suspense>;
+      return <Suspense fallback={<GateFallback />}><RoleGate roles={["admin"]}><Secret /></RoleGate></Suspense>;
     }`;
-    expect(gates(code)).toEqual({
+    expect(readPage(code)).toEqual({
       importsRoleGate: true,
       gates: [{ roles: ["admin"], insideSuspense: true, insideDefaultExport: true }],
+      outsideGate: ["Suspense", "GateFallback", "RoleGate"],
     });
   });
 
   it("notices a gate outside Suspense, a gate only in a helper, and roles that are not a plain list", () => {
     const outside = `${importLine}export default function Page() { return <RoleGate roles={["admin"]}>x</RoleGate>; }`;
-    expect(gates(outside).gates[0].insideSuspense).toBe(false);
+    expect(readPage(outside).gates[0].insideSuspense).toBe(false);
 
     const helperOnly = `${importLine}function Helper() { return <Suspense><RoleGate roles={["admin"]}>x</RoleGate></Suspense>; }
       export default function Page() { return <p>x</p>; }`;
-    expect(gates(helperOnly).gates[0].insideDefaultExport).toBe(false);
+    expect(readPage(helperOnly).gates[0].insideDefaultExport).toBe(false);
 
     const computed = `${importLine}export default function Page() { return <Suspense><RoleGate roles={allRoles}>x</RoleGate></Suspense>; }`;
-    expect(gates(computed).gates[0].roles).toBeNull();
+    expect(readPage(computed).gates[0].roles).toBeNull();
+  });
+
+  it("lists data rendered beside the gate, even inside its own Suspense", () => {
+    const code = `${importLine}export default function Page() {
+      return <PageContainer><PageHeader title="x" /><Suspense><Secret /></Suspense>
+        <Suspense fallback={<GateFallback />}><RoleGate roles={["admin"]}><Content /></RoleGate></Suspense></PageContainer>;
+    }`;
+    const outside = readPage(code).outsideGate.filter((name) => !chromeOutsideGate.has(name));
+    expect(outside).toEqual(["Secret"]);
   });
 
   it("finds no gate and no import in a page without one", () => {
-    expect(gates("export default function Page() { return <p>x</p>; }")).toEqual({ importsRoleGate: false, gates: [] });
+    expect(readPage("export default function Page() { return <p>x</p>; }")).toEqual({
+      importsRoleGate: false,
+      gates: [],
+      outsideGate: ["p"],
+    });
+  });
+});
+
+describe("every page is either public or protected (fails closed)", () => {
+  it("has no page outside the public list that lacks a protected section", () => {
+    const unclassified = pages
+      .filter(({ path }) => !publicPaths.includes(path) && rolesFor(path) === null)
+      .map(({ file }) => file);
+    expect(
+      unclassified,
+      "add each page either to publicPaths above or to a protected section in src/lib/auth/roles.ts",
+    ).toEqual([]);
+  });
+
+  it("keeps the public list public", () => {
+    for (const path of publicPaths) expect(rolesFor(path), path).toBeNull();
+  });
+
+  it("has no route handler inside a protected section (they need their own access check)", () => {
+    const unguarded = routeHandlers.filter(({ path }) => rolesFor(path) !== null).map(({ file }) => file);
+    expect(unguarded).toEqual([]);
   });
 });
 
 describe("protected pages", () => {
   for (const { file, path, roles } of protectedPages) {
     it(`${path} renders its content inside <Suspense><RoleGate roles={${JSON.stringify(roles)}}>`, () => {
-      const { gates: found, importsRoleGate } = gates(readFileSync(file, "utf8"));
+      expect(file.endsWith(".tsx"), `${file}: a protected page is a .tsx file, so this test can read it`).toBe(true);
+      const { gates: found, importsRoleGate, outsideGate } = readPage(readFileSync(file, "utf8"));
 
       expect(importsRoleGate, `${file} imports RoleGate from @/components/auth/role-gate`).toBe(true);
       expect(found.length, `${file} renders a RoleGate`).toBeGreaterThan(0);
@@ -169,6 +242,9 @@ describe("protected pages", () => {
         expect(gate.insideSuspense, `${file}: RoleGate inside <Suspense>`).toBe(true);
         expect(gate.insideDefaultExport, `${file}: RoleGate in the page component`).toBe(true);
       }
+      // Anything else beside the gate would reach every signed-in visitor, whatever their role.
+      const beside = outsideGate.filter((name) => !chromeOutsideGate.has(name));
+      expect(beside, `${file}: only page chrome outside the RoleGate`).toEqual([]);
     });
   }
 });
