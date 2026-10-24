@@ -266,9 +266,10 @@ async function must(what, request) {
  * Safe to run again: areas and agencies are brought up to date; services and windows that exist are
  * left alone, so a price admin changed and a place already booked are never reset.
  *
- * @param {{ client: import("@supabase/supabase-js").SupabaseClient, agencyUserIds: Record<string, string>, keyPrefix?: string, now?: Date }} options
- *   agencyUserIds: the agency user's id per agency key. keyPrefix: put before every agency key, so a
- *   test run gets its own agencies.
+ * @param {{ client: import("@supabase/supabase-js").SupabaseClient, agencyUserIds?: Record<string, string>, keyPrefix?: string, now?: Date }} options
+ *   agencyUserIds: the agency user's id per agency key; without it each agency keeps the sign-in
+ *   account it has (the e2e setup refreshes the windows that way). keyPrefix: put before every agency
+ *   key, so a test run gets its own agencies.
  * @returns {Promise<{ areas: number, servicesAdded: number, agencies: number, windowsAdded: number }>}
  */
 export async function seedCatalog({ client, agencyUserIds, keyPrefix = "", now = new Date() }) {
@@ -307,6 +308,7 @@ export async function seedCatalog({ client, agencyUserIds, keyPrefix = "", now =
       .from("agencies")
       .upsert(
         agencies.map(({ key, name }) => {
+          if (!agencyUserIds) return { key: `${keyPrefix}${key}`, name };
           const userId = agencyUserIds[key];
           if (!userId) throw new Error(`No agency user for the agency ${key}.`);
           return { key: `${keyPrefix}${key}`, name, user_id: userId };
@@ -390,11 +392,11 @@ async function main() {
   );
 }
 
+// No top-level await: Playwright loads this file with require() (e2e/setup/catalog.setup.ts), which
+// cannot load a module that awaits at its top level.
 if (import.meta.main) {
-  try {
-    await main();
-  } catch (error) {
+  main().catch((error) => {
     console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
     process.exitCode = 1;
-  }
+  });
 }

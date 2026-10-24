@@ -92,6 +92,15 @@ describe("seedCatalog", () => {
     expect(service.data?.price_idr).toBe(regularPrice + 1);
   });
 
+  it("keeps each agency's sign-in link when it runs without agency users (the e2e setup does that)", async () => {
+    const third = await seedCatalog({ client: adminClient(), keyPrefix, now });
+    expect(third.windowsAdded).toBe(0);
+    const rows = await agencyIds();
+    expect(rows.map(({ key, user_id }) => [key, user_id]).sort()).toEqual(
+      agencies.map(({ key }) => [`${keyPrefix}${key}`, agencyUserIds[key]]).sort(),
+    );
+  });
+
   it("seeds every service, so the catalog has them all", async () => {
     const { data } = await visitorClient().from("services").select("id");
     expect((data ?? []).map((row) => row.id)).toEqual(expect.arrayContaining(seedServices.map((service) => service.id)));

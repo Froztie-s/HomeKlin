@@ -9,6 +9,14 @@ import type { Locale } from "next-intl";
 // services, and free windows combined over the partner agencies of an area, never which agency.
 // Errors: every function throws a CatalogError when the database answers with an error.
 
+/**
+ * The cache tag of everything read from the catalog. Pages that cache catalog reads tag them with
+ * cacheTag(catalogCacheTag); admin's changes (T7b) call updateTag(catalogCacheTag), so the customer
+ * pages show a new price at once. Sources: node_modules/next/dist/docs/01-app/03-api-reference/
+ * 04-functions/cacheTag.md and updateTag.md
+ */
+export const catalogCacheTag = "catalog";
+
 /** The service types customers filter by (jenis layanan); their names are UI text in src/messages. */
 export const serviceCategories = ["whole-home", "rooms", "fabrics"] as const;
 export type ServiceCategory = (typeof serviceCategories)[number];

@@ -125,18 +125,25 @@ describe("services and areas", () => {
   });
 
   it("refuses a visitor or a customer who tries to change a price or add a service", async () => {
-    for (const client of [visitorClient(), signedIn(customer).client]) {
-      const update = await client.from("services").update({ price_idr: 1 }).eq("id", `${prefix}-alpha`);
-      const insert = await client.from("services").insert({
-        id: `${prefix}-evil`, category: "rooms", name_id: "x", name_en: "x",
-        description_id: "x", description_en: "x", price_idr: 1, duration_minutes: 60,
-      });
-      expect(update.error?.code).toBe("42501");
-      expect(insert.error?.code).toBe("42501");
-    }
+    const evil = {
+      id: `${prefix}-evil`, category: "rooms", name_id: "x", name_en: "x",
+      description_id: "x", description_en: "x", price_idr: 1, duration_minutes: 60,
+    };
+    // A visitor has no write right at all.
+    const visitorUpdate = await visitorClient().from("services").update({ price_idr: 1 }).eq("id", `${prefix}-alpha`);
+    const visitorInsert = await visitorClient().from("services").insert(evil);
+    expect(visitorUpdate.error?.code).toBe("42501");
+    expect(visitorInsert.error?.code).toBe("42501");
+    // Signed-in users have the right since T7b, limited to admins by row-level security: a customer's
+    // insert is refused, and their update finds no row to change.
+    const customerUpdate = await signedIn(customer).client.from("services").update({ price_idr: 1 }).eq("id", `${prefix}-alpha`).select("id");
+    const customerInsert = await signedIn(customer).client.from("services").insert(evil);
+    expect(customerUpdate.data ?? []).toEqual([]);
+    expect(customerInsert.error?.code).toBe("42501");
+
     const { data } = await adminClient().from("services").select("price_idr").eq("id", `${prefix}-alpha`).single();
     expect(data?.price_idr).toBe(100000);
-  });
+  }, 20_000);
 });
 
 describe("agency data stays private", () => {

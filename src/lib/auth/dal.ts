@@ -43,6 +43,17 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
 });
 
 /**
+ * For Server Actions and route handlers: the signed-in user if their role is one of `roles`, else null.
+ * It never redirects and never reads the language (root params do not reach Server Actions, so
+ * requireRole would throw there); the caller answers a null with its own refusal. Row-level security
+ * still checks every read and write in the database as well.
+ */
+export async function authorize(roles: readonly AppRole[]): Promise<CurrentUser | null> {
+  const user = await getCurrentUser();
+  return user && roles.includes(user.role) ? user : null;
+}
+
+/**
  * The signed-in user if their role is one of `roles`. A visitor who is not signed in goes to the sign-in
  * page; a signed-in user with another role goes to their own home (a customer opening /admin lands on
  * /home). Both redirects keep the current language.

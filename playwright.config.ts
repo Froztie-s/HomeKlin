@@ -42,7 +42,8 @@ export default defineConfig({
     // spec, such as the sign-in specs, starts signed out. Their own testDir keeps them out of the
     // device projects and lets another config reuse them.
     // Source: https://playwright.dev/docs/test-global-setup-teardown ("Option 1: Project Dependencies")
-    { name: "setup", testDir: "./e2e/setup", testMatch: /auth\.setup\.ts$/, teardown: "teardown" },
+    // Setup also refreshes the test project's catalog and free windows (e2e/setup/catalog.setup.ts).
+    { name: "setup", testDir: "./e2e/setup", testMatch: /\.setup\.ts$/, teardown: "teardown" },
     { name: "teardown", testDir: "./e2e/setup", testMatch: /auth\.teardown\.ts$/ },
     // Customer and cleaner pages are mobile-first; agency and admin pages are desktop-first.
     // `*.spec.ts` runs in both projects; `*.mobile.spec.ts` and `*.desktop.spec.ts` run only in theirs.
