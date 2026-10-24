@@ -1,18 +1,16 @@
-import { ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
+import Form from "next/form";
 import { useTranslations } from "next-intl";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { AreaPicker } from "@/components/customer/area-picker";
-import {
-  defaultArea,
-  previewJob,
-  previewServices,
-  serviceAreas,
-} from "@/components/customer/home-preview-data";
+import { previewJob } from "@/components/customer/home-preview-data";
 import { JobStatusCard } from "@/components/customer/job-status-card";
 import { ServiceRow } from "@/components/customer/service-row";
 import { SampleNote } from "@/components/ui/sample-note";
-import { Link } from "@/i18n/navigation";
+import { getPathname, Link } from "@/i18n/navigation";
+import { getCatalogServices, getServiceAreas } from "@/lib/catalog/cached";
+import { defaultAreaId } from "@/lib/catalog/customer-filters";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("HomePage");
@@ -20,8 +18,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 // The customer app home: where (area), what is happening now (the running job), then what to book.
-// Static design preview until T7-T8 connect the catalog and T12 the customer's real orders.
-// The brand sits in the app bar (src/components/shell/app-header.tsx) on every width.
+// The services, prices and areas are HomeKlin's real catalog, cached and prerendered with the page
+// (src/lib/catalog/cached.ts); the running job stays a labelled sample until T12 brings the customer's
+// real orders. The brand sits in the app bar (src/components/shell/app-header.tsx) on every width.
 export default function HomePage() {
   const t = useTranslations("HomePage");
   return (
@@ -30,10 +29,13 @@ export default function HomePage() {
         <h1 className="font-display text-2xl font-semibold text-ink md:text-3xl md:tracking-display">
           {t("title")}
         </h1>
-        <AreaPicker areas={serviceAreas} defaultArea={defaultArea} />
+        <HomeAreaForm />
       </header>
 
-      <JobStatusCard job={previewJob} />
+      <div className="flex flex-col gap-3">
+        <JobStatusCard job={previewJob} />
+        <SampleNote>{t("previewNote")}</SampleNote>
+      </div>
 
       <section aria-labelledby="home-services-title">
         <div className="flex items-center justify-between gap-3">
@@ -48,16 +50,40 @@ export default function HomePage() {
             <ChevronRight className="size-4" aria-hidden="true" />
           </Link>
         </div>
-        <ul className="mt-3 divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
-          {previewServices.map((service) => (
-            <li key={service.id}>
-              <ServiceRow service={service} />
-            </li>
-          ))}
-        </ul>
+        <HomeServices />
       </section>
-
-      <SampleNote>{t("previewNote")}</SampleNote>
     </div>
+  );
+}
+
+// Choosing an area leads to /services?area=..., where that area's free slots and services are. A
+// button sends it (choosing in the list alone never leaves the page); next/form makes it a client-side
+// navigation, and without JavaScript it is a plain GET form.
+async function HomeAreaForm() {
+  const [areas, locale, t] = await Promise.all([getServiceAreas(), getLocale(), getTranslations("HomePage")]);
+  return (
+    <Form action={getPathname({ href: "/services", locale })} className="flex flex-wrap items-center gap-x-3 gap-y-3">
+      <AreaPicker areas={areas} value={defaultAreaId} />
+      <button
+        type="submit"
+        className="inline-flex min-h-touch items-center gap-2 rounded-full border border-border-control bg-surface px-5 text-sm font-semibold text-ink transition-[background-color,border-color,transform] duration-150 ease-out-quart hover:border-brand-600 hover:bg-brand-50 active:scale-[0.98] active:bg-brand-100"
+      >
+        {t("areaSubmit")}
+        <ArrowRight className="size-4 shrink-0" aria-hidden="true" />
+      </button>
+    </Form>
+  );
+}
+
+async function HomeServices() {
+  const services = await getCatalogServices();
+  return (
+    <ul className="mt-3 divide-y divide-border overflow-hidden rounded-xl border border-border bg-surface">
+      {services.map((service) => (
+        <li key={service.id}>
+          <ServiceRow service={service} />
+        </li>
+      ))}
+    </ul>
   );
 }

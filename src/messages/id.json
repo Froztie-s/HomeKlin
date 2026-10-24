@@ -98,13 +98,19 @@
   "ServicesGrid": {
     "eyebrow": "Daftar harga",
     "title": "Layanan dan harga, <accent>tanpa kejutan</accent>",
-    "note": "Harga contoh selama masa pratinjau. Harga resmi diatur HomeKlin dan selalu tampil penuh sebelum Anda membayar.",
+    "note": "Harga tampil penuh. Tidak ada biaya tambahan saat Anda membayar.",
     "all": "Lihat semua layanan"
   },
   "Service": {
-    "from": "mulai dari",
-    "duration": "± {hours, plural, other {# jam}}",
-    "nextSlot": "Jadwal terdekat: <nowrap>{slot}</nowrap>"
+    "durationHours": "± {hours, plural, other {# jam}}",
+    "durationMinutes": "± {minutes, plural, other {# menit}}",
+    "durationHoursMinutes": "± {hours, plural, other {# jam}} {minutes, plural, other {# menit}}"
+  },
+  "ServicePhotos": {
+    "regular": "Petugas kebersihan mengepel lantai ruang tamu yang terang",
+    "deep": "Petugas kebersihan mengelap mesin kopi di meja dapur",
+    "sofa-carpet": "Petugas kebersihan bersarung tangan menyedot debu dudukan sofa",
+    "kitchen-bathroom": "Petugas kebersihan memakai sarung tangan karet di dekat wastafel dapur"
   },
   "Safety": {
     "title": "Rumah Anda tetap dalam <accent>pantauan Anda</accent>",
@@ -182,7 +188,7 @@
       "helpCenter": "Pusat bantuan",
       "account": "Akun"
     },
-    "preview": "Situs pratinjau proyek universitas. Harga dan data di situs ini adalah contoh.",
+    "preview": "Situs pratinjau proyek universitas. Pembayaran hanya simulasi, dan pesanan contoh di situs ini bukan data nyata.",
     "copyright": "© 2026 HomeKlin"
   },
   "HomePage": {
@@ -190,12 +196,55 @@
     "title": "Pesan kebersihan rumah",
     "services": "Layanan HomeKlin",
     "seeAll": "Semua layanan",
-    "previewNote": "Pratinjau tampilan: layanan, harga, jadwal, dan pesanan di halaman ini adalah data contoh."
+    "areaSubmit": "Lihat jadwal",
+    "previewNote": "Pratinjau tampilan: pesanan berjalan di atas adalah data contoh."
   },
   "ServicesPage": {
     "title": "Layanan",
-    "description": "Satu daftar harga dari HomeKlin. Jadwal terdekat untuk {area}.",
-    "previewNote": "Pratinjau tampilan: layanan, harga, dan jadwal di halaman ini adalah data contoh."
+    "description": "Satu daftar harga dari HomeKlin. Harga tampil penuh, tanpa biaya tambahan."
+  },
+  "CatalogFilters": {
+    "searchLabel": "Cari layanan",
+    "searchPlaceholder": "Misalnya sofa",
+    "searchSubmit": "Cari",
+    "typeLabel": "Jenis layanan",
+    "types": {
+      "all": "Semua",
+      "whole-home": "Seluruh rumah",
+      "rooms": "Ruangan tertentu",
+      "fabrics": "Sofa, karpet & kasur"
+    },
+    "pending": "Memperbarui daftar…"
+  },
+  "CatalogResults": {
+    "title": "Daftar harga",
+    "count": "{count, plural, other {# layanan}}",
+    "countForQuery": "{count, plural, other {# layanan}} untuk “{query}”",
+    "clearSearch": "Hapus pencarian",
+    "noMatchTitle": "Tidak ada layanan yang cocok",
+    "noMatchBody": "Coba kata lain atau jenis layanan lain. Pencarian membaca nama dan keterangan layanan dalam bahasa Indonesia dan Inggris.",
+    "showAll": "Lihat semua layanan",
+    "unservedTitle": "Belum ada jadwal kosong di {area}",
+    "unservedBody": "HomeKlin belum melayani area ini, jadi belum ada layanan yang dapat dipesan di sini. Pilih area lain untuk melihat layanan, harga, dan jadwal kosongnya.",
+    "servedAreas": "Area yang sudah dilayani HomeKlin",
+    "errorTitle": "Daftar layanan tidak dapat dimuat",
+    "errorBody": "Ada gangguan saat membaca daftar layanan. Muat ulang halaman untuk mencoba lagi.",
+    "retry": "Muat ulang",
+    "loading": "Memuat layanan…"
+  },
+  "FreeWindows": {
+    "title": "Jadwal kosong di {area}",
+    "nearest": "Paling cepat",
+    "today": "Hari ini, {weekday} {date}",
+    "tomorrow": "Besok, {weekday} {date}",
+    "day": "{weekday}, {date}",
+    "window": "{start}-{end}",
+    "inJakartaTime": "{time} WIB",
+    "showAll": "Lihat semua jadwal kosong",
+    "timeNote": "Waktu dalam WIB (waktu Jakarta). Petugas tiba dalam rentang waktu yang tertulis.",
+    "fullBody": "Semua jadwal di {area} untuk {days, plural, other {# hari}} ke depan sudah terisi. Coba lagi nanti, atau pilih area lain.",
+    "errorBody": "Jadwal kosong tidak dapat dimuat saat ini. Muat ulang halaman untuk mencoba lagi.",
+    "loading": "Memuat jadwal kosong…"
   },
   "OrdersPage": {
     "title": "Pesanan",
@@ -220,39 +269,7 @@
     "watch": "Tonton langsung"
   },
   "PreviewData": {
-    "areas": {
-      "jakarta-selatan": "Jakarta Selatan",
-      "jakarta-pusat": "Jakarta Pusat",
-      "jakarta-barat": "Jakarta Barat",
-      "jakarta-timur": "Jakarta Timur",
-      "jakarta-utara": "Jakarta Utara"
-    },
-    "services": {
-      "regular": {
-        "name": "Pembersihan Rutin",
-        "description": "Lantai, debu, dapur, dan kamar mandi untuk perawatan rutin.",
-        "nextSlot": "Besok, 08.00",
-        "photoAlt": "Petugas kebersihan mengepel lantai ruang tamu yang terang"
-      },
-      "deep": {
-        "name": "Deep Cleaning",
-        "description": "Pembersihan menyeluruh sampai sudut, perabot, dan peralatan dapur.",
-        "nextSlot": "Sab, 09.00",
-        "photoAlt": "Petugas kebersihan mengelap mesin kopi di meja dapur"
-      },
-      "sofa-carpet": {
-        "name": "Sofa & Karpet",
-        "description": "Penyedotan dan pembersihan kain sofa dan karpet.",
-        "nextSlot": "Hari ini, 15.00",
-        "photoAlt": "Petugas kebersihan bersarung tangan menyedot debu dudukan sofa"
-      },
-      "kitchen-bathroom": {
-        "name": "Dapur & Kamar Mandi",
-        "description": "Kerak, lemak, dan noda air di dapur serta kamar mandi.",
-        "nextSlot": "Besok, 10.00",
-        "photoAlt": "Petugas kebersihan memakai sarung tangan karet di dekat wastafel dapur"
-      }
-    },
+    "jobService": "Pembersihan Rutin",
     "cleanerPhotoAlt": "Foto {name}",
     "jobScheduled": "Hari ini, 09.00"
   },

@@ -109,8 +109,11 @@ test.describe("the customer app in English", () => {
   test("shows prices the Indonesian way on English pages", async ({ page }) => {
     await page.goto("/en/services");
     const prices = page.getByRole("main").getByText(/^Rp\s[\d.]+$/);
-    await expect(prices).toHaveCount(4);
-    await expect(page.getByRole("main").getByText("from", { exact: true })).toHaveCount(4);
+    await expect(prices.first()).toBeVisible();
+    for (const price of await prices.allTextContents()) expect(price).toMatch(/^Rp\s\d{1,3}(\.\d{3})*$/);
+    // The one full price (T8): never "from" a price, and never "IDR 85,000".
+    await expect(page.getByRole("main").getByText("from", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("main")).not.toContainText("IDR");
   });
 });
 

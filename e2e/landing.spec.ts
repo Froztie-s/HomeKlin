@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// The landing page at / (markdown/SPEC.md "Landing page"): what HomeKlin is, services with sample prices,
+// The landing page at / (markdown/SPEC.md "Landing page"): what HomeKlin is, services with their prices,
 // how it works, safety facts, a FAQ teaser and one primary action, "Pesan sekarang", into booking.
 // Built on the redesign system in markdown/design.md (T3c).
 const headline = "Jasa kebersihan rumah yang bisa Anda tonton langsung";
@@ -113,18 +113,22 @@ test.describe("landing page", () => {
     await expect(facts.nth(3)).toContainText("Persetujuan");
   });
 
-  test("lists the four services with a starting price and marks the prices as samples", async ({ page }) => {
+  test("shows four of HomeKlin's services with their full price, and no hidden fees", async ({ page }) => {
     await page.goto("/");
     const services = page.getByRole("region", { name: "Layanan dan harga, tanpa kejutan" });
     const items = services.getByRole("listitem");
+    // Four cards whatever the catalog holds; the full list is one link away (T8).
     await expect(items).toHaveCount(4);
+    await expect(items.first().getByRole("heading", { level: 3 })).toHaveText("Pembersihan Rutin");
     for (const item of await items.all()) {
       await expect(item.getByRole("heading", { level: 3 })).toBeVisible();
-      await expect(item).toContainText("mulai dari");
       await expect(item.getByText(/^Rp\s[\d.]+$/)).toBeVisible();
+      await expect(item.getByText(/^± \d+ (jam|menit)/)).toBeVisible();
+      await expect(item.getByRole("img")).toBeVisible();
       await expect(item.getByRole("link")).toHaveAttribute("href", "/services");
     }
-    await expect(services.getByText(/Harga contoh selama masa pratinjau/)).toBeVisible();
+    await expect(services).not.toContainText("mulai dari");
+    await expect(services.getByText("Harga tampil penuh. Tidak ada biaya tambahan saat Anda membayar.")).toBeVisible();
     await expect(services.getByRole("link", { name: "Lihat semua layanan" })).toHaveAttribute("href", "/services");
   });
 
@@ -163,11 +167,14 @@ test.describe("landing page", () => {
     await expect(faq.getByRole("link", { name: "Lihat semua pertanyaan" })).toHaveAttribute("href", "/support");
   });
 
-  test("ends with one call to action and a footer that says the data are samples", async ({ page }) => {
+  test("ends with one call to action and a footer that says payment is simulated", async ({ page }) => {
     await page.goto("/");
     const cta = page.getByRole("region", { name: "Pilih jadwal yang masih kosong di area Anda" });
     await expect(cta.getByRole("link", { name: "Pesan sekarang" })).toHaveAttribute("href", "/home");
-    await expect(page.getByRole("contentinfo")).toContainText("Harga dan data di situs ini adalah contoh");
+    const footer = page.getByRole("contentinfo");
+    await expect(footer).toContainText("Pembayaran hanya simulasi");
+    // The prices are HomeKlin's price list since T8, so nothing calls them samples any more.
+    await expect(footer).not.toContainText("Harga dan data di situs ini adalah contoh");
   });
 
   // Both languages (T4): English is checked with the same rules as the Indonesian default.

@@ -55,7 +55,7 @@ export function JobStatusCard({ job, headingLevel = 2, elevation = "card" }: Job
         </p>
       </div>
       <p className="mt-3 text-sm text-ink-muted">
-        {t("detail", { service: preview(`services.${job.serviceId}.name`), time: job.finishesAround })}
+        {t("detail", { service: preview("jobService"), time: job.finishesAround })}
       </p>
 
       <div className="mt-5 flex flex-col gap-4 border-t border-border pt-5 @lg:flex-row @lg:items-center @lg:justify-between @lg:gap-6">

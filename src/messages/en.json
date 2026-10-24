@@ -98,13 +98,19 @@
   "ServicesGrid": {
     "eyebrow": "Price list",
     "title": "Services and prices, <accent>no surprises</accent>",
-    "note": "Sample prices during the preview. HomeKlin sets the real prices and always shows them in full before you pay.",
+    "note": "Prices are shown in full. There are no extra fees when you pay.",
     "all": "See all services"
   },
   "Service": {
-    "from": "from",
-    "duration": "About {hours, plural, one {# hour} other {# hours}}",
-    "nextSlot": "Next free slot: <nowrap>{slot}</nowrap>"
+    "durationHours": "About {hours, plural, one {# hour} other {# hours}}",
+    "durationMinutes": "About {minutes, plural, one {# minute} other {# minutes}}",
+    "durationHoursMinutes": "About {hours, plural, one {# hour} other {# hours}} {minutes, plural, one {# minute} other {# minutes}}"
+  },
+  "ServicePhotos": {
+    "regular": "A cleaner mopping the floor of a bright living room",
+    "deep": "A cleaner wiping a coffee machine on a kitchen counter",
+    "sofa-carpet": "A cleaner in gloves vacuuming a sofa seat",
+    "kitchen-bathroom": "A cleaner in rubber gloves next to a kitchen sink"
   },
   "Safety": {
     "title": "Your home stays under <accent>your watch</accent>",
@@ -182,7 +188,7 @@
       "helpCenter": "Help center",
       "account": "Account"
     },
-    "preview": "A university project preview site. Prices and data on this site are samples.",
+    "preview": "A university project preview site. Payments are simulated, and the sample order on this site is not real data.",
     "copyright": "© 2026 HomeKlin"
   },
   "HomePage": {
@@ -190,12 +196,55 @@
     "title": "Book a home cleaning",
     "services": "HomeKlin services",
     "seeAll": "All services",
-    "previewNote": "Design preview: the services, prices, times and order on this page are sample data."
+    "areaSubmit": "See free slots",
+    "previewNote": "Design preview: the current order above is sample data."
   },
   "ServicesPage": {
     "title": "Services",
-    "description": "One price list from HomeKlin. Next free slots for {area}.",
-    "previewNote": "Design preview: the services, prices and times on this page are sample data."
+    "description": "One price list from HomeKlin. Prices are shown in full, with no extra fees."
+  },
+  "CatalogFilters": {
+    "searchLabel": "Search services",
+    "searchPlaceholder": "For example, sofa",
+    "searchSubmit": "Search",
+    "typeLabel": "Type of service",
+    "types": {
+      "all": "All",
+      "whole-home": "Whole home",
+      "rooms": "Specific rooms",
+      "fabrics": "Sofa, carpet & mattress"
+    },
+    "pending": "Updating the list…"
+  },
+  "CatalogResults": {
+    "title": "Price list",
+    "count": "{count, plural, one {# service} other {# services}}",
+    "countForQuery": "{count, plural, one {# service} other {# services}} for “{query}”",
+    "clearSearch": "Clear search",
+    "noMatchTitle": "No matching services",
+    "noMatchBody": "Try another word or another type of service. The search reads service names and descriptions in Indonesian and English.",
+    "showAll": "See all services",
+    "unservedTitle": "No free slots in {area} yet",
+    "unservedBody": "HomeKlin does not serve this area yet, so nothing can be booked here. Choose another area to see its services, prices and free slots.",
+    "servedAreas": "Areas HomeKlin serves",
+    "errorTitle": "The service list could not be loaded",
+    "errorBody": "Something went wrong while reading the service list. Reload the page to try again.",
+    "retry": "Reload",
+    "loading": "Loading services…"
+  },
+  "FreeWindows": {
+    "title": "Free slots in {area}",
+    "nearest": "Earliest",
+    "today": "Today, {weekday} {date}",
+    "tomorrow": "Tomorrow, {weekday} {date}",
+    "day": "{weekday}, {date}",
+    "window": "{start}-{end}",
+    "inJakartaTime": "{time} WIB",
+    "showAll": "See all free slots",
+    "timeNote": "Times are in Jakarta time (WIB). Your cleaner arrives within the time shown.",
+    "fullBody": "Every slot in {area} for the next {days, plural, one {# day} other {# days}} is taken. Try again later, or choose another area.",
+    "errorBody": "The free slots could not be loaded right now. Reload the page to try again.",
+    "loading": "Loading free slots…"
   },
   "OrdersPage": {
     "title": "Orders",
@@ -220,39 +269,7 @@
     "watch": "Watch live"
   },
   "PreviewData": {
-    "areas": {
-      "jakarta-selatan": "South Jakarta",
-      "jakarta-pusat": "Central Jakarta",
-      "jakarta-barat": "West Jakarta",
-      "jakarta-timur": "East Jakarta",
-      "jakarta-utara": "North Jakarta"
-    },
-    "services": {
-      "regular": {
-        "name": "Regular Cleaning",
-        "description": "Floors, dust, kitchen and bathroom, for regular upkeep.",
-        "nextSlot": "Tomorrow, 08.00",
-        "photoAlt": "A cleaner mopping the floor of a bright living room"
-      },
-      "deep": {
-        "name": "Deep Cleaning",
-        "description": "A thorough clean, down to the corners, furniture and kitchen appliances.",
-        "nextSlot": "Sat, 09.00",
-        "photoAlt": "A cleaner wiping a coffee machine on a kitchen counter"
-      },
-      "sofa-carpet": {
-        "name": "Sofa & Carpet",
-        "description": "Vacuuming and cleaning of sofa fabric and carpets.",
-        "nextSlot": "Today, 15.00",
-        "photoAlt": "A cleaner in gloves vacuuming a sofa seat"
-      },
-      "kitchen-bathroom": {
-        "name": "Kitchen & Bathroom",
-        "description": "Limescale, grease and water stains in the kitchen and bathroom.",
-        "nextSlot": "Tomorrow, 10.00",
-        "photoAlt": "A cleaner in rubber gloves next to a kitchen sink"
-      }
-    },
+    "jobService": "Regular Cleaning",
     "cleanerPhotoAlt": "Photo of {name}",
     "jobScheduled": "Today, 09.00"
   },
