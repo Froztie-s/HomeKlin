@@ -19,7 +19,16 @@ const pageGroups = [
   {
     who: "an admin",
     session: signedInAs.admin,
-    paths: ["/admin", "/admin/monitor", "/admin/tickets", "/admin/recordings", "/admin/services", "/admin/faq"],
+    paths: [
+      "/admin",
+      "/admin/monitor",
+      "/admin/tickets",
+      "/admin/recordings",
+      "/admin/services",
+      "/admin/services/new",
+      "/admin/services/edit?id=regular",
+      "/admin/faq",
+    ],
   },
 ];
 
