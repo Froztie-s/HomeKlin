@@ -53,8 +53,8 @@ export const agencyAreas = {
 };
 
 /**
- * HomeKlin's services and its one price list (prices in whole rupiah). The first four are the ones the
- * landing page and the customer preview already show (src/components/customer/home-preview-data.ts).
+ * HomeKlin's services and its one price list (prices in whole rupiah), as first seeded. The landing
+ * page features the first four that have a photo (src/components/customer/service-photos.ts).
  *
  * @type {readonly { id: string, category: "whole-home" | "rooms" | "fabrics", nameId: string, nameEn: string, descriptionId: string, descriptionEn: string, priceIdr: number, durationMinutes: number }[]}
  */

@@ -22,6 +22,10 @@ const pageGroups = [
       "/en/support",
       "/en/login",
       "/en/signup",
+      // The catalog's other states (T8): an area nobody serves, and a search without a match.
+      "/services?area=jakarta-utara",
+      "/en/services?area=jakarta-utara",
+      "/services?q=zzzz",
     ],
   },
   {

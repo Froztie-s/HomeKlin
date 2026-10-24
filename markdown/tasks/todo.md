@@ -48,11 +48,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: tables for HomeKlin services (type, one price set by admin), service areas, partner agencies and the areas they serve, and agency availability slots per area; an "available slots" query returns, per area, the combined free slots of the agencies serving it (a slot appears only if at least one agency there has it free); seed includes at least 6 services and 2 agencies covering overlapping areas; list endpoint supports area/type filters and keyword search (in both languages); service names and descriptions are stored in Indonesian and English (since T4 every page is bilingual); RLS: public read of active services and of aggregated availability only, never of agency identity.
   - Verify: Vitest for filters, slot aggregation (incl. an area with no free agency) and RLS.
   - Deps: T6. Skills: `api-and-interface-design`.
-- [ ] **T7b Admin services and price list** (S)
+- [x] **T7b Admin services and price list** (S) — done 2026-10-24 (admin agent): `/admin/services` list, create (`/new`), edit (`/edit?id=`), on/off switch, no delete; Server Actions with `authorize` + RLS + `updateTag`; e2e `admin-services` and `admin-to-catalog` (a saved price shows on `/services` at once)
   - Accept: admin creates and edits HomeKlin services and their prices at `/admin/services`; non-admins are refused on the server and by RLS; changes appear in the customer catalog.
   - Verify: Playwright desktop admin edit; Vitest/RLS test that an agency or customer cannot change a price.
   - Deps: T7. Skills: `frontend-ui-engineering`, `security-and-hardening`.
-- [ ] **T8 Customer catalog UI** (M)
+- [x] **T8 Customer catalog UI** (M) — done 2026-10-24 (customer agent): `/services` with area picker, type filter, keyword search, full prices, the area's free arrival windows (Jakarta time), empty states (Jakarta Utara, no match), loading skeletons; `/home` and the landing grid on real data
   - Accept: mobile-first browse/search/filter of HomeKlin's services; price shown clearly with no hidden fees; free slots for the chosen area visible; no agency shown or named anywhere; empty state when no slot is free in the area; loading states.
   - Verify: Playwright mobile: find a service by area and type; the no-agency-wording test still passes.
   - Deps: T7. Skills: `frontend-ui-engineering`.
