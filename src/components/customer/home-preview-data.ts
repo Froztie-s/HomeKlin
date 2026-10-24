@@ -1,7 +1,8 @@
 // SAMPLE DATA for the preview of the landing page and the customer app (the only source for both).
 // Everything here is fictional: the prices, durations and free slots, the running job, and the cleaner
 // "Wulan Anggraeni" (a stock photo with an invented name; credits in markdown/image-sources.md).
-// Replaced by real data in T7 (services and the HomeKlin price list), T8 (free slots per area),
+// Replaced by real data in T8 (the services, prices and free slots per area that T7 put in the
+// database, read through src/lib/catalog/catalog.ts),
 // T12 (the customer's orders) and T28 (the cleaner assigned to a job).
 // The data keeps ids, numbers and photo files only. Every word people read or hear (names,
 // descriptions, durations, slot labels, alt texts) is in the PreviewData and Service namespaces of

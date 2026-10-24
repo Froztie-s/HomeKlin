@@ -40,11 +40,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Deps: T5.
 
 ### Checkpoint 1: Foundation
-- [ ] Build, tests, CI green; deployed URL works; login works for all four roles; `code-review-and-quality` run; review with human. — 2026-10-23: all done except the user's review (CI green, live login checked for all four demo roles, review findings fixed; see `markdown/Progress.md`)
+- [x] Build, tests, CI green; deployed URL works; login works for all four roles; `code-review-and-quality` run; review with human. — 2026-10-23: all done; the user reviewed on 2026-10-24 (CI green, live login checked for all four demo roles, review findings fixed; see `markdown/Progress.md`)
 
 ## Phase 2: Catalog and order
 
-- [ ] **T7 Catalog data and API** (M)
+- [x] **T7 Catalog data and API** (M) — done 2026-10-24: migration `20261024100000_catalog.sql` (services, service areas, agencies, agency areas, arrival windows; RLS); `src/lib/catalog/catalog.ts` (`listServices`, `listServiceAreas`, `listFreeSlots`) and `src/lib/validation/catalog.ts`; seed: 7 services, 5 areas, 2 agencies overlapping in Jakarta Selatan and Pusat, none in Jakarta Utara, 3 weeks of windows; live and test migrated and seeded
   - Accept: tables for HomeKlin services (type, one price set by admin), service areas, partner agencies and the areas they serve, and agency availability slots per area; an "available slots" query returns, per area, the combined free slots of the agencies serving it (a slot appears only if at least one agency there has it free); seed includes at least 6 services and 2 agencies covering overlapping areas; list endpoint supports area/type filters and keyword search (in both languages); service names and descriptions are stored in Indonesian and English (since T4 every page is bilingual); RLS: public read of active services and of aggregated availability only, never of agency identity.
   - Verify: Vitest for filters, slot aggregation (incl. an area with no free agency) and RLS.
   - Deps: T6. Skills: `api-and-interface-design`.

@@ -20,7 +20,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { existsSync } from "node:fs";
-import { agencies, demoAccounts } from "./seed-data.mjs";
+import { agencies, agencyAreas, demoAccounts, seedAreas, seedServices, slotPattern } from "./seed-data.mjs";
 
 /** The app_metadata key that marks an account as made by this seed. */
 export const SEED_MARKER = "homeklin_seed";
@@ -221,6 +221,144 @@ export async function seed({ client, password, emailPrefix = "", onResult = () =
   return results;
 }
 
+const hourMs = 3_600_000;
+const jakartaOffsetHours = 7; // Asia/Jakarta is UTC+7 all year (no daylight saving time)
+
+/**
+ * The arrival windows of slotPattern from tomorrow (Jakarta date) on, as ISO times, without the closed
+ * weekday. Pure, so the tests can pin "now".
+ *
+ * @param {Date} now
+ * @param {typeof slotPattern} [pattern]
+ * @returns {{ startsAt: string, endsAt: string }[]}
+ */
+export function slotTimes(now, pattern = slotPattern) {
+  // The Jakarta calendar date: shift by the offset and read the UTC fields.
+  const jakartaNow = new Date(now.getTime() + jakartaOffsetHours * hourMs);
+  const [year, month, day] = [jakartaNow.getUTCFullYear(), jakartaNow.getUTCMonth(), jakartaNow.getUTCDate()];
+  const at = (dayOffset, hour) => new Date(Date.UTC(year, month, day + dayOffset, hour - jakartaOffsetHours));
+
+  const slots = [];
+  for (let offset = 1; offset <= pattern.days; offset += 1) {
+    if (at(offset, 12).getUTCDay() === pattern.closedWeekday) continue;
+    for (const [start, end] of pattern.windows) {
+      slots.push({ startsAt: at(offset, start).toISOString(), endsAt: at(offset, end).toISOString() });
+    }
+  }
+  return slots;
+}
+
+/**
+ * @template T
+ * @param {string} what
+ * @param {PromiseLike<{ data: T, error: { message: string } | null }>} request
+ * @returns {Promise<T>}
+ */
+async function must(what, request) {
+  const { data, error } = await request;
+  if (error) throw new Error(`Could not seed the ${what}: ${error.message}`);
+  return data;
+}
+
+/**
+ * Seeds the catalog (T7): the service areas, HomeKlin's services, the partner agencies linked to their
+ * agency users, the areas each agency serves, and each agency's arrival windows for the coming weeks.
+ * Safe to run again: areas and agencies are brought up to date; services and windows that exist are
+ * left alone, so a price admin changed and a place already booked are never reset.
+ *
+ * @param {{ client: import("@supabase/supabase-js").SupabaseClient, agencyUserIds: Record<string, string>, keyPrefix?: string, now?: Date }} options
+ *   agencyUserIds: the agency user's id per agency key. keyPrefix: put before every agency key, so a
+ *   test run gets its own agencies.
+ * @returns {Promise<{ areas: number, servicesAdded: number, agencies: number, windowsAdded: number }>}
+ */
+export async function seedCatalog({ client, agencyUserIds, keyPrefix = "", now = new Date() }) {
+  await must(
+    "service areas",
+    client.from("service_areas").upsert(
+      seedAreas.map(({ id, nameId, nameEn }, index) => ({ id, name_id: nameId, name_en: nameEn, sort_order: index })),
+      { onConflict: "id" },
+    ),
+  );
+
+  const addedServices = await must(
+    "services",
+    client
+      .from("services")
+      .upsert(
+        seedServices.map((service, index) => ({
+          id: service.id,
+          category: service.category,
+          name_id: service.nameId,
+          name_en: service.nameEn,
+          description_id: service.descriptionId,
+          description_en: service.descriptionEn,
+          price_idr: service.priceIdr,
+          duration_minutes: service.durationMinutes,
+          sort_order: index,
+        })),
+        { onConflict: "id", ignoreDuplicates: true },
+      )
+      .select("id"),
+  );
+
+  const rows = await must(
+    "agencies",
+    client
+      .from("agencies")
+      .upsert(
+        agencies.map(({ key, name }) => {
+          const userId = agencyUserIds[key];
+          if (!userId) throw new Error(`No agency user for the agency ${key}.`);
+          return { key: `${keyPrefix}${key}`, name, user_id: userId };
+        }),
+        { onConflict: "key" },
+      )
+      .select("id, key"),
+  );
+  const agencyId = (key) => {
+    const row = rows.find((entry) => entry.key === `${keyPrefix}${key}`);
+    if (!row) throw new Error(`The agency ${key} was not saved.`);
+    return row.id;
+  };
+
+  await must(
+    "agency areas",
+    client.from("agency_areas").upsert(
+      agencies.flatMap(({ key }) => (agencyAreas[key] ?? []).map((areaId) => ({ agency_id: agencyId(key), area_id: areaId }))),
+      { onConflict: "agency_id,area_id", ignoreDuplicates: true },
+    ),
+  );
+
+  const times = slotTimes(now);
+  const addedWindows = await must(
+    "arrival windows",
+    client
+      .from("availability_slots")
+      .upsert(
+        agencies.flatMap(({ key }) =>
+          (agencyAreas[key] ?? []).flatMap((areaId) =>
+            times.map(({ startsAt, endsAt }) => ({
+              agency_id: agencyId(key),
+              area_id: areaId,
+              starts_at: startsAt,
+              ends_at: endsAt,
+              capacity: slotPattern.capacity,
+            })),
+          ),
+        ),
+        { onConflict: "agency_id,area_id,starts_at", ignoreDuplicates: true },
+      )
+      .select("id"),
+  );
+
+  return {
+    areas: seedAreas.length,
+    servicesAdded: addedServices.length,
+    agencies: rows.length,
+    windowsAdded: addedWindows.length,
+  };
+}
+
 async function main() {
   if (existsSync(".env")) process.loadEnvFile(".env");
   const target = seedTarget(process.argv[2], process.env);
@@ -237,8 +375,18 @@ async function main() {
   });
   const created = results.filter((result) => result.status === "created").length;
   console.log(
-    `Done: ${created} created, ${results.length - created} updated. ` +
+    `Users: ${created} created, ${results.length - created} updated. ` +
       `Every demo user signs in with ${target.passwordVariable} from .env.`,
+  );
+
+  // The agency users seeded above are the sign-in accounts of the partner agencies.
+  const agencyUserIds = Object.fromEntries(
+    results.filter((result) => result.role === "agency" && result.agency).map((result) => [result.agency, result.id]),
+  );
+  const catalog = await seedCatalog({ client, agencyUserIds });
+  console.log(
+    `Catalog: ${catalog.areas} areas, ${catalog.servicesAdded} services added (existing ones kept), ` +
+      `${catalog.agencies} agencies, ${catalog.windowsAdded} new arrival windows.`,
   );
 }
 

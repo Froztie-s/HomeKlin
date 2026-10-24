@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { agencies } from "../scripts/seed-data.mjs";
-import { demoUsers, planSeed, SEED_MARKER, seedTarget } from "../scripts/seed.mjs";
+import { agencies, agencyAreas, seedAreas, seedServices, slotPattern } from "../scripts/seed-data.mjs";
+import { serviceCategories } from "@/lib/catalog/catalog";
+import { demoUsers, planSeed, SEED_MARKER, seedTarget, slotTimes } from "../scripts/seed.mjs";
 
 // The demo users of the seed script (T6, scripts/seed.mjs) and the decisions it takes before it changes
 // anything. The seed against a real project is tested in tests/integration/seed.test.ts.
@@ -202,3 +203,77 @@ function errorMessage(run: () => unknown): string {
   }
   throw new Error("Expected an error, but nothing was thrown.");
 }
+
+// The catalog part of the seed (T7): HomeKlin's services and price list, the service areas, which
+// areas each partner agency serves, and the agencies' arrival windows for the coming weeks.
+describe("catalog seed data", () => {
+  it("has at least 6 services, at least 2 of each service type, all with a price and a duration", () => {
+    expect(seedServices.length).toBeGreaterThanOrEqual(6);
+    for (const category of serviceCategories) {
+      expect(seedServices.filter((service) => service.category === category).length, category).toBeGreaterThanOrEqual(2);
+    }
+    for (const service of seedServices) {
+      expect(service.priceIdr, service.id).toBeGreaterThan(0);
+      expect(Number.isInteger(service.priceIdr), service.id).toBe(true);
+      expect(service.durationMinutes, service.id).toBeGreaterThanOrEqual(30);
+    }
+  });
+
+  it("names and describes every service and area in Indonesian and English, within the column limits", () => {
+    for (const { id, nameId, nameEn, descriptionId, descriptionEn } of seedServices) {
+      for (const name of [nameId, nameEn]) expect(name.length, id).toBeGreaterThan(0);
+      for (const name of [nameId, nameEn]) expect(name.length, id).toBeLessThanOrEqual(80);
+      for (const text of [descriptionId, descriptionEn]) expect(text.length, id).toBeGreaterThan(0);
+      for (const text of [descriptionId, descriptionEn]) expect(text.length, id).toBeLessThanOrEqual(300);
+    }
+    for (const { id, nameId, nameEn } of seedAreas) expect([nameId.length > 0, nameEn.length > 0], id).toEqual([true, true]);
+  });
+
+  it("uses no em or en dash in any text customers read", () => {
+    const texts = [...seedServices.flatMap((s) => [s.nameId, s.nameEn, s.descriptionId, s.descriptionEn]), ...seedAreas.flatMap((a) => [a.nameId, a.nameEn])];
+    for (const text of texts) expect(text, text).not.toMatch(/[\u2013\u2014]/);
+  });
+
+  it("has two agencies whose areas overlap, and one area nobody serves yet (the empty state)", () => {
+    const [first, second] = agencies.map((agency) => agencyAreas[agency.key] ?? []);
+    expect(first.filter((area) => second.includes(area)).length).toBeGreaterThan(0);
+    const areaIds = seedAreas.map((area) => area.id);
+    for (const area of [...first, ...second]) expect(areaIds).toContain(area);
+    expect(areaIds.filter((area) => !first.includes(area) && !second.includes(area)).length).toBeGreaterThan(0);
+  });
+});
+
+describe("slotTimes", () => {
+  // Saturday 24 October 2026, 10.00 in Jakarta (UTC+7).
+  const now = new Date("2026-10-24T03:00:00.000Z");
+  const slots = slotTimes(now);
+
+  it("starts tomorrow in Jakarta time and skips Sundays (Sunday 25 October is closed)", () => {
+    expect(slots[0]).toEqual({ startsAt: "2026-10-26T01:00:00.000Z", endsAt: "2026-10-26T03:00:00.000Z" });
+    for (const { startsAt } of slots) {
+      const jakarta = new Date(new Date(startsAt).getTime() + 7 * 3_600_000);
+      expect(jakarta.getUTCDay(), startsAt).not.toBe(0);
+    }
+  });
+
+  it("gives the four arrival windows of each open day over three weeks, all in the future and unique", () => {
+    // 25 October to 14 November: 21 days, of which three are Sundays.
+    expect(slots).toHaveLength(18 * slotPattern.windows.length);
+    expect(slots.slice(0, 4).map(({ startsAt }) => startsAt)).toEqual([
+      "2026-10-26T01:00:00.000Z",
+      "2026-10-26T03:00:00.000Z",
+      "2026-10-26T06:00:00.000Z",
+      "2026-10-26T08:00:00.000Z",
+    ]);
+    expect(new Set(slots.map(({ startsAt }) => startsAt)).size).toBe(slots.length);
+    for (const { startsAt, endsAt } of slots) {
+      expect(new Date(startsAt).getTime()).toBeGreaterThan(now.getTime());
+      expect(new Date(endsAt).getTime()).toBeGreaterThan(new Date(startsAt).getTime());
+    }
+  });
+
+  it("uses the same Jakarta day whatever the time of day in UTC", () => {
+    // 23.30 on Saturday in Jakarta is still Saturday there, though it is 16.30 UTC.
+    expect(slotTimes(new Date("2026-10-24T16:30:00.000Z"))[0]?.startsAt).toBe("2026-10-26T01:00:00.000Z");
+  });
+});
