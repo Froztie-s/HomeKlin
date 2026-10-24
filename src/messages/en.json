@@ -311,8 +311,121 @@
   },
   "AdminServicesPage": {
     "title": "Services & prices",
+    "description": "One price list for every HomeKlin customer. Active services appear in the customer catalog at these prices, with no extra fees.",
+    "add": "Add service",
+    "summary": "{total, plural, one {# service} other {# services}}, {active, plural, other {# active}}",
     "emptyTitle": "No services yet",
-    "emptyBody": "HomeKlin’s list of services and prices appears here. Customers see these prices as they are, with no extra fees."
+    "emptyBody": "Add HomeKlin’s first service with the Add service button. Customers see these prices as they are, with no extra fees.",
+    "loadErrorTitle": "The list of services could not be loaded",
+    "loadErrorBody": "Reload this page. If it still fails, try again in a few minutes.",
+    "table": {
+      "caption": "HomeKlin’s services and their prices",
+      "service": "Service",
+      "category": "Type",
+      "price": "Price",
+      "duration": "Duration",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "categories": {
+      "whole-home": "Whole home",
+      "rooms": "Single rooms",
+      "fabrics": "Fabrics & mattresses"
+    },
+    "duration": {
+      "hours": "{hours, plural, one {# hour} other {# hours}}",
+      "minutes": "{minutes, plural, one {# minute} other {# minutes}}",
+      "hoursMinutes": "{hours, plural, one {# hour} other {# hours}} {minutes, plural, one {# minute} other {# minutes}}"
+    },
+    "edit": "Edit",
+    "editName": "Edit {name}",
+    "notice": {
+      "created": "{name} added.",
+      "saved": "Changes to {name} saved.",
+      "live": "Customers see this service in the catalog at {price}.",
+      "hidden": "This service is inactive, so it does not appear in the customer catalog yet."
+    }
+  },
+  "AdminServiceSwitch": {
+    "label": "Show {name} in the customer catalog",
+    "active": "Active",
+    "inactive": "Inactive",
+    "nowActive": "{name} now appears in the customer catalog.",
+    "nowInactive": "{name} no longer appears in the customer catalog.",
+    "errors": {
+      "forbidden": "Only an admin can change services.",
+      "notFound": "This service could not be found any more. Reload this page.",
+      "unavailable": "The status could not be changed. Try again in a moment."
+    }
+  },
+  "AdminServiceForm": {
+    "sections": {
+      "basics": "Service",
+      "texts": "Name and description",
+      "pricing": "Price and duration",
+      "visibility": "In the customer catalog"
+    },
+    "textsHint": "Fill in both languages. Customers read the text in the language they choose.",
+    "fields": {
+      "id": "Service ID",
+      "idHint": "Lowercase letters, numbers and hyphens, for example mattress-wash. It cannot be changed once saved.",
+      "idFixed": "The ID cannot be changed.",
+      "category": "Service type",
+      "categoryPlaceholder": "Choose a type",
+      "sortOrder": "Display order",
+      "sortOrderHint": "Lower numbers come first in the catalog.",
+      "nameId": "Name (Indonesian)",
+      "nameEn": "Name (English)",
+      "descriptionId": "Description (Indonesian)",
+      "descriptionEn": "Description (English)",
+      "descriptionHint": "One or two sentences, at most 300 characters.",
+      "price": "Price (Rp)",
+      "priceHint": "The full price the customer pays, with no other fees. For example 85000 or 85.000.",
+      "duration": "Duration (minutes)",
+      "durationHint": "About how long the job takes, 30 to 720 minutes.",
+      "active": "Active: shown in the customer catalog",
+      "activeHint": "Customers see an active service at once, at the price above. An inactive service stays saved for past orders."
+    },
+    "submitCreate": "Save service",
+    "submitEdit": "Save changes",
+    "pending": "Saving…",
+    "cancel": "Cancel",
+    "errorSummary": "{count, plural, one {Check the field marked above.} other {Check the # fields marked above.}}",
+    "errors": {
+      "idRequired": "Enter a service ID.",
+      "idInvalid": "Use only lowercase letters, numbers and hyphens, for example mattress-wash.",
+      "idTooLong": "The ID can be at most 40 characters.",
+      "idTaken": "Another service already uses this ID. Choose another one.",
+      "categoryRequired": "Choose a service type.",
+      "nameRequired": "Enter the service name.",
+      "nameTooLong": "The name can be at most 80 characters.",
+      "descriptionRequired": "Enter a short description.",
+      "descriptionTooLong": "The description can be at most 300 characters.",
+      "priceRequired": "Enter a price.",
+      "priceInvalid": "Write the price in whole rupiah, for example 85000 or 85.000.",
+      "priceTooLow": "The price must be more than Rp 0.",
+      "priceTooHigh": "The price can be at most Rp 100.000.000.",
+      "durationRequired": "Enter the duration in minutes.",
+      "durationInvalid": "Write the duration as a number of minutes, for example 120.",
+      "durationRange": "The duration must be between 30 and 720 minutes.",
+      "sortOrderInvalid": "Write the order as a whole number from 0 to 9999."
+    },
+    "formErrors": {
+      "forbidden": "Only an admin can change services. Log in with an admin account, then try again.",
+      "notFound": "This service could not be found any more. Open the list of services, then try again.",
+      "unavailable": "The changes could not be saved. Try again in a moment."
+    }
+  },
+  "AdminServiceNewPage": {
+    "title": "Add service",
+    "description": "Fill in the service in both languages. A new service is not shown to customers until you make it active."
+  },
+  "AdminServiceEditPage": {
+    "title": "Edit service",
+    "description": "While this service is active, customers see changes to its price and text as soon as you save them.",
+    "notFoundTitle": "Service not found",
+    "notFoundBody": "There is no service at this address. Choose a service from the Services & prices list.",
+    "back": "Back to the list of services"
   },
   "AdminFaqPage": {
     "title": "FAQ",

@@ -311,8 +311,121 @@
   },
   "AdminServicesPage": {
     "title": "Layanan & Harga",
+    "description": "Satu daftar harga untuk semua pelanggan HomeKlin. Layanan yang aktif tampil di katalog pelanggan dengan harga ini, tanpa biaya tambahan.",
+    "add": "Tambah layanan",
+    "summary": "{total, plural, other {# layanan}}, {active, plural, other {# aktif}}",
     "emptyTitle": "Belum ada layanan",
-    "emptyBody": "Daftar layanan dan harga HomeKlin muncul di sini. Pelanggan melihat harga ini apa adanya, tanpa biaya tambahan."
+    "emptyBody": "Tambahkan layanan pertama HomeKlin dengan tombol Tambah layanan. Pelanggan melihat harga ini apa adanya, tanpa biaya tambahan.",
+    "loadErrorTitle": "Daftar layanan belum dapat dimuat",
+    "loadErrorBody": "Muat ulang halaman ini. Jika masih gagal, coba lagi beberapa menit lagi.",
+    "table": {
+      "caption": "Layanan HomeKlin dan harganya",
+      "service": "Layanan",
+      "category": "Jenis",
+      "price": "Harga",
+      "duration": "Durasi",
+      "status": "Status",
+      "actions": "Aksi"
+    },
+    "categories": {
+      "whole-home": "Seluruh rumah",
+      "rooms": "Per ruangan",
+      "fabrics": "Kain & kasur"
+    },
+    "duration": {
+      "hours": "{hours, plural, other {# jam}}",
+      "minutes": "{minutes, plural, other {# menit}}",
+      "hoursMinutes": "{hours, plural, other {# jam}} {minutes, plural, other {# menit}}"
+    },
+    "edit": "Ubah",
+    "editName": "Ubah {name}",
+    "notice": {
+      "created": "{name} ditambahkan.",
+      "saved": "Perubahan pada {name} disimpan.",
+      "live": "Pelanggan melihat layanan ini di katalog dengan harga {price}.",
+      "hidden": "Layanan ini nonaktif, jadi belum tampil di katalog pelanggan."
+    }
+  },
+  "AdminServiceSwitch": {
+    "label": "Tampilkan {name} di katalog pelanggan",
+    "active": "Aktif",
+    "inactive": "Nonaktif",
+    "nowActive": "{name} sekarang tampil di katalog pelanggan.",
+    "nowInactive": "{name} tidak tampil lagi di katalog pelanggan.",
+    "errors": {
+      "forbidden": "Hanya admin yang dapat mengubah layanan.",
+      "notFound": "Layanan ini tidak ditemukan lagi. Muat ulang halaman ini.",
+      "unavailable": "Status belum dapat diubah. Coba lagi sebentar lagi."
+    }
+  },
+  "AdminServiceForm": {
+    "sections": {
+      "basics": "Layanan",
+      "texts": "Nama dan deskripsi",
+      "pricing": "Harga dan durasi",
+      "visibility": "Di katalog pelanggan"
+    },
+    "textsHint": "Isi kedua bahasa. Pelanggan membaca teks dalam bahasa yang mereka pilih.",
+    "fields": {
+      "id": "ID layanan",
+      "idHint": "Huruf kecil, angka, dan tanda hubung, misalnya cuci-kasur. Tidak dapat diubah setelah disimpan.",
+      "idFixed": "ID tidak dapat diubah.",
+      "category": "Jenis layanan",
+      "categoryPlaceholder": "Pilih jenis",
+      "sortOrder": "Urutan tampil",
+      "sortOrderHint": "Angka kecil tampil lebih dulu di katalog.",
+      "nameId": "Nama (Bahasa Indonesia)",
+      "nameEn": "Nama (Inggris)",
+      "descriptionId": "Deskripsi (Bahasa Indonesia)",
+      "descriptionEn": "Deskripsi (Inggris)",
+      "descriptionHint": "Satu atau dua kalimat, paling banyak 300 karakter.",
+      "price": "Harga (Rp)",
+      "priceHint": "Harga penuh yang dibayar pelanggan, tanpa biaya lain. Misalnya 85000 atau 85.000.",
+      "duration": "Durasi (menit)",
+      "durationHint": "Perkiraan lama pekerjaan, 30 sampai 720 menit.",
+      "active": "Aktif: tampil di katalog pelanggan",
+      "activeHint": "Pelanggan langsung melihat layanan yang aktif dengan harga di atas. Layanan nonaktif tetap tersimpan untuk pesanan lama."
+    },
+    "submitCreate": "Simpan layanan",
+    "submitEdit": "Simpan perubahan",
+    "pending": "Menyimpan…",
+    "cancel": "Batal",
+    "errorSummary": "{count, plural, other {Periksa # kolom yang ditandai.}}",
+    "errors": {
+      "idRequired": "Masukkan ID layanan.",
+      "idInvalid": "Gunakan huruf kecil, angka, dan tanda hubung saja, misalnya cuci-kasur.",
+      "idTooLong": "ID paling banyak 40 karakter.",
+      "idTaken": "ID ini sudah dipakai layanan lain. Pilih ID lain.",
+      "categoryRequired": "Pilih jenis layanan.",
+      "nameRequired": "Masukkan nama layanan.",
+      "nameTooLong": "Nama paling banyak 80 karakter.",
+      "descriptionRequired": "Masukkan deskripsi singkat.",
+      "descriptionTooLong": "Deskripsi paling banyak 300 karakter.",
+      "priceRequired": "Masukkan harga.",
+      "priceInvalid": "Tulis harga dalam rupiah penuh, misalnya 85000 atau 85.000.",
+      "priceTooLow": "Harga harus lebih dari Rp 0.",
+      "priceTooHigh": "Harga paling tinggi Rp 100.000.000.",
+      "durationRequired": "Masukkan durasi dalam menit.",
+      "durationInvalid": "Tulis durasi sebagai angka menit, misalnya 120.",
+      "durationRange": "Durasi antara 30 dan 720 menit.",
+      "sortOrderInvalid": "Tulis urutan sebagai angka bulat dari 0 sampai 9999."
+    },
+    "formErrors": {
+      "forbidden": "Hanya admin yang dapat mengubah layanan. Masuk dengan akun admin, lalu coba lagi.",
+      "notFound": "Layanan ini tidak ditemukan lagi. Buka daftar layanan, lalu coba lagi.",
+      "unavailable": "Perubahan belum dapat disimpan. Coba lagi sebentar lagi."
+    }
+  },
+  "AdminServiceNewPage": {
+    "title": "Tambah layanan",
+    "description": "Isi data layanan dalam dua bahasa. Layanan baru belum tampil ke pelanggan sampai Anda mengaktifkannya."
+  },
+  "AdminServiceEditPage": {
+    "title": "Ubah layanan",
+    "description": "Selama layanan ini aktif, pelanggan melihat perubahan harga dan teks segera setelah Anda menyimpannya.",
+    "notFoundTitle": "Layanan tidak ditemukan",
+    "notFoundBody": "Tidak ada layanan dengan alamat ini. Pilih layanan dari daftar Layanan & Harga.",
+    "back": "Kembali ke daftar layanan"
   },
   "AdminFaqPage": {
     "title": "FAQ",
