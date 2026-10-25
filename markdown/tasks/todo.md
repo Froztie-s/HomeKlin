@@ -61,9 +61,9 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Verify: Vitest concurrent-booking test and routing tests (one agency free, several free, none free); Playwright booking happy path and rejection.
   - Deps: T8. Skills: `api-and-interface-design`, `doubt-driven-development` (routing race).
 - [ ] **T9b Order without sign-up (email code at checkout)** (M) — user request 2026-10-25, plan approved
-  - Accept: landing and `/services` service clicks open `/pesan?layanan=<id>`; one form (service, area, window, address, phone, email, consent); "Kirim kode" emails a 6-digit code; the code places the order (account created for a new email, signed in); a signed-in customer skips the code; `/login` signs customers in by code, with password login kept for staff; `/signup` removed; phone stored on the order; order confirmation emailed (Brevo); tests never send real email (Ethereal SMTP on the test project, codes via the admin API).
+  - Accept: landing and `/services` service clicks open `/pesan?layanan=<id>`; one form (service, area, window, address, phone, email, consent); "Kirim kode" emails a 6-digit code; the code places the order (account created for a new email, signed in); a signed-in customer skips the code; `/login` signs customers in by code, with password login kept for staff; `/signup` removed; phone stored on the order; order confirmation emailed (Gmail SMTP, nodemailer); tests never send real email (Ethereal SMTP on the test project, codes via the admin API).
   - Verify: unit tests for validation, actions and the email sender; integration test for `book_slot` with the phone; e2e: guest order end to end, wrong code, resend, returning customer by code, signed-in customer, staff password login, window taken between steps, English, 360 px.
-  - Deps: T9, human Brevo account. Skills: `security-and-hardening`, `frontend-ui-engineering`, `test-driven-development`.
+  - Deps: T9, the user's Gmail app password. Skills: `security-and-hardening`, `frontend-ui-engineering`, `test-driven-development`.
 - [ ] **T10 Midtrans Sandbox payment start** (S)
   - Accept: server creates a Snap transaction for an order; pay screen opens the sandbox payment; keys only in env vars.
   - Verify: manual sandbox payment; unit test for payload.

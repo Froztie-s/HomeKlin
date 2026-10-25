@@ -1,54 +1,67 @@
+import nodemailer from "nodemailer";
 import type { Locale } from "next-intl";
 import { formatRupiah } from "@/lib/format";
 
-// Email from the app (T9b): the order confirmation, sent through Brevo's transactional email API with
-// a plain HTTPS call (no SDK). The emailed sign-in codes are sent by Supabase Auth itself, through
-// Brevo's SMTP (scripts/supabase.mjs smtp). Without BREVO_API_KEY (tests, CI, a local copy without the
-// key) nothing is sent and the caller is told so: an order never fails because an email could not go.
-// Source: https://developers.brevo.com/reference/sendtransacemail
+// Email from the app (T9b): the order confirmation, sent over SMTP with nodemailer, through the same
+// Gmail account that Supabase Auth uses for the sign-in codes (scripts/supabase.mjs smtp). Gmail needs
+// an app password (Google account > Security > 2-Step Verification > App passwords), not the account
+// password itself. Without SMTP settings (tests, CI) nothing is sent and the caller is told so: an
+// order never fails because an email could not go.
+// Sources: https://nodemailer.com/smtp/ and https://support.google.com/a/answer/176600
 
 export type EmailMessage = { to: string; subject: string; html: string; text: string };
 
-export type SendResult = { sent: true } | { sent: false; reason: "not_configured" | "refused" | "network" };
+export type SendResult = { sent: true } | { sent: false; reason: "not_configured" | "failed" };
+
+export type SmtpSettings = { host: string; port: number; user: string; pass: string };
+
+type Mail = { from: string; to: string; subject: string; html: string; text: string };
+type Transport = { sendMail: (mail: Mail) => Promise<unknown> };
+type CreateTransport = (options: Record<string, unknown>) => Transport;
 
 type SendOptions = {
-  apiKey: string | undefined;
-  /** "Name <address>" or a bare address: a sender verified in Brevo. */
+  smtp: SmtpSettings | undefined;
+  /** "Name <address>": for Gmail, the Gmail address itself. */
   from: string;
-  fetchFn?: typeof fetch;
+  createTransport?: CreateTransport;
 };
 
-const brevoUrl = "https://api.brevo.com/v3/smtp/email";
+const defaultTransport: CreateTransport = (options) => nodemailer.createTransport(options);
 
-function sender(from: string): { name: string; email: string } {
-  const match = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(from);
-  return match ? { name: match[1] || "HomeKlin", email: match[2] } : { name: "HomeKlin", email: from.trim() };
+export async function sendEmail(
+  message: EmailMessage,
+  { smtp, from, createTransport = defaultTransport }: SendOptions,
+): Promise<SendResult> {
+  if (!smtp) return { sent: false, reason: "not_configured" };
+  try {
+    // Port 587 with STARTTLS: the connection is upgraded to TLS before the login is sent.
+    const transport = createTransport({
+      host: smtp.host,
+      port: smtp.port,
+      secure: smtp.port === 465,
+      requireTLS: smtp.port !== 465,
+      auth: { user: smtp.user, pass: smtp.pass },
+      connectionTimeout: 10_000,
+    });
+    await transport.sendMail({ from, to: message.to, subject: message.subject, html: message.html, text: message.text });
+    return { sent: true };
+  } catch {
+    return { sent: false, reason: "failed" };
+  }
 }
 
-export async function sendEmail(message: EmailMessage, { apiKey, from, fetchFn = fetch }: SendOptions): Promise<SendResult> {
-  if (!apiKey) return { sent: false, reason: "not_configured" };
-  try {
-    const response = await fetchFn(brevoUrl, {
-      method: "POST",
-      headers: { "api-key": apiKey, "content-type": "application/json", accept: "application/json" },
-      body: JSON.stringify({
-        sender: sender(from),
-        to: [{ email: message.to }],
-        subject: message.subject,
-        htmlContent: message.html,
-        textContent: message.text,
-      }),
-      signal: AbortSignal.timeout(10_000),
-    });
-    return response.ok ? { sent: true } : { sent: false, reason: "refused" };
-  } catch {
-    return { sent: false, reason: "network" };
-  }
+/** The SMTP settings from the environment (server only), or undefined when they are not set. */
+function smtpFromEnv(): SmtpSettings | undefined {
+  const { SMTP_USER: user, SMTP_PASS: pass } = process.env;
+  if (!user || !pass) return undefined;
+  return { host: process.env.SMTP_HOST ?? "smtp.gmail.com", port: Number(process.env.SMTP_PORT ?? 587), user, pass };
 }
 
 /** Sends with the settings from the environment (server only). */
 export function sendAppEmail(message: EmailMessage): Promise<SendResult> {
-  return sendEmail(message, { apiKey: process.env.BREVO_API_KEY, from: process.env.EMAIL_FROM ?? "HomeKlin <no-reply@homeklin.invalid>" });
+  const smtp = smtpFromEnv();
+  const from = process.env.EMAIL_FROM ?? `HomeKlin <${smtp?.user ?? "no-reply@homeklin.invalid"}>`;
+  return sendEmail(message, { smtp, from });
 }
 
 export type ConfirmationOrder = {

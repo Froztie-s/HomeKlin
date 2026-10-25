@@ -13,7 +13,7 @@
 //   ethereal               create a throw-away Ethereal SMTP account (mail is accepted, never
 //                          delivered) and write it into .env as ETHEREAL_SMTP_USER / _PASS
 //   smtp <live|test>       send the project's auth emails (the 6-digit sign-in codes, T9b) through
-//                          Brevo (live: BREVO_SMTP_LOGIN, BREVO_SMTP_KEY, EMAIL_FROM) or Ethereal (test),
+//                          Gmail (live: SMTP_USER, SMTP_PASS, optional SMTP_HOST, EMAIL_FROM) or Ethereal (test),
 //                          with the code template in Indonesian and English
 //
 // Needs SUPABASE_ACCESS_TOKEN in .env (a personal access token from
@@ -199,10 +199,11 @@ const commands = {
     const settings =
       which === "live"
         ? {
-            host: "smtp-relay.brevo.com",
-            user: process.env.BREVO_SMTP_LOGIN,
-            pass: process.env.BREVO_SMTP_KEY,
-            sender: parseSender(process.env.EMAIL_FROM),
+            // Gmail by default: SMTP_USER is the Gmail address, SMTP_PASS an app password.
+            host: process.env.SMTP_HOST ?? "smtp.gmail.com",
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+            sender: parseSender(process.env.EMAIL_FROM ?? `HomeKlin <${process.env.SMTP_USER ?? ""}>`),
           }
         : {
             host: "smtp.ethereal.email",
@@ -210,7 +211,7 @@ const commands = {
             pass: process.env.ETHEREAL_SMTP_PASS,
             sender: { name: "HomeKlin (test)", address: process.env.ETHEREAL_SMTP_USER },
           };
-    const missing = which === "live" ? ["BREVO_SMTP_LOGIN", "BREVO_SMTP_KEY", "EMAIL_FROM"] : ["ETHEREAL_SMTP_USER", "ETHEREAL_SMTP_PASS"];
+    const missing = which === "live" ? ["SMTP_USER", "SMTP_PASS"] : ["ETHEREAL_SMTP_USER", "ETHEREAL_SMTP_PASS"];
     if (!settings.user || !settings.pass || !settings.sender.address) {
       fail(`Missing in .env: ${missing.filter((name) => !process.env[name]).join(", ") || "a sender address"}.`);
     }

@@ -71,47 +71,42 @@ describe("parseCode", () => {
 
 describe("sendEmail", () => {
   const message = { to: "nadia@example.com", subject: "Pesanan", html: "<p>Halo</p>", text: "Halo" };
+  const smtp = { host: "smtp.gmail.com", port: 587, user: "homeklin.demo@gmail.com", pass: "app-password" };
 
-  it("sends through Brevo's API with the key in the header and the sender from the settings", async () => {
-    const fetchFn = vi.fn(async () => new Response("{}", { status: 201 }));
-    const result = await sendEmail(message, { apiKey: "key-1", from: "HomeKlin <halo@homeklin.example>", fetchFn });
+  it("sends over SMTP (Gmail) from the configured sender", async () => {
+    const sendMail = vi.fn(async () => ({ messageId: "1" }));
+    const createTransport = vi.fn(() => ({ sendMail }));
+    const result = await sendEmail(message, { smtp, from: "HomeKlin <homeklin.demo@gmail.com>", createTransport });
 
     expect(result).toEqual({ sent: true });
-    const [url, init] = fetchFn.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe("https://api.brevo.com/v3/smtp/email");
-    expect(init.method).toBe("POST");
-    expect((init.headers as Record<string, string>)["api-key"]).toBe("key-1");
-    expect(JSON.parse(String(init.body))).toEqual({
-      sender: { name: "HomeKlin", email: "halo@homeklin.example" },
-      to: [{ email: "nadia@example.com" }],
+    expect(createTransport).toHaveBeenCalledWith(
+      expect.objectContaining({ host: "smtp.gmail.com", port: 587, secure: false, requireTLS: true, auth: { user: smtp.user, pass: smtp.pass } }),
+    );
+    expect(sendMail).toHaveBeenCalledWith({
+      from: "HomeKlin <homeklin.demo@gmail.com>",
+      to: "nadia@example.com",
       subject: "Pesanan",
-      htmlContent: "<p>Halo</p>",
-      textContent: "Halo",
+      html: "<p>Halo</p>",
+      text: "Halo",
     });
   });
 
-  it("sends nothing and says so when no key is set (tests and CI)", async () => {
-    const fetchFn = vi.fn();
-    expect(await sendEmail(message, { apiKey: undefined, from: "halo@homeklin.example", fetchFn })).toEqual({
+  it("sends nothing and says so when SMTP is not set (tests and CI)", async () => {
+    const createTransport = vi.fn();
+    expect(await sendEmail(message, { smtp: undefined, from: "x@example.com", createTransport })).toEqual({
       sent: false,
       reason: "not_configured",
     });
-    expect(fetchFn).not.toHaveBeenCalled();
+    expect(createTransport).not.toHaveBeenCalled();
   });
 
-  it("reports a refusal or a network error instead of throwing", async () => {
-    const refused = vi.fn(async () => new Response("bad", { status: 401 }));
-    expect(await sendEmail(message, { apiKey: "k", from: "halo@homeklin.example", fetchFn: refused })).toEqual({
-      sent: false,
-      reason: "refused",
-    });
-    const offline = vi.fn(async () => {
-      throw new TypeError("fetch failed");
-    });
-    expect(await sendEmail(message, { apiKey: "k", from: "halo@homeklin.example", fetchFn: offline })).toEqual({
-      sent: false,
-      reason: "network",
-    });
+  it("reports a failed send instead of throwing", async () => {
+    const createTransport = vi.fn(() => ({
+      sendMail: async () => {
+        throw new Error("Invalid login");
+      },
+    }));
+    expect(await sendEmail(message, { smtp, from: "x@example.com", createTransport })).toEqual({ sent: false, reason: "failed" });
   });
 });
 
