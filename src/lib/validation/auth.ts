@@ -56,6 +56,9 @@ const signUpSchema = z.object({
   next,
 });
 
+// Signing in with an emailed code (T9b): the email first, then the same email with the code.
+const codeLoginSchema = z.object({ email, locale, next });
+
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 
@@ -103,4 +106,9 @@ export function parseSignIn(formData: FormData) {
 
 export function parseSignUp(formData: FormData) {
   return parse(signUpSchema, formData);
+}
+
+/** The email (and language and next page) of a sign-in by emailed code. */
+export function parseCodeLogin(formData: FormData) {
+  return parse(codeLoginSchema, formData);
 }

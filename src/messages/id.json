@@ -315,13 +315,19 @@
       "slotInvalid": "Pilih jadwal kedatangan.",
       "addressTooShort": "Tulis alamat lengkap, paling sedikit 10 karakter.",
       "addressTooLong": "Alamat terlalu panjang. Persingkat menjadi paling banyak 300 karakter.",
-      "consentRequired": "Nyalakan persetujuan siaran untuk memesan."
+      "consentRequired": "Nyalakan persetujuan siaran untuk memesan.",
+      "phoneRequired": "Masukkan nomor HP Anda.",
+      "phoneInvalid": "Periksa nomor HP Anda, misalnya 0812 3456 7890.",
+      "emailRequired": "Masukkan email Anda.",
+      "emailInvalid": "Periksa penulisan email Anda, misalnya nama@domain.com.",
+      "codeInvalid": "Kode salah atau sudah tidak berlaku. Periksa email Anda atau kirim kode baru."
     },
     "formErrors": {
       "notCustomer": "Hanya akun pelanggan yang dapat memesan. Masuk dengan akun pelanggan Anda, lalu coba lagi.",
       "slotUnavailable": "Pelanggan lain memesan tempat terakhir pada jadwal ini sesaat sebelum Anda. Pilih jadwal lain di bawah. Alamat dan persetujuan Anda tetap tersimpan.",
       "serviceUnavailable": "Layanan ini sudah tidak ditawarkan. Pilih layanan lain dari daftar layanan.",
-      "unavailable": "Pesanan belum dapat dibuat karena ada gangguan. Coba lagi sebentar lagi."
+      "unavailable": "Pesanan belum dapat dibuat karena ada gangguan. Coba lagi sebentar lagi.",
+      "rateLimited": "Terlalu banyak percobaan. Tunggu beberapa menit, lalu coba lagi."
     }
   },
   "BookingUnavailable": {
@@ -586,7 +592,8 @@
       "weakPassword": "Kata sandi ini terlalu mudah ditebak. Pilih kata sandi lain.",
       "emailRejected": "Email ini tidak dapat digunakan. Gunakan alamat email lain.",
       "confirmEmail": "Akun Anda sudah dibuat. Buka email dari HomeKlin untuk mengaktifkannya, lalu masuk.",
-      "unavailable": "Permintaan Anda belum dapat diproses. Coba lagi sebentar lagi."
+      "unavailable": "Permintaan Anda belum dapat diproses. Coba lagi sebentar lagi.",
+      "codeInvalid": "Kode salah atau sudah tidak berlaku. Periksa email Anda atau kirim kode baru."
     }
   },
   "AccountChip": {

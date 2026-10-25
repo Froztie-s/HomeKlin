@@ -10,6 +10,11 @@
 //   autoconfirm <live|test> switch off email confirmation: sign-up signs the user in at once
 //                          (Supabase's built-in email reaches only the project team, 2 per hour)
 //   migrate <live|test>    apply the files in supabase/migrations that the project has not had yet
+//   ethereal               create a throw-away Ethereal SMTP account (mail is accepted, never
+//                          delivered) and write it into .env as ETHEREAL_SMTP_USER / _PASS
+//   smtp <live|test>       send the project's auth emails (the 6-digit sign-in codes, T9b) through
+//                          Brevo (live: BREVO_SMTP_LOGIN, BREVO_SMTP_KEY, EMAIL_FROM) or Ethereal (test),
+//                          with the code template in Indonesian and English
 //
 // Needs SUPABASE_ACCESS_TOKEN in .env (a personal access token from
 // https://supabase.com/dashboard/account/tokens). Secrets go into .env (git-ignored) and are never
@@ -94,6 +99,21 @@ async function query(ref, sql) {
   return api("POST", `/projects/${ref}/database/query`, { query: sql });
 }
 
+// The email with the sign-in code (T9b). Supabase fills in {{ .Token }}. Both languages in one email,
+// because the code is asked for before the customer has an account with a language.
+const codeSubject = "Kode masuk HomeKlin / HomeKlin sign-in code";
+const codeTemplate = `<p>Kode masuk HomeKlin Anda:</p>
+<p style="font-size:28px;font-weight:bold;letter-spacing:6px">{{ .Token }}</p>
+<p>Ketik kode ini di halaman HomeKlin. Kode berlaku 10 menit. Jika Anda tidak meminta kode ini, abaikan email ini.</p>
+<hr>
+<p>Your HomeKlin sign-in code is <strong>{{ .Token }}</strong>. Type it on the HomeKlin page. It is valid for 10 minutes. If you did not ask for it, ignore this email.</p>`;
+
+/** "Name <address>" or a bare address -> { name, address }. */
+function parseSender(from) {
+  const match = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(from ?? "");
+  return match ? { name: match[1] || "HomeKlin", address: match[2] } : { name: "HomeKlin", address: (from ?? "").trim() };
+}
+
 const commands = {
   async orgs() {
     for (const org of await api("GET", "/organizations")) console.log(`${org.slug}  ${org.name}`);
@@ -156,6 +176,71 @@ const commands = {
     await api("PATCH", `/projects/${ref}/config/auth`, { mailer_autoconfirm: true });
     const config = await api("GET", `/projects/${ref}/config/auth`);
     console.log(`Email confirmation is ${config.mailer_autoconfirm ? "off (sign-up signs in at once)" : "still on"}.`);
+  },
+
+  async ethereal() {
+    if (process.env.ETHEREAL_SMTP_USER) fail("ETHEREAL_SMTP_USER is already set in .env.");
+    // Ethereal (by the Nodemailer project): a fake SMTP service for tests; nothing is ever delivered.
+    // Source: https://ethereal.email (the account API Nodemailer's createTestAccount uses).
+    const response = await fetch("https://api.nodemailer.com/user", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ requestor: "homeklin-tests", version: "1.0.0" }),
+    });
+    if (!response.ok) fail(`Ethereal answered ${response.status}.`);
+    const account = await response.json();
+    if (!account.user || !account.pass) fail("Ethereal returned no account.");
+    writeEnv({ ETHEREAL_SMTP_USER: account.user, ETHEREAL_SMTP_PASS: account.pass });
+  },
+
+  async smtp(argument) {
+    const which = target(argument);
+    const ref = projectRef(which);
+    const settings =
+      which === "live"
+        ? {
+            host: "smtp-relay.brevo.com",
+            user: process.env.BREVO_SMTP_LOGIN,
+            pass: process.env.BREVO_SMTP_KEY,
+            sender: parseSender(process.env.EMAIL_FROM),
+          }
+        : {
+            host: "smtp.ethereal.email",
+            user: process.env.ETHEREAL_SMTP_USER,
+            pass: process.env.ETHEREAL_SMTP_PASS,
+            sender: { name: "HomeKlin (test)", address: process.env.ETHEREAL_SMTP_USER },
+          };
+    const missing = which === "live" ? ["BREVO_SMTP_LOGIN", "BREVO_SMTP_KEY", "EMAIL_FROM"] : ["ETHEREAL_SMTP_USER", "ETHEREAL_SMTP_PASS"];
+    if (!settings.user || !settings.pass || !settings.sender.address) {
+      fail(`Missing in .env: ${missing.filter((name) => !process.env[name]).join(", ") || "a sender address"}.`);
+    }
+
+    await api("PATCH", `/projects/${ref}/config/auth`, {
+      smtp_host: settings.host,
+      smtp_port: "587",
+      smtp_user: settings.user,
+      smtp_pass: settings.pass,
+      smtp_admin_email: settings.sender.address,
+      smtp_sender_name: settings.sender.name,
+      // Live: at most one email per address per minute and 30 per hour. Test: the e2e suite asks for
+      // several codes per run (and codes to one address back to back), and Ethereal delivers nothing.
+      smtp_max_frequency: which === "live" ? 60 : 1,
+      rate_limit_email_sent: which === "live" ? 30 : 300,
+      // A 6-digit code, valid for 10 minutes.
+      mailer_otp_length: 6,
+      mailer_otp_exp: 600,
+      // A new customer gets the confirmation email, a returning one the magic-link email: both carry the code.
+      mailer_subjects_magic_link: codeSubject,
+      mailer_templates_magic_link_content: codeTemplate,
+      mailer_subjects_confirmation: codeSubject,
+      mailer_templates_confirmation_content: codeTemplate,
+    });
+    const config = await api("GET", `/projects/${ref}/config/auth`);
+    console.log(
+      `The ${which} project sends its auth emails through ${config.smtp_host} as ${config.smtp_sender_name}; ` +
+        `codes have ${config.mailer_otp_length} digits and last ${config.mailer_otp_exp} s; ` +
+        `at most ${config.rate_limit_email_sent} emails per hour.`,
+    );
   },
 
   async migrate(argument) {

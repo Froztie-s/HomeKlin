@@ -14,6 +14,7 @@ const area = `${prefix}-area`;
 const otherArea = `${prefix}-other`;
 const serviceId = `${prefix}-svc`;
 const address = "Jl. Uji Coba No. 1, Kebayoran Baru, Jakarta Selatan";
+const phone = "+6281234567890";
 const customers: TestUser[] = [];
 const others: TestUser[] = [];
 let agencyA = "";
@@ -40,6 +41,7 @@ const book = (user: TestUser, startsAt: string, overrides: Record<string, unknow
     p_area: area,
     p_starts_at: startsAt,
     p_address: address,
+    p_phone: phone,
     p_consent: true,
     ...overrides,
   });
@@ -197,6 +199,15 @@ describe("book_slot refusals", () => {
     expect((await book(customers[0], times.starts_at, { p_address: "x".repeat(301) })).error?.message).toBe("address_invalid");
   });
 
+  it("refuses a phone number that is not an Indonesian mobile number in +62 form", async () => {
+    const times = nextWindow();
+    await addSlots([{ agency: agencyA, capacity: 1, times }]);
+    for (const bad of ["081234567890", "+6221123456", "+62812", "", "+6281234567890123"]) {
+      expect((await book(customers[0], times.starts_at, { p_phone: bad })).error?.message, bad).toBe("phone_invalid");
+    }
+    expect(await ordersAt(times.starts_at)).toEqual([]);
+  });
+
   it("refuses a service that is switched off or does not exist", async () => {
     const times = nextWindow();
     await addSlots([{ agency: agencyA, capacity: 1, times }]);
@@ -208,7 +219,7 @@ describe("book_slot refusals", () => {
     await addSlots([{ agency: agencyA, capacity: 3, times }]);
     for (const user of others) expect((await book(user, times.starts_at)).error?.message).toBe("not_customer");
     const visitor = await visitorClient().rpc("book_slot", {
-      p_service: serviceId, p_area: area, p_starts_at: times.starts_at, p_address: address, p_consent: true,
+      p_service: serviceId, p_area: area, p_starts_at: times.starts_at, p_address: address, p_phone: phone, p_consent: true,
     });
     expect(visitor.error?.code).toBe("42501");
     expect(await ordersAt(times.starts_at)).toEqual([]);
@@ -240,7 +251,7 @@ describe("orders stay private", () => {
     // The same through src/lib/booking/orders.ts, in the app's types.
     const orders = (await listMyOrders(customers[2].client)).filter((order) => order.startsAt === times.starts_at);
     expect(orders).toEqual([
-      expect.objectContaining({ id: mine.data?.[0]?.order_id, serviceId, areaId: area, address, priceIdr: 123000, status: "pending_payment" }),
+      expect.objectContaining({ id: mine.data?.[0]?.order_id, serviceId, areaId: area, address, contactPhone: phone, priceIdr: 123000, status: "pending_payment" }),
     ]);
   });
 });

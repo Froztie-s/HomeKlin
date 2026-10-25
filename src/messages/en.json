@@ -315,13 +315,19 @@
       "slotInvalid": "Choose an arrival time.",
       "addressTooShort": "Write your full address, at least 10 characters.",
       "addressTooLong": "The address is too long. Shorten it to 300 characters at most.",
-      "consentRequired": "Turn on the streaming consent to book."
+      "consentRequired": "Turn on the streaming consent to book.",
+      "phoneRequired": "Enter your mobile number.",
+      "phoneInvalid": "Check your mobile number, for example 0812 3456 7890.",
+      "emailRequired": "Enter your email.",
+      "emailInvalid": "Check your email, for example name@domain.com.",
+      "codeInvalid": "The code is wrong or has expired. Check your email or send a new code."
     },
     "formErrors": {
       "notCustomer": "Only customer accounts can book. Sign in with your customer account, then try again.",
       "slotUnavailable": "Another customer booked the last place in this slot just before you. Choose another slot below. Your address and consent are kept.",
       "serviceUnavailable": "This service is no longer offered. Choose another service from the services list.",
-      "unavailable": "The order could not be made because something went wrong. Try again in a moment."
+      "unavailable": "The order could not be made because something went wrong. Try again in a moment.",
+      "rateLimited": "Too many attempts. Wait a few minutes, then try again."
     }
   },
   "BookingUnavailable": {
@@ -586,7 +592,8 @@
       "weakPassword": "This password is too easy to guess. Choose another one.",
       "emailRejected": "This email address cannot be used. Use another one.",
       "confirmEmail": "Your account is created. Open the email from HomeKlin to activate it, then log in.",
-      "unavailable": "We could not process this right now. Try again in a moment."
+      "unavailable": "We could not process this right now. Try again in a moment.",
+      "codeInvalid": "The code is wrong or has expired. Check your email or send a new code."
     }
   },
   "AccountChip": {

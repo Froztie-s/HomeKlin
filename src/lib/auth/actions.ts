@@ -1,10 +1,12 @@
 "use server";
 
 import { cookies } from "next/headers";
+import type { Locale } from "next-intl";
 import { redirect } from "@/i18n/navigation";
 import { isSessionCookieName } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { parseLocale, parseSignIn, parseSignUp, type AuthErrorKey } from "@/lib/validation/auth";
+import { parseCodeLogin, parseLocale, parseSignIn, parseSignUp, type AuthErrorKey } from "@/lib/validation/auth";
+import { parseCode } from "@/lib/validation/booking";
 import { authFailureKey, type AuthFailureKey } from "./errors";
 import { isAppRole, safeNextPath } from "./roles";
 
@@ -20,7 +22,9 @@ import { isAppRole, safeNextPath } from "./roles";
 
 export type AuthFormState = {
   fieldErrors?: Partial<Record<"fullName" | "email" | "password", AuthErrorKey>>;
-  formError?: AuthFailureKey;
+  formError?: AuthFailureKey | "codeInvalid";
+  /** Sign-in by code: the code was emailed (if the account exists), so the page shows the code step. */
+  codeSent?: boolean;
   /** What the visitor typed, to refill the form after an error. Never the password. */
   values?: { email?: string; fullName?: string };
 } | null;
@@ -39,15 +43,58 @@ export async function signIn(_previous: AuthFormState, formData: FormData): Prom
   const supabase = await createSupabaseServerClient({ writeCookies: true });
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error || !data.user) return { formError: authFailureKey(error), values };
+  return enter(supabase, data.user.id, next, locale, values);
+}
 
-  // Where to go depends on the role (SPEC: role-based redirect after login).
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", data.user.id).maybeSingle();
+/** After a successful sign-in: on to `next` or the role's home (SPEC: role-based redirect after login). */
+async function enter(
+  supabase: Awaited<ReturnType<typeof createSupabaseServerClient>>,
+  userId: string,
+  next: string | undefined,
+  locale: Locale,
+  values: NonNullable<AuthFormState>["values"],
+): Promise<AuthFormState> {
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", userId).maybeSingle();
   if (!isAppRole(profile?.role)) {
     // An account without a profile cannot use the site; do not leave it signed in.
     await supabase.auth.signOut({ scope: "local" });
     return { formError: "unavailable", values };
   }
   return redirect({ href: safeNextPath(next, profile.role), locale });
+}
+
+/**
+ * Sign-in by emailed code, step 1 (T9b): email a 6-digit code to an existing account. It never creates
+ * an account (ordering does that) and answers the same whether or not the email has one, so the form
+ * cannot be used to find out who is a customer.
+ */
+export async function sendLoginCode(_previous: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const values = { email: textField(formData, "email") };
+  const parsed = parseCodeLogin(formData);
+  if (!parsed.ok) return { fieldErrors: parsed.fieldErrors, values };
+
+  const supabase = await createSupabaseServerClient({ writeCookies: true });
+  const { error } = await supabase.auth.signInWithOtp({ email: parsed.data.email, options: { shouldCreateUser: false } });
+  if (error && (error.status === 429 || error.code?.startsWith("over_"))) return { formError: "rateLimited", values };
+  return { codeSent: true, values };
+}
+
+/** Sign-in by emailed code, step 2: check the code, then on to `next` or the role's home. */
+export async function verifyLoginCode(_previous: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const values = { email: textField(formData, "email") };
+  const parsed = parseCodeLogin(formData);
+  if (!parsed.ok) return { fieldErrors: parsed.fieldErrors, values };
+  const code = parseCode(formData.get("code"));
+  if (!code) return { formError: "codeInvalid", codeSent: true, values };
+
+  const { email, locale, next } = parsed.data;
+  const supabase = await createSupabaseServerClient({ writeCookies: true });
+  const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+  if (error || !data.user) {
+    if (error?.status === 429) return { formError: "rateLimited", codeSent: true, values };
+    return { formError: "codeInvalid", codeSent: true, values };
+  }
+  return enter(supabase, data.user.id, next, locale, values);
 }
 
 export async function signUp(_previous: AuthFormState, formData: FormData): Promise<AuthFormState> {

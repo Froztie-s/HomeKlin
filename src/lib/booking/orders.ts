@@ -14,6 +14,8 @@ export type CustomerOrder = {
   startsAt: string;
   endsAt: string;
   address: string;
+  /** The customer's phone for the cleaner (+628...); null on orders made before T9b. */
+  contactPhone: string | null;
   /** The price when the customer booked, in whole rupiah. */
   priceIdr: number;
   status: OrderStatus;
@@ -27,6 +29,7 @@ type OrderRow = {
   starts_at: string;
   ends_at: string;
   address: string;
+  contact_phone: string | null;
   price_idr: number;
   status: OrderStatus;
   created_at: string;
@@ -50,6 +53,7 @@ export async function listMyOrders(client: SupabaseClient): Promise<CustomerOrde
     startsAt: new Date(row.starts_at).toISOString(),
     endsAt: new Date(row.ends_at).toISOString(),
     address: row.address,
+    contactPhone: row.contact_phone,
     priceIdr: row.price_idr,
     status: row.status,
     createdAt: new Date(row.created_at).toISOString(),
