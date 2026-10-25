@@ -51,7 +51,8 @@ async function askForCode(page: Page, email: string) {
 
 /** The order the confirmation shows, read from the address. */
 async function bookedId(page: Page): Promise<string> {
-  await expect(page).toHaveURL(/\/orders\?booked=[0-9a-f-]{36}$/);
+  // Booking and the redirect run on the server; under a full parallel run that can take over 5 s.
+  await expect(page).toHaveURL(/\/orders\?booked=[0-9a-f-]{36}$/, { timeout: 15_000 });
   return new URL(page.url()).searchParams.get("booked") ?? "";
 }
 
@@ -280,7 +281,7 @@ test.describe("as a guest", () => {
     await expect(page.getByText(`We sent a 6-digit code to ${email}.`)).toBeVisible({ timeout: emailWait });
     await page.getByLabel("6-digit code").fill(await codeFor(email));
     await page.getByRole("button", { name: "Book now" }).click();
-    await expect(page).toHaveURL(/\/en\/orders\?booked=[0-9a-f-]{36}$/);
+    await expect(page).toHaveURL(/\/en\/orders\?booked=[0-9a-f-]{36}$/, { timeout: 15_000 });
     await expect(page.getByText("Awaiting payment")).toBeVisible();
     await cancelOrder(new URL(page.url()).searchParams.get("booked") ?? "");
   });

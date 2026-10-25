@@ -1,5 +1,4 @@
 import { expect, test, type Page } from "@playwright/test";
-import { randomBytes, randomUUID } from "node:crypto";
 import { adminClient } from "../tests/integration/test-project";
 import {
   agencyMarks,
@@ -109,7 +108,8 @@ test.describe("as a signed-in customer", () => {
     await expect(submitButton(page)).toBeEnabled();
     await submitButton(page).click();
 
-    await expect(page).toHaveURL(/\/orders\?booked=[0-9a-f-]{36}$/);
+    // Booking and the redirect run on the server; under a full parallel run that can take over 5 s.
+    await expect(page).toHaveURL(/\/orders\?booked=[0-9a-f-]{36}$/, { timeout: 15_000 });
     const orderId = new URL(page.url()).searchParams.get("booked") ?? "";
     try {
       const confirmation = page.getByRole("region", { name: "Pesanan Anda sudah dibuat" });
@@ -269,33 +269,12 @@ test.describe("as a signed-in customer", () => {
 });
 
 test.describe("as a visitor", () => {
-  const created: string[] = [];
-  test.afterAll(async () => {
-    for (const id of created.splice(0)) await adminClient().auth.admin.deleteUser(id);
-  });
-
-  test("opens the old booking address, signs in with a password on the way and lands on the order", async ({ page }) => {
-    const email = `homeklin-e2e-booking-${randomUUID().slice(0, 8)}@example.com`;
-    const password = randomBytes(18).toString("base64url");
-    const { data, error } = await adminClient().auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name: "Uji Pemesan" },
-    });
-    if (error || !data.user) throw new Error(`Could not create the test customer: ${error?.message}`);
-    created.push(data.user.id);
-
+  // Ordering needs no account beforehand (T9b): the old booking address leads straight to the order
+  // page with the same choice, without a sign-in on the way.
+  test("opens the old booking address and lands on the order page with the same choice, without signing in", async ({ page }) => {
     const target = await windowFor("08.00", 2);
     const params = new URLSearchParams({ service: service.id, area, starts: target.startsAt });
     await page.goto(`/book?${params.toString()}`);
-    await expect(page).toHaveURL(/\/login\?next=/);
-    // Customers sign in by code; this demo-style account has a password, which works too.
-    await page.getByRole("link", { name: "Masuk dengan kata sandi" }).click();
-    await expect(page).toHaveURL(/\/login\?next=.*cara=sandi/);
-    await page.getByLabel("Email", { exact: true }).fill(email);
-    await page.getByLabel("Kata sandi", { exact: true }).fill(password);
-    await page.getByRole("button", { name: "Masuk", exact: true }).click();
 
     await expect(page).toHaveURL(orderPath(service.id, area, target.startsAt));
     await expect(page.getByRole("region", { name: "Layanan" }).getByText(service.name, { exact: true })).toBeVisible();

@@ -38,14 +38,13 @@ describe("stripLocale", () => {
 
 describe("rolesFor", () => {
   it("leaves the landing page, the app home, services, help and sign-in public", () => {
-    for (const path of ["/", "/home", "/services", "/support", "/login", "/signup"]) {
+    for (const path of ["/", "/home", "/services", "/pesan", "/book", "/support", "/login", "/signup"]) {
       expect(rolesFor(path)).toBeNull();
     }
   });
 
   it("gives each protected section to one role, including its sub-pages", () => {
     expect(rolesFor("/orders")).toEqual(["customer"]);
-    expect(rolesFor("/book")).toEqual(["customer"]);
     expect(rolesFor("/account")).toEqual(["customer"]);
     expect(rolesFor("/cleaner")).toEqual(["cleaner"]);
     expect(rolesFor("/cleaner/account")).toEqual(["cleaner"]);

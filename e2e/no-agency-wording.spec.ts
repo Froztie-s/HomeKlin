@@ -15,13 +15,13 @@ const pageGroups = [
       "/services",
       "/support",
       "/login",
-      "/signup",
+      "/pesan",
       "/en",
       "/en/home",
       "/en/services",
       "/en/support",
       "/en/login",
-      "/en/signup",
+      "/en/pesan",
       // The catalog's other states (T8): an area nobody serves, and a search without a match.
       "/services?area=jakarta-utara",
       "/en/services?area=jakarta-utara",
@@ -31,7 +31,7 @@ const pageGroups = [
   {
     who: "a signed-in customer",
     session: signedInAs.customer,
-    paths: ["/orders", "/account", "/book", "/en/orders", "/en/account", "/en/book"],
+    paths: ["/orders", "/account", "/pesan", "/en/orders", "/en/account", "/en/pesan"],
   },
 ];
 const agencyWording = /agensi|agency|mitra|partner/i;

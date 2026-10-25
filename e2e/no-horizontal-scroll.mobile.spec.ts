@@ -8,8 +8,8 @@ import { signedInAs, signedOut } from "./setup/auth-state";
 test.use({ viewport: { width: 360, height: 740 } });
 
 const pageGroups = [
-  { who: "a visitor", session: signedOut, paths: ["/", "/home", "/services", "/support", "/login", "/signup"] },
-  { who: "a customer", session: signedInAs.customer, paths: ["/orders", "/account", "/book"] },
+  { who: "a visitor", session: signedOut, paths: ["/", "/home", "/services", "/support", "/login", "/pesan"] },
+  { who: "a customer", session: signedInAs.customer, paths: ["/orders", "/account", "/pesan"] },
   { who: "a cleaner", session: signedInAs.cleaner, paths: ["/cleaner", "/cleaner/account"] },
   {
     who: "an agency",
