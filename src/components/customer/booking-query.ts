@@ -1,10 +1,10 @@
 import type { FreeSlot } from "@/lib/catalog/catalog";
 import { groupSlotsByJakartaDay, type SlotDay } from "@/lib/catalog/slots-days";
 
-// The addresses of the booking screens (T9). The choice lives in the address,
-// /book?service=<id>&area=<id>&starts=<ISO start of the window>, so a sign-in in between (the proxy
-// keeps the query in `next`) brings the customer back to the same booking, and a reload keeps it.
-// The confirmation is /orders?booked=<order id>. Whatever the address says is only a suggestion: the
+// The addresses of the booking screens (T9, T9b). The old booking address,
+// /book?service=<id>&area=<id>&starts=<ISO start of the window>, now leads to the order page
+// (./order-query.ts, which reads its own address with the same rules); the confirmation is
+// /orders?booked=<order id>. Whatever the address says is only a suggestion: the
 // page checks it against the catalog and the free windows, and the booking action checks every field
 // again on the server (src/lib/validation/booking.ts).
 
@@ -41,12 +41,6 @@ function isoStart(value: string | string[] | undefined): string | undefined {
   return Number.isNaN(time) ? undefined : new Date(time).toISOString();
 }
 
-/** The booking page's address for one service, area and window ("/book?..."; Link adds /en). */
-export function bookingHref({ serviceId, areaId, startsAt }: Required<BookingQuery>): string {
-  const params = new URLSearchParams({ service: serviceId, area: areaId, starts: startsAt });
-  return `/book?${params.toString()}`;
-}
-
 /** The service, area and window in the booking page's address; anything unreadable is left out. */
 export function parseBookingQuery(params: SearchParams): BookingQuery {
   const query: BookingQuery = {};
@@ -76,11 +70,4 @@ export function parseBookedOrderId(params: SearchParams): string | undefined {
 export function jakartaDayOf(startsAt: string, now: Date): Pick<SlotDay, "date" | "relative"> {
   const [day] = groupSlotsByJakartaDay([{ startsAt, endsAt: startsAt }], now);
   return { date: day.date, relative: day.relative };
-}
-
-/** The page's query string with another window's start, the rest kept as it is. */
-export function searchWithStarts(search: string, startsAt: string): string {
-  const params = new URLSearchParams(search);
-  params.set("starts", startsAt);
-  return `?${params.toString()}`;
 }

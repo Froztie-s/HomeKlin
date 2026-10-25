@@ -26,7 +26,7 @@ export function CtaShell() {
             <p className="mt-4 text-body-lg text-on-band-muted">{t("body")}</p>
           </div>
           <div className="lg:col-span-4 lg:flex lg:justify-end">
-            <ButtonLink href="/home" variant="accent" size="lg">
+            <ButtonLink href="/pesan" variant="accent" size="lg">
               {t("cta")}
             </ButtonLink>
           </div>

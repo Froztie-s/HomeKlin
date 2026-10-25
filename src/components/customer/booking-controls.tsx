@@ -1,8 +1,9 @@
 "use client";
 
 import { Check, CircleAlert } from "lucide-react";
+import type { InputHTMLAttributes } from "react";
 
-// Small pieces of the booking form (T9), in the T3b customer look (markdown/design.md, Forms).
+// Small pieces of the order form (T9, T9b), in the T3b customer look (markdown/design.md, Forms).
 
 /** A field's problem, under it, tied to it with aria-describedby by the caller. */
 export function FieldError({ id, message }: { id: string; message?: string }) {
@@ -12,6 +13,45 @@ export function FieldError({ id, message }: { id: string; message?: string }) {
       <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
       <span>{message}</span>
     </p>
+  );
+}
+
+/** The order form's input look, shared by its text fields, its textarea and its selects. */
+export const orderInputClass =
+  "w-full rounded-md border border-border-control bg-surface px-4 text-base text-ink caret-brand-700 transition-colors duration-150 ease-out-quart hover:border-brand-600 aria-invalid:border-danger aria-invalid:bg-danger-surface disabled:cursor-not-allowed disabled:border-border disabled:bg-surface-sunken";
+
+type OrderFieldProps = Omit<InputHTMLAttributes<HTMLInputElement>, "id" | "className"> & {
+  id: string;
+  label: string;
+  /** Shown under the field at all times. */
+  hint?: string;
+  error?: string;
+};
+
+/** A labelled text field of the order form, with its hint and its problem tied to it. */
+export function OrderField({ id, label, hint, error, ...input }: OrderFieldProps) {
+  const hintId = hint ? `${id}-hint` : undefined;
+  const errorId = `${id}-error`;
+  const describedBy = [hintId, error ? errorId : undefined].filter(Boolean).join(" ") || undefined;
+  return (
+    <div className="flex flex-col gap-2">
+      <label htmlFor={id} className="px-1 text-sm font-medium text-ink">
+        {label}
+      </label>
+      <input
+        id={id}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={describedBy}
+        className={`${orderInputClass} h-12`}
+        {...input}
+      />
+      {hint ? (
+        <p id={hintId} className="px-1 text-sm text-ink-faint">
+          {hint}
+        </p>
+      ) : null}
+      <FieldError id={errorId} message={error} />
+    </div>
   );
 }
 

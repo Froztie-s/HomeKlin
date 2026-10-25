@@ -3,7 +3,6 @@ import { randomBytes, randomUUID } from "node:crypto";
 import { adminClient } from "../tests/integration/test-project";
 import {
   agencyMarks,
-  bookPath,
   cancelOrder,
   dayText,
   fillWindow,
@@ -13,13 +12,16 @@ import {
   windowText,
   type Window,
 } from "./booking-test-data";
+import { orderPath } from "./order-test-data";
 import { readTestUsers, signedInAs } from "./setup/auth-state";
 
-// T9 on a phone (customers are mobile-first): from the price list to a booked order. The customer
-// picks a service and a free arrival window, gives the address, switches on the streaming consent and
-// books; the order then waits for payment. Also: the consent is required, a window someone else takes
-// in the meantime is refused with other windows offered, a window that is gone when the page opens,
-// an unknown service, and a visitor who signs in on the way. To the customer HomeKlin is one company:
+// T9 on a phone (customers are mobile-first), on the order page since T9b (/pesan): a signed-in
+// customer goes from the price list to a booked order. The customer picks a service and a free
+// arrival window, gives the address and phone, switches on the streaming consent and books; the order
+// then waits for payment. Also: the consent is required, a window someone else takes in the meantime
+// is refused with other windows offered, a window that is gone when the page opens, an unknown
+// service, and a visitor who opens the old booking address and signs in on the way. Guests ordering
+// with an emailed code are in e2e/order.mobile.spec.ts. To the customer HomeKlin is one company:
 // nothing on these pages, nor in the data sent to the browser, names the agency that got the job.
 // Test data (e2e/booking-test-data.ts): late windows in Jakarta Barat only, one per test, and every
 // order made here is deleted again with its place given back.
@@ -27,6 +29,7 @@ import { readTestUsers, signedInAs } from "./setup/auth-state";
 const area = "jakarta-barat";
 const service = { id: "regular", name: "Pembersihan Rutin", nameEn: "Regular Cleaning" };
 const address = "Jl. Contoh Raya No. 12, RT 03/RW 05, Kembangan, Jakarta Barat";
+const phone = "0812 3456 7890";
 const agencyWording = /agensi|agency|mitra|partner/i;
 
 const usedStarts: string[] = [];
@@ -73,14 +76,17 @@ test.describe("as a signed-in customer", () => {
     expect(price).toMatch(/^Rp/);
     await card.getByRole("link", { name: `Pesan ${service.name}` }).click();
 
-    // The booking page opens on the earliest free window, with the service, its full price and the area.
-    await expect(page).toHaveURL(/\/book\?service=regular&area=jakarta-barat&starts=\d{4}-/);
+    // The order page opens on the earliest free window, with the service, its full price and the area.
+    await expect(page).toHaveURL(/\/pesan\?layanan=regular&area=jakarta-barat&starts=\d{4}-/);
     await expect(page.getByRole("heading", { level: 1, name: "Pesan layanan" })).toBeVisible();
     const summary = page.getByRole("region", { name: "Layanan" });
-    await expect(summary.getByText(service.name)).toBeVisible();
-    await expect(summary.getByText(price, { exact: true })).toBeVisible();
+    await expect(summary.getByLabel("Pilih layanan")).toHaveValue(service.id);
+    await expect(summary.getByText(service.name, { exact: true })).toBeVisible();
     await expect(summary.getByText("± 2 jam")).toBeVisible();
-    await expect(summary.getByText("Jakarta Barat")).toBeVisible();
+    await expect(bookingForm(page).getByText(price, { exact: true })).toBeVisible();
+    await expect(bookingForm(page).getByLabel("Area layanan")).toHaveValue(area);
+    // Signed in: no email and no code, the order goes straight through.
+    await expect(page.getByText("Anda memesan sebagai")).toBeVisible();
 
     // Another window, late in the range; the choice goes into the address too.
     await chooseWindow(page, target);
@@ -94,6 +100,7 @@ test.describe("as a signed-in customer", () => {
     await expect(page).toHaveURL(new RegExp(`starts=${encodeURIComponent(target.startsAt)}`));
 
     await page.getByLabel("Alamat lengkap").fill(address);
+    await page.getByLabel("Nomor HP").fill(phone);
     // The streaming consent comes with a plain explanation, and booking waits for it.
     await expect(page.getByText(/Hanya Anda dan tim pemantau HomeKlin/)).toBeVisible();
     await expect(page.getByText(/disimpan 7 hari, lalu dihapus/)).toBeVisible();
@@ -126,8 +133,13 @@ test.describe("as a signed-in customer", () => {
       }
 
       // The order really waits for payment, at the chosen window.
-      const { data } = await adminClient().from("orders").select("status, starts_at, stream_consent").eq("id", orderId).single();
+      const { data } = await adminClient()
+        .from("orders")
+        .select("status, starts_at, stream_consent, contact_phone")
+        .eq("id", orderId)
+        .single();
       expect(data?.status).toBe("pending_payment");
+      expect(data?.contact_phone).toBe("+6281234567890");
       expect(data?.stream_consent).toBe(true);
       expect(new Date(data?.starts_at as string).toISOString()).toBe(target.startsAt);
     } finally {
@@ -137,8 +149,9 @@ test.describe("as a signed-in customer", () => {
 
   test("refuses to book without the streaming consent", async ({ page }) => {
     const target = await windowFor("10.00");
-    await page.goto(bookPath(service.id, area, target.startsAt));
+    await page.goto(orderPath(service.id, area, target.startsAt));
     await page.getByLabel("Alamat lengkap").fill(address);
+    await page.getByLabel("Nomor HP").fill(phone);
     await expect(consentSwitch(page)).not.toBeChecked();
     await expect(submitButton(page)).toBeDisabled();
     await expect(page.getByText("Nyalakan persetujuan siaran di atas untuk memesan.")).toBeVisible();
@@ -147,7 +160,7 @@ test.describe("as a signed-in customer", () => {
     await bookingForm(page).evaluate((form) => (form as HTMLFormElement).requestSubmit());
     await expect(page.getByText("Nyalakan persetujuan siaran untuk memesan.", { exact: true })).toBeVisible();
     await expect(consentSwitch(page)).toHaveAttribute("aria-invalid", "true");
-    await expect(page).toHaveURL(/\/book\?/);
+    await expect(page).toHaveURL(/\/pesan\?/);
     await expect(page.getByLabel("Alamat lengkap")).toHaveValue(address);
     const id = customerId();
     if (id) expect(await ordersAt(id, area, [target.startsAt])).toEqual([]);
@@ -155,11 +168,14 @@ test.describe("as a signed-in customer", () => {
 
   test("shows each problem next to its field", async ({ page }) => {
     const target = await windowFor("10.00", 1);
-    await page.goto(bookPath(service.id, area, target.startsAt));
+    await page.goto(orderPath(service.id, area, target.startsAt));
     await page.getByLabel("Alamat lengkap").fill("Jl. A");
     await consentSwitch(page).check();
     await submitButton(page).click();
     await expect(page.getByText("Tulis alamat lengkap, paling sedikit 10 karakter.")).toBeVisible();
+    // The phone is the cleaner's contact on the day, so it is required too.
+    await expect(page.getByLabel("Nomor HP")).toHaveAccessibleDescription(/Masukkan nomor HP Anda\./);
+    await expect(page.getByText("Periksa 2 isian yang ditandai.")).toBeVisible();
     await expect(page.getByLabel("Alamat lengkap")).toHaveAttribute("aria-invalid", "true");
     await expect(page.getByLabel("Alamat lengkap")).toBeFocused();
     // The consent stays on, so fixing the address is all that is left to do.
@@ -169,10 +185,11 @@ test.describe("as a signed-in customer", () => {
 
   test("says plainly when someone else takes the window first, and offers the other windows", async ({ page }) => {
     const target = await windowFor("13.00");
-    await page.goto(bookPath(service.id, area, target.startsAt));
+    await page.goto(orderPath(service.id, area, target.startsAt));
     const chosen = page.getByRole("group", { name: "Jadwal kedatangan" });
     await expect(chosen.getByText(`${windowText(target)} WIB`, { exact: true })).toBeVisible();
     await page.getByLabel("Alamat lengkap").fill(address);
+    await page.getByLabel("Nomor HP").fill(phone);
     await consentSwitch(page).check();
 
     // Meanwhile other customers book the window's last places.
@@ -182,7 +199,7 @@ test.describe("as a signed-in customer", () => {
       const alert = page.getByRole("alert").filter({ hasText: "Jadwal ini baru saja terisi" });
       await expect(alert).toBeVisible();
       await expect(alert).toContainText("Pelanggan lain memesan tempat terakhir");
-      await expect(page).toHaveURL(/\/book\?/);
+      await expect(page).toHaveURL(/\/pesan\?/);
 
       // The other free windows are offered right there, without the one that was taken.
       const day = page.getByRole("group", { name: dayText(target.startsAt) });
@@ -200,32 +217,32 @@ test.describe("as a signed-in customer", () => {
   });
 
   test("says so when the window is gone by the time the page opens", async ({ page }) => {
-    await page.goto(bookPath(service.id, area, sundayAfternoon()));
+    await page.goto(orderPath(service.id, area, sundayAfternoon()));
     await expect(page.getByRole("heading", { name: "Jadwal ini sudah tidak kosong" })).toBeVisible();
     await expect(page.getByRole("group", { name: "Jadwal kedatangan" }).getByText("Belum ada jadwal yang dipilih")).toBeVisible();
-    // The area's free windows are open to choose from, and the way back is there.
+    // The area's free windows are open to choose from, right there.
     await expect(page.getByRole("radio").first()).toBeVisible();
     await expect(page.getByRole("radio", { checked: true })).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Kembali ke daftar layanan" })).toHaveAttribute(
-      "href",
-      `/services?area=${area}`,
-    );
   });
 
-  test("leads back to the services when the service cannot be booked", async ({ page }) => {
+  test("asks for another service when the one in the address cannot be booked", async ({ page }) => {
     const target = await windowFor("08.00");
-    await page.goto(bookPath("no-such-service", area, target.startsAt));
-    await expect(page.getByRole("heading", { level: 2, name: "Layanan ini tidak dapat dipesan" })).toBeVisible();
-    await expect(bookingForm(page)).toHaveCount(0);
-    await page.getByRole("link", { name: "Kembali ke daftar layanan" }).click();
-    await expect(page).toHaveURL(`/services?area=${area}`);
+    await page.goto(orderPath("no-such-service", area, target.startsAt));
+    await expect(page.getByText("Layanan dari tautan ini tidak dapat dipesan. Pilih layanan lain di bawah.")).toBeVisible();
+    const choice = page.getByLabel("Pilih layanan");
+    await expect(choice).toHaveValue("");
+    await choice.selectOption(service.id);
+    await expect(page.getByRole("region", { name: "Layanan" }).getByText(service.name, { exact: true })).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`layanan=${service.id}`));
+    // The window from the address is still chosen.
+    await expect(page.getByRole("group", { name: "Jadwal kedatangan" })).toContainText(windowText(target));
   });
 
   test("works in English, with times in Jakarta time", async ({ page }) => {
     const target = await windowFor("08.00", 1);
-    await page.goto(bookPath(service.id, area, target.startsAt, "/en"));
+    await page.goto(orderPath(service.id, area, target.startsAt, "/en"));
     await expect(page.getByRole("heading", { level: 1, name: "Book a cleaning" })).toBeVisible();
-    await expect(page.getByRole("region", { name: "Service" }).getByText(service.nameEn)).toBeVisible();
+    await expect(page.getByRole("region", { name: "Service" }).getByText(service.nameEn, { exact: true })).toBeVisible();
     await expect(
       page.getByRole("group", { name: "Arrival time" }).getByText(`${windowText(target)} WIB`, { exact: true }),
     ).toBeVisible();
@@ -240,7 +257,7 @@ test.describe("as a signed-in customer", () => {
     test("the booking page has no horizontal scroll and names no agency, in both languages", async ({ page }) => {
       const target = await windowFor("13.00", 1);
       for (const prefix of ["", "/en"]) {
-        await page.goto(bookPath(service.id, area, target.startsAt, prefix));
+        await page.goto(orderPath(service.id, area, target.startsAt, prefix));
         await expect(submitButton(page).or(page.getByRole("button", { name: "Book now" }))).toBeVisible();
         await page.getByRole("button", { name: /^(Ganti jadwal|Change time)$/ }).click();
         expect(await page.content()).not.toMatch(agencyWording);
@@ -257,7 +274,7 @@ test.describe("as a visitor", () => {
     for (const id of created.splice(0)) await adminClient().auth.admin.deleteUser(id);
   });
 
-  test("signs in on the way and comes back to the same booking", async ({ page }) => {
+  test("opens the old booking address, signs in with a password on the way and lands on the order", async ({ page }) => {
     const email = `homeklin-e2e-booking-${randomUUID().slice(0, 8)}@example.com`;
     const password = randomBytes(18).toString("base64url");
     const { data, error } = await adminClient().auth.admin.createUser({
@@ -270,15 +287,18 @@ test.describe("as a visitor", () => {
     created.push(data.user.id);
 
     const target = await windowFor("08.00", 2);
-    const path = bookPath(service.id, area, target.startsAt);
-    await page.goto(path);
+    const params = new URLSearchParams({ service: service.id, area, starts: target.startsAt });
+    await page.goto(`/book?${params.toString()}`);
     await expect(page).toHaveURL(/\/login\?next=/);
+    // Customers sign in by code; this demo-style account has a password, which works too.
+    await page.getByRole("link", { name: "Masuk dengan kata sandi" }).click();
+    await expect(page).toHaveURL(/\/login\?next=.*cara=sandi/);
     await page.getByLabel("Email", { exact: true }).fill(email);
     await page.getByLabel("Kata sandi", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Masuk", exact: true }).click();
 
-    await expect(page).toHaveURL(path);
-    await expect(page.getByRole("region", { name: "Layanan" }).getByText(service.name)).toBeVisible();
+    await expect(page).toHaveURL(orderPath(service.id, area, target.startsAt));
+    await expect(page.getByRole("region", { name: "Layanan" }).getByText(service.name, { exact: true })).toBeVisible();
     await expect(
       page.getByRole("group", { name: "Jadwal kedatangan" }).getByText(`${windowText(target)} WIB`, { exact: true }),
     ).toBeVisible();

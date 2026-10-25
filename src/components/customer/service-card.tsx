@@ -9,8 +9,8 @@ import { ServiceVisual } from "./service-visual";
 type ServiceCardProps = {
   service: Service;
   /**
-   * Where "Pesan" leads: the booking page for this service in the area's earliest free window
-   * (bookingHref in ./booking-query.ts). Left out when the area has no free window, so the card never
+   * Where "Pesan" leads: the order page for this service in the area's earliest free window
+   * (orderHref in ./order-query.ts). Left out when the area has no free window, so the card never
    * offers a booking that cannot be made.
    */
   bookHref?: string;
@@ -19,7 +19,7 @@ type ServiceCardProps = {
 // One HomeKlin service on /services: what it covers, how long it takes and its one full price (no
 // "from": the price is the whole price, with no fees on top). The facts sit in the same place on
 // every card. A narrow card (a phone) puts a small picture beside the name, so the list stays easy to
-// scan; from a 384 px card the photo moves on top. "Pesan" opens the booking page in the earliest free
+// scan; from a 384 px card the photo moves on top. "Pesan" opens the order page (T9b) in the earliest free
 // window of the area, which the customer can change there (T9). Free slots are the same for every
 // service (any service fits any arrival window), so the page shows them once for the area instead of
 // on each card.

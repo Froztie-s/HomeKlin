@@ -1,15 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
-  bookingHref,
   findFreeWindow,
   jakartaDayOf,
   parseBookedOrderId,
   parseBookingQuery,
-  searchWithStarts,
 } from "@/components/customer/booking-query";
 
-// The booking screens (T9) keep the customer's choice in the address: /book?service=&area=&starts=
-// (so a sign-in in between brings the customer back to the same booking), and the confirmation opens
+// The booking screens (T9) read the old booking address /book?service=&area=&starts= (which now
+// leads to the order page, tests/order-ui-query.test.ts), and the confirmation opens
 // /orders?booked=<order id>. These helpers read and write those addresses; the server action checks
 // every value again (src/lib/validation/booking.ts), so anything odd here is simply ignored.
 
@@ -17,16 +15,6 @@ const nov6At15 = "2026-11-06T08:00:00.000Z"; // Friday 6 November, 15.00 in Jaka
 const slot = (startsAt: string, hours = 2) => ({
   startsAt,
   endsAt: new Date(Date.parse(startsAt) + hours * 3_600_000).toISOString(),
-});
-
-describe("bookingHref", () => {
-  it("leads to /book with the service, the area and the window's start", () => {
-    const href = bookingHref({ serviceId: "regular", areaId: "jakarta-barat", startsAt: nov6At15 });
-    expect(href).toBe("/book?service=regular&area=jakarta-barat&starts=2026-11-06T08%3A00%3A00.000Z");
-    const url = new URL(href, "https://homeklin.invalid");
-    expect(url.pathname).toBe("/book");
-    expect(url.searchParams.get("starts")).toBe(nov6At15);
-  });
 });
 
 describe("parseBookingQuery", () => {
@@ -99,20 +87,5 @@ describe("jakartaDayOf", () => {
 
   it("counts a late UTC evening as the next day in Jakarta", () => {
     expect(jakartaDayOf("2026-11-05T17:30:00.000Z", now).date).toBe("2026-11-06");
-  });
-});
-
-describe("searchWithStarts", () => {
-  it("replaces the window's start and keeps the rest of the address", () => {
-    const search = "?service=regular&area=jakarta-barat&starts=2026-11-06T01%3A00%3A00.000Z";
-    expect(searchWithStarts(search, nov6At15)).toBe(
-      "?service=regular&area=jakarta-barat&starts=2026-11-06T08%3A00%3A00.000Z",
-    );
-  });
-
-  it("adds the start when the address had none", () => {
-    expect(searchWithStarts("?service=regular&area=jakarta-barat", nov6At15)).toBe(
-      "?service=regular&area=jakarta-barat&starts=2026-11-06T08%3A00%3A00.000Z",
-    );
   });
 });

@@ -2,8 +2,10 @@ import { expect, test, type Page } from "@playwright/test";
 import { randomBytes, randomUUID } from "node:crypto";
 import { adminClient } from "../tests/integration/test-project";
 
-// T5 on a phone (customers and cleaners are mobile-first): signing up, signing in, `next`, signing
-// out, and the role check that refuses a signed-in user a section that is not theirs. Runs against
+// T5 on a phone (customers and cleaners are mobile-first): signing in, `next`, signing out, and the
+// role check that refuses a signed-in user a section that is not theirs. Since T9b there is no separate
+// sign-up (the account is made by ordering, e2e/order.mobile.spec.ts) and customers sign in by emailed
+// code; these accounts have a password, which "Masuk dengan kata sandi" still accepts. Runs against
 // the separate Supabase test project (playwright.config.ts). Every user here is made for this file
 // with a unique address on example.com, and deleted again afterwards. Every test starts signed out.
 
@@ -11,7 +13,6 @@ type Role = "customer" | "cleaner" | "agency" | "admin";
 type Account = { id: string; email: string; password: string; name: string };
 
 const createdIds: string[] = [];
-const signedUpEmails: string[] = [];
 
 /** A confirmed user with a fictional name and the given role (set the way only the service role can). */
 async function createAccount(role: Role, name: string): Promise<Account> {
@@ -33,18 +34,6 @@ async function createAccount(role: Role, name: string): Promise<Account> {
   return { id: data.user.id, email, password, name };
 }
 
-/** A user who signed up through the form, found by their unique address. */
-async function userIdByEmail(email: string): Promise<string | undefined> {
-  const admin = adminClient();
-  for (let page = 1; ; page += 1) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
-    if (error) throw new Error(`Could not list the test users: ${error.message}`);
-    const user = data.users.find((candidate) => candidate.email === email);
-    if (user) return user.id;
-    if (data.users.length < 1000) return undefined;
-  }
-}
-
 let customer: Account;
 let cleaner: Account;
 
@@ -55,54 +44,32 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => {
   const admin = adminClient();
-  for (const email of signedUpEmails) {
-    const id = await userIdByEmail(email);
-    if (id) createdIds.push(id);
-  }
   for (const id of createdIds.splice(0)) await admin.auth.admin.deleteUser(id);
 });
 
+/** On /login: "Masuk dengan kata sandi", then the email and password. */
 async function fillLogin(page: Page, account: Account, password = account.password) {
+  const withPassword = page.getByRole("link", { name: "Masuk dengan kata sandi" });
+  const passwordField = page.getByLabel("Kata sandi", { exact: true });
+  // The form streams in after the page shell; wait for it, then switch to the password if needed.
+  await expect(withPassword.or(passwordField)).toBeVisible();
+  if (await withPassword.isVisible()) await withPassword.click();
+  await expect(passwordField).toBeVisible();
   await page.getByLabel("Email", { exact: true }).fill(account.email);
   await page.getByLabel("Kata sandi", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
 }
 
-test.describe("signing up", () => {
-  test("creates a customer account through the form and lands on /home, signed in", async ({ page }) => {
-    const email = `homeklin-e2e-signup-${randomUUID().slice(0, 8)}@example.com`;
-    signedUpEmails.push(email);
-
+test.describe("no separate sign-up", () => {
+  test("the old sign-up address leads to the order page, and /login offers ordering instead", async ({ page }) => {
     await page.goto("/signup");
-    await expect(page.getByRole("heading", { level: 1, name: "Buat akun HomeKlin" })).toBeVisible();
-    await page.getByLabel("Nama lengkap").fill("Uji Pelanggan Baru");
-    await page.getByLabel("Email", { exact: true }).fill(email);
-    await page.getByLabel("Kata sandi", { exact: true }).fill(randomBytes(18).toString("base64url"));
-    await page.getByRole("button", { name: "Buat akun", exact: true }).click();
+    await expect(page).toHaveURL("/pesan");
+    await expect(page.getByRole("heading", { level: 1, name: "Pesan layanan" })).toBeVisible();
 
-    await expect(page).toHaveURL("/home");
-    await expect(page.getByRole("heading", { level: 1, name: "Pesan kebersihan rumah" })).toBeVisible();
-    const chip = page.getByRole("banner").getByRole("link", { name: "Uji Pelanggan Baru, akun Anda" });
-    await expect(chip).toBeVisible();
-    await expect(chip).toHaveAttribute("href", "/account");
-    await expect(chip).toHaveText("UB");
-    await expect(page.getByRole("banner").getByRole("link", { name: "Masuk", exact: true })).toHaveCount(0);
-  });
-
-  test("shows every problem next to its field and puts the cursor in the first one", async ({ page }) => {
-    await page.goto("/signup");
-    await page.getByRole("button", { name: "Buat akun", exact: true }).click();
-
-    const name = page.getByLabel("Nama lengkap");
-    await expect(name).toHaveAttribute("aria-invalid", "true");
-    await expect(name).toHaveAccessibleDescription("Masukkan nama lengkap Anda.");
-    await expect(name).toBeFocused();
-    await expect(page.getByLabel("Email", { exact: true })).toHaveAccessibleDescription("Masukkan email Anda.");
-    // The password keeps its rule as a hint and gets the problem after it.
-    await expect(page.getByLabel("Kata sandi", { exact: true })).toHaveAccessibleDescription(
-      "Minimal 8 karakter. Masukkan kata sandi Anda.",
-    );
-    await expect(page).toHaveURL("/signup");
+    await page.goto("/login");
+    await expect(page.getByRole("link", { name: "Daftar", exact: true })).toHaveCount(0);
+    await expect(page.getByText("Belum pernah memesan?")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Pesan layanan" })).toHaveAttribute("href", "/services");
   });
 });
 
@@ -115,7 +82,7 @@ test.describe("signing in", () => {
     await expect(page.getByRole("main").getByRole("alert")).toHaveText(
       "Email atau kata sandi salah. Periksa lagi, lalu coba masuk kembali.",
     );
-    await expect(page).toHaveURL("/login");
+    await expect(page).toHaveURL("/login?cara=sandi");
     await expect(page.getByLabel("Email", { exact: true })).toHaveValue(customer.email);
     await expect(page.getByLabel("Kata sandi", { exact: true })).toHaveValue("");
   });
@@ -124,10 +91,11 @@ test.describe("signing in", () => {
     await page.goto("/orders");
     await expect(page).toHaveURL(/\/login\?next=%2Forders$/);
     await expect(page.getByRole("heading", { level: 1, name: "Masuk ke HomeKlin" })).toBeVisible();
-    // The way to sign up instead keeps the page the visitor wanted.
-    await expect(page.getByRole("link", { name: "Daftar", exact: true })).toHaveAttribute(
+    // Customers get a code; the password way keeps the page the visitor wanted.
+    await expect(page.getByRole("button", { name: "Kirim kode" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Masuk dengan kata sandi" })).toHaveAttribute(
       "href",
-      "/signup?next=%2Forders",
+      "/login?next=%2Forders&cara=sandi",
     );
 
     await fillLogin(page, customer);
@@ -157,7 +125,7 @@ test.describe("signing in", () => {
     // Signed in already: the sign-in pages send the customer on, to `next` when they may open it.
     await page.goto("/login");
     await expect(page).toHaveURL("/home");
-    await page.goto("/signup?next=%2Forders");
+    await page.goto("/login?next=%2Forders&cara=sandi");
     await expect(page).toHaveURL("/orders");
   });
 
@@ -209,6 +177,8 @@ test.describe("in English", () => {
   test("signs in from /en/login, with English messages, and stays in English", async ({ page }) => {
     await page.goto("/en/login");
     await expect(page.getByRole("heading", { level: 1, name: "Log in to HomeKlin" })).toBeVisible();
+    await page.getByRole("link", { name: "Log in with a password" }).click();
+    await expect(page).toHaveURL("/en/login?cara=sandi");
     await page.getByLabel("Email", { exact: true }).fill(customer.email);
     await page.getByLabel("Password", { exact: true }).fill("not-the-password");
     await page.getByRole("button", { name: "Log in", exact: true }).click();

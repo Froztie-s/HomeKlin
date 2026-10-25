@@ -18,7 +18,7 @@ import { rolesFor } from "@/lib/auth/roles";
 const appDir = join("src", "app", "[locale]");
 
 /** The pages anyone may open. Every other page must belong to a protected section (roles.ts). */
-const publicPaths = ["/", "/home", "/services", "/support", "/login", "/signup", "/[...rest]"];
+const publicPaths = ["/", "/home", "/services", "/pesan", "/support", "/login", "/signup", "/[...rest]"];
 
 /** What a protected page may render outside its RoleGate: page chrome only, never data. */
 const chromeOutsideGate = new Set(["PageContainer", "PageHeader", "Suspense", "GateFallback", "RoleGate"]);

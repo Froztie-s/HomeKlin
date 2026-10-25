@@ -257,7 +257,8 @@
     "emptyBody": "You can search for answers by keyword. If the answer is not there, you can chat with an admin from this page."
   },
   "AccountPage": {
-    "title": "Account"
+    "title": "Account",
+    "signInNote": "You log in with a code we send to your email. No password needed."
   },
   "AreaPicker": {
     "label": "Service area"
@@ -272,9 +273,9 @@
     "book": "Book",
     "bookLabel": "Book {service}"
   },
-  "BookPage": {
+  "OrderPage": {
     "title": "Book a cleaning",
-    "description": "Check the service and the time, add your address, then book."
+    "description": "Choose a service and a time, then add your address and contact details. No account needed first."
   },
   "Booking": {
     "formLabel": "Book a cleaning",
@@ -329,6 +330,38 @@
       "unavailable": "The order could not be made because something went wrong. Try again in a moment.",
       "rateLimited": "Too many attempts. Wait a few minutes, then try again."
     }
+  },
+  "Order": {
+    "serviceTitle": "Service",
+    "serviceLabel": "Choose a service",
+    "servicePlaceholder": "Choose one of the services",
+    "serviceUnknown": "The service in this link cannot be booked. Choose another service below.",
+    "whereTitle": "Area and time",
+    "areaLabel": "Service area",
+    "unservedTitle": "HomeKlin does not serve {area} yet",
+    "unservedBody": "Choose another area above to see its free slots.",
+    "fullTitle": "Every slot in {area} is taken",
+    "fullBody": "There are no free slots for the next {days, plural, one {day} other {# days}}. Choose another area, or try again later.",
+    "slotsErrorTitle": "The slots in {area} could not be loaded",
+    "slotsErrorBody": "Something went wrong while reading the slots. Reload the page to try again.",
+    "retry": "Reload",
+    "contactTitle": "Address and contact",
+    "phoneLabel": "Mobile number",
+    "phoneHint": "Your HomeKlin cleaner calls this number on the day.",
+    "emailLabel": "Email",
+    "emailHint": "We send a code to this email. The code places your order, with no password needed.",
+    "signedInTitle": "You are booking as",
+    "signedInNote": "The order confirmation goes to this account's email.",
+    "submitSend": "Send code",
+    "pendingSend": "Sending the code…",
+    "sendNote": "Your order is placed once you enter the code from the email.",
+    "codeTitle": "Enter the code from the email",
+    "codeSentTo": "We sent a 6-digit code to <strong>{email}</strong>.",
+    "recapTitle": "Your order",
+    "recapWindow": "{day}, {window} WIB",
+    "staffTitle": "Staff accounts cannot book",
+    "staffBody": "You are signed in with a HomeKlin staff account. Orders are made with a customer account. Log out first if you want to book as a customer.",
+    "staffLink": "Go to your work page"
   },
   "BookingUnavailable": {
     "serviceTitle": "This service cannot be booked",
@@ -551,32 +584,17 @@
   "LoginPage": {
     "metaTitle": "Log in",
     "title": "Log in to HomeKlin",
-    "lead": "Use the email and password of your HomeKlin account."
-  },
-  "SignupPage": {
-    "metaTitle": "Sign up",
-    "title": "Create a HomeKlin account",
-    "lead": "With an account you can book, pay, and watch the work in your home live."
+    "lead": "Customers log in with a code from their email, no password needed."
   },
   "Auth": {
     "fields": {
-      "fullName": "Full name",
       "email": "Email",
       "password": "Password",
-      "passwordHint": "At least 8 characters.",
       "showPassword": "Show password"
     },
     "login": {
       "submit": "Log in",
-      "pending": "Logging in…",
-      "switchPrompt": "No account yet?",
-      "switchLink": "Sign up"
-    },
-    "signup": {
-      "submit": "Create account",
-      "pending": "Creating your account…",
-      "switchPrompt": "Already have an account?",
-      "switchLink": "Log in"
+      "pending": "Logging in…"
     },
     "errors": {
       "emailRequired": "Enter your email.",
@@ -595,6 +613,28 @@
       "unavailable": "We could not process this right now. Try again in a moment.",
       "codeInvalid": "The code is wrong or has expired. Check your email or send a new code."
     }
+  },
+  "AuthLogin": {
+    "submitCode": "Send code",
+    "pendingCode": "Sending the code…",
+    "verify": "Log in",
+    "verifying": "Logging in…",
+    "codeTitle": "Enter the code from the email",
+    "codeSentTo": "If <strong>{email}</strong> has a HomeKlin account, we sent a 6-digit code to that email.",
+    "withPassword": "Log in with a password",
+    "withCode": "Log in with an email code",
+    "passwordTitle": "Log in with a password",
+    "passwordNote": "For HomeKlin cleaner and staff accounts, and demo accounts.",
+    "firstTimePrompt": "Never booked before?",
+    "firstTimeLink": "Book a service"
+  },
+  "CodeEntry": {
+    "codeLabel": "6-digit code",
+    "codeHint": "No email yet? Check your spam folder too.",
+    "resend": "Send the code again",
+    "resendIn": "Send the code again in {seconds} seconds",
+    "changeEmail": "Change email",
+    "resent": "A new code is on its way. Use the newest code."
   },
   "AccountChip": {
     "signIn": "Log in",

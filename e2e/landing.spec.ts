@@ -59,12 +59,12 @@ test.describe("landing page", () => {
     expect(background).toBe("rgb(243, 242, 234)");
   });
 
-  test("sends every order button to the booking home", async ({ page }) => {
+  test("sends every order button to the order page", async ({ page }) => {
     await page.goto("/");
     const ctas = page.getByRole("link", { name: "Pesan sekarang" });
     expect(await ctas.count()).toBeGreaterThanOrEqual(3);
     for (const cta of await ctas.all()) {
-      await expect(cta).toHaveAttribute("href", "/home");
+      await expect(cta).toHaveAttribute("href", "/pesan");
     }
   });
 
@@ -120,12 +120,14 @@ test.describe("landing page", () => {
     // Four cards whatever the catalog holds; the full list is one link away (T8).
     await expect(items).toHaveCount(4);
     await expect(items.first().getByRole("heading", { level: 3 })).toHaveText("Pembersihan Rutin");
+    await expect(items.first().getByRole("link")).toHaveAttribute("href", "/pesan?layanan=regular");
     for (const item of await items.all()) {
       await expect(item.getByRole("heading", { level: 3 })).toBeVisible();
       await expect(item.getByText(/^Rp\s[\d.]+$/)).toBeVisible();
       await expect(item.getByText(/^± \d+ (jam|menit)/)).toBeVisible();
       await expect(item.getByRole("img")).toBeVisible();
-      await expect(item.getByRole("link")).toHaveAttribute("href", "/services");
+      // Each card opens the order page for its service (T9b).
+      await expect(item.getByRole("link")).toHaveAttribute("href", /^\/pesan\?layanan=[a-z0-9-]+$/);
     }
     await expect(services).not.toContainText("mulai dari");
     await expect(services.getByText("Harga tampil penuh. Tidak ada biaya tambahan saat Anda membayar.")).toBeVisible();
@@ -170,7 +172,7 @@ test.describe("landing page", () => {
   test("ends with one call to action and a footer that says payment is simulated", async ({ page }) => {
     await page.goto("/");
     const cta = page.getByRole("region", { name: "Pilih jadwal yang masih kosong di area Anda" });
-    await expect(cta.getByRole("link", { name: "Pesan sekarang" })).toHaveAttribute("href", "/home");
+    await expect(cta.getByRole("link", { name: "Pesan sekarang" })).toHaveAttribute("href", "/pesan");
     const footer = page.getByRole("contentinfo");
     await expect(footer).toContainText("Pembayaran hanya simulasi");
     // The prices are HomeKlin's price list since T8, so nothing calls them samples any more.

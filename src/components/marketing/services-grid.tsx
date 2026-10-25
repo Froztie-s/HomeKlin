@@ -2,6 +2,7 @@ import { ArrowUpRight, Clock } from "lucide-react";
 import { useLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { ServiceDuration } from "@/components/customer/service-duration";
+import { orderHref } from "@/components/customer/order-query";
 import { hasServicePhoto } from "@/components/customer/service-photos";
 import { ServiceVisual } from "@/components/customer/service-visual";
 import { Link } from "@/i18n/navigation";
@@ -20,8 +21,9 @@ const featuredCount = 4;
 // cards would be too narrow for the duration and the price on one line). The services and their one
 // full price are HomeKlin's real catalog (T8), cached and prerendered with the page; admin's changes
 // show at once (src/lib/catalog/cached.ts). The four are the first in admin's order that have a photo.
-// Each card is one link to /services; on hover or keyboard focus it inverts to forest green, which is
-// the feedback for "this is clickable" (the service filter lives on /services, where SPEC puts it).
+// Each card is one link to the order page for that service (/pesan?layanan=<id>, T9b); on hover or
+// keyboard focus it inverts to forest green, which is the feedback for "this is clickable" (the
+// service filter lives on /services, where SPEC puts it).
 export async function ServicesGrid() {
   const [t, services] = await Promise.all([getTranslations("ServicesGrid"), getCatalogServices()]);
   const featured = pickFeatured(services, hasServicePhoto, featuredCount);
@@ -100,7 +102,7 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
         </div>
         <h3 className="mt-4 font-display text-title font-semibold">
           <Link
-            href="/services"
+            href={orderHref({ serviceId: service.id })}
             className="rounded-sm after:absolute after:inset-0 after:rounded-lg focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:-outline-offset-4 focus-visible:after:outline-lime"
           >
             {service.name[locale]}

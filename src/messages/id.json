@@ -257,7 +257,8 @@
     "emptyBody": "Anda dapat mencari jawaban dengan kata kunci. Jika jawabannya tidak ada, Anda dapat menghubungi admin lewat chat dari halaman ini."
   },
   "AccountPage": {
-    "title": "Akun"
+    "title": "Akun",
+    "signInNote": "Anda masuk dengan kode yang kami kirim ke email Anda. Tidak perlu kata sandi."
   },
   "AreaPicker": {
     "label": "Area layanan"
@@ -272,9 +273,9 @@
     "book": "Pesan",
     "bookLabel": "Pesan {service}"
   },
-  "BookPage": {
+  "OrderPage": {
     "title": "Pesan layanan",
-    "description": "Periksa layanan dan jadwalnya, isi alamat Anda, lalu pesan."
+    "description": "Pilih layanan dan jadwal, lalu isi alamat dan kontak Anda. Tidak perlu membuat akun dulu."
   },
   "Booking": {
     "formLabel": "Pesan layanan",
@@ -329,6 +330,38 @@
       "unavailable": "Pesanan belum dapat dibuat karena ada gangguan. Coba lagi sebentar lagi.",
       "rateLimited": "Terlalu banyak percobaan. Tunggu beberapa menit, lalu coba lagi."
     }
+  },
+  "Order": {
+    "serviceTitle": "Layanan",
+    "serviceLabel": "Pilih layanan",
+    "servicePlaceholder": "Pilih salah satu layanan",
+    "serviceUnknown": "Layanan dari tautan ini tidak dapat dipesan. Pilih layanan lain di bawah.",
+    "whereTitle": "Area dan jadwal",
+    "areaLabel": "Area layanan",
+    "unservedTitle": "HomeKlin belum melayani {area}",
+    "unservedBody": "Pilih area lain di atas untuk melihat jadwal kosongnya.",
+    "fullTitle": "Semua jadwal di {area} sudah terisi",
+    "fullBody": "Belum ada jadwal kosong untuk {days, plural, other {# hari}} ke depan. Pilih area lain, atau coba lagi nanti.",
+    "slotsErrorTitle": "Jadwal di {area} tidak dapat dimuat",
+    "slotsErrorBody": "Ada gangguan saat membaca jadwal. Muat ulang halaman untuk mencoba lagi.",
+    "retry": "Muat ulang",
+    "contactTitle": "Alamat dan kontak",
+    "phoneLabel": "Nomor HP",
+    "phoneHint": "Petugas HomeKlin menghubungi nomor ini pada hari kedatangan.",
+    "emailLabel": "Email",
+    "emailHint": "Kami kirim kode ke email ini. Kode itu membuat pesanan Anda, tanpa perlu kata sandi.",
+    "signedInTitle": "Anda memesan sebagai",
+    "signedInNote": "Konfirmasi pesanan dikirim ke email akun ini.",
+    "submitSend": "Kirim kode",
+    "pendingSend": "Mengirim kode…",
+    "sendNote": "Pesanan dibuat setelah Anda memasukkan kode dari email.",
+    "codeTitle": "Masukkan kode dari email",
+    "codeSentTo": "Kami mengirim kode 6 angka ke <strong>{email}</strong>.",
+    "recapTitle": "Pesanan Anda",
+    "recapWindow": "{day}, {window} WIB",
+    "staffTitle": "Akun staf tidak dapat memesan",
+    "staffBody": "Anda sedang masuk dengan akun staf HomeKlin. Pesanan dibuat dengan akun pelanggan. Keluar dulu bila ingin memesan sebagai pelanggan.",
+    "staffLink": "Ke halaman kerja Anda"
   },
   "BookingUnavailable": {
     "serviceTitle": "Layanan ini tidak dapat dipesan",
@@ -551,32 +584,17 @@
   "LoginPage": {
     "metaTitle": "Masuk",
     "title": "Masuk ke HomeKlin",
-    "lead": "Gunakan email dan kata sandi akun HomeKlin Anda."
-  },
-  "SignupPage": {
-    "metaTitle": "Daftar",
-    "title": "Buat akun HomeKlin",
-    "lead": "Dengan akun, Anda dapat memesan, membayar, dan menonton pekerjaan di rumah Anda secara langsung."
+    "lead": "Pelanggan masuk dengan kode dari email, tanpa kata sandi."
   },
   "Auth": {
     "fields": {
-      "fullName": "Nama lengkap",
       "email": "Email",
       "password": "Kata sandi",
-      "passwordHint": "Minimal 8 karakter.",
       "showPassword": "Tampilkan kata sandi"
     },
     "login": {
       "submit": "Masuk",
-      "pending": "Sedang masuk…",
-      "switchPrompt": "Belum punya akun?",
-      "switchLink": "Daftar"
-    },
-    "signup": {
-      "submit": "Buat akun",
-      "pending": "Sedang membuat akun…",
-      "switchPrompt": "Sudah punya akun?",
-      "switchLink": "Masuk"
+      "pending": "Sedang masuk…"
     },
     "errors": {
       "emailRequired": "Masukkan email Anda.",
@@ -595,6 +613,28 @@
       "unavailable": "Permintaan Anda belum dapat diproses. Coba lagi sebentar lagi.",
       "codeInvalid": "Kode salah atau sudah tidak berlaku. Periksa email Anda atau kirim kode baru."
     }
+  },
+  "AuthLogin": {
+    "submitCode": "Kirim kode",
+    "pendingCode": "Mengirim kode…",
+    "verify": "Masuk",
+    "verifying": "Sedang masuk…",
+    "codeTitle": "Masukkan kode dari email",
+    "codeSentTo": "Jika <strong>{email}</strong> terdaftar di HomeKlin, kami sudah mengirim kode 6 angka ke email itu.",
+    "withPassword": "Masuk dengan kata sandi",
+    "withCode": "Masuk dengan kode email",
+    "passwordTitle": "Masuk dengan kata sandi",
+    "passwordNote": "Untuk akun petugas dan staf HomeKlin, serta akun demo.",
+    "firstTimePrompt": "Belum pernah memesan?",
+    "firstTimeLink": "Pesan layanan"
+  },
+  "CodeEntry": {
+    "codeLabel": "Kode 6 angka",
+    "codeHint": "Belum ada emailnya? Periksa juga folder spam.",
+    "resend": "Kirim ulang kode",
+    "resendIn": "Kirim ulang kode dalam {seconds} detik",
+    "changeEmail": "Ganti email",
+    "resent": "Kode baru sudah dikirim. Gunakan kode yang terbaru."
   },
   "AccountChip": {
     "signIn": "Masuk",

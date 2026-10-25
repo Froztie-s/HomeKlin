@@ -74,7 +74,7 @@ export function MarketingHeader() {
                 <AccountSlot palette="forest" showName />
               </Suspense>
             </div>
-            <ButtonLink href="/home" variant="forest" hideArrowOnPhones>
+            <ButtonLink href="/pesan" variant="forest" hideArrowOnPhones>
               {t("cta")}
             </ButtonLink>
           </div>

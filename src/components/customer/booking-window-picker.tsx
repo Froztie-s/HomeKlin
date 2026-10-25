@@ -5,7 +5,15 @@ import { useTranslations } from "next-intl";
 import { useRef } from "react";
 import { Link } from "@/i18n/navigation";
 import { FieldError } from "./booking-controls";
-import type { BookingDay } from "./booking-form";
+
+/** One day of free windows, written on the server in Jakarta time. */
+export type BookingDay = {
+  /** YYYY-MM-DD in Jakarta. */
+  date: string;
+  /** "Senin, 9 November", "Besok, Jumat 6 November". */
+  label: string;
+  windows: { startsAt: string; label: string }[];
+};
 
 type WindowPickerProps = {
   areaName: string;

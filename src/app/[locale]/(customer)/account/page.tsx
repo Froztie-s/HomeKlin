@@ -13,7 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t("title") };
 }
 
-// Customers only (T5): who is signed in, and signing out. The title is prerendered; the rest renders
+// Customers only (T5): who is signed in, and signing out. Customers have no password (T9b): they sign
+// in with a code sent to their email, and the page says so. The title is prerendered; the rest renders
 // inside the page's own role check (a layout's check would not protect it).
 export default function AccountPage() {
   const t = useTranslations("AccountPage");
@@ -23,6 +24,7 @@ export default function AccountPage() {
       <Suspense fallback={<GateFallback />}>
         <RoleGate roles={["customer"]}>
           <AccountSummary />
+          <p className="mt-4 max-w-prose px-1 text-sm text-ink-muted">{t("signInNote")}</p>
         </RoleGate>
       </Suspense>
     </PageContainer>

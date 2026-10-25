@@ -40,7 +40,7 @@ export function Hero() {
           {t("lead")}
         </p>
         <div className="mt-8 flex animate-rise flex-wrap items-center gap-x-6 gap-y-4 animate-delay-160 lg:mt-10">
-          <ButtonLink href="/home" variant="accent" size="lg">
+          <ButtonLink href="/pesan" variant="accent" size="lg">
             {t("cta")}
           </ButtonLink>
           <a
