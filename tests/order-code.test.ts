@@ -70,7 +70,8 @@ describe("parseCode", () => {
 });
 
 describe("sendEmail", () => {
-  const message = { to: "nadia@example.com", subject: "Pesanan", html: "<p>Halo</p>", text: "Halo" };
+  // A made-up address on a normal domain (the transport is a stand-in, nothing is sent).
+  const message = { to: "nadia@pelanggan-uji.id", subject: "Pesanan", html: "<p>Halo</p>", text: "Halo" };
   const smtp = { host: "smtp.gmail.com", port: 587, user: "homeklin.demo@gmail.com", pass: "app-password" };
 
   it("sends over SMTP (Gmail) from the configured sender", async () => {
@@ -84,7 +85,7 @@ describe("sendEmail", () => {
     );
     expect(sendMail).toHaveBeenCalledWith({
       from: "HomeKlin <homeklin.demo@gmail.com>",
-      to: "nadia@example.com",
+      to: "nadia@pelanggan-uji.id",
       subject: "Pesanan",
       html: "<p>Halo</p>",
       text: "Halo",
@@ -97,6 +98,17 @@ describe("sendEmail", () => {
       sent: false,
       reason: "not_configured",
     });
+    expect(createTransport).not.toHaveBeenCalled();
+  });
+
+  it("never sends to reserved test domains, which cannot receive mail (RFC 2606)", async () => {
+    const createTransport = vi.fn();
+    for (const to of ["t9b-1@example.com", "a@sub.example.org", "x@example.net", "y@shop.test", "z@host.invalid", "q@site.example"]) {
+      expect(await sendEmail({ ...message, to }, { smtp, from: "x@example.com", createTransport }), to).toEqual({
+        sent: false,
+        reason: "undeliverable",
+      });
+    }
     expect(createTransport).not.toHaveBeenCalled();
   });
 

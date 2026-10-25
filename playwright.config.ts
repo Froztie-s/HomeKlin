@@ -73,6 +73,11 @@ export default defineConfig({
     env: {
       NEXT_PUBLIC_SUPABASE_URL: testSupabaseUrl,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.TEST_SUPABASE_PUBLISHABLE_KEY,
+      // The app under test never sends real email (T9b): empty SMTP settings override the ones that
+      // Next.js would read from .env, so the order confirmation is skipped ("not_configured"). The
+      // sign-in codes go through the test project's Ethereal SMTP, which delivers nothing.
+      SMTP_USER: "",
+      SMTP_PASS: "",
     },
   },
 });

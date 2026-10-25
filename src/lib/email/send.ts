@@ -11,7 +11,10 @@ import { formatRupiah } from "@/lib/format";
 
 export type EmailMessage = { to: string; subject: string; html: string; text: string };
 
-export type SendResult = { sent: true } | { sent: false; reason: "not_configured" | "failed" };
+export type SendResult = { sent: true } | { sent: false; reason: "not_configured" | "undeliverable" | "failed" };
+
+/** example.com/.net/.org and the .test, .invalid, .example and .localhost top-level domains. */
+const reservedDomain = /@(?:[^@]*\.)?(?:example\.(?:com|net|org)|[^@]*\.(?:test|invalid|example|localhost))$/i;
 
 export type SmtpSettings = { host: string; port: number; user: string; pass: string };
 
@@ -33,6 +36,9 @@ export async function sendEmail(
   { smtp, from, createTransport = defaultTransport }: SendOptions,
 ): Promise<SendResult> {
   if (!smtp) return { sent: false, reason: "not_configured" };
+  // Test and demo accounts use reserved domains (RFC 2606), which can never receive mail: sending
+  // there would only bounce back into the sender's inbox.
+  if (reservedDomain.test(message.to)) return { sent: false, reason: "undeliverable" };
   try {
     // Port 587 with STARTTLS: the connection is upgraded to TLS before the login is sent.
     const transport = createTransport({
