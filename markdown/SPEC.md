@@ -154,6 +154,7 @@ Priority: P0 must work at hand-over, P1 should work, P2 stretch.
 - Customer can book a service for a slot. The booking is **routed automatically** to one partner agency in that area with that slot free. Routing is race-safe: two customers booking the last free capacity of a slot at the same moment cannot both succeed, and the loser is told the slot is no longer free.
 - No customer page shows, names or hints at a partner agency. Once a cleaner is assigned, the customer sees the cleaner's name and photo as "Petugas HomeKlin".
 - Streaming consent toggle must be switched on at booking time (Plan, Risk 3).
+- **Ordering needs no separate sign-up (user decision, 2026-10-25).** A service on the landing page or `/services` opens one order form at `/pesan`: service, area, arrival window, address, phone number (contact for the cleaner), email and the streaming consent. HomeKlin emails a 6-digit code; the customer types it on the form, which proves the email is theirs, creates the customer account if the email is new, signs them in, and places the order. A returning customer signs in at `/login` with a new emailed code to pay, watch the live stream or replay the recording. Staff (cleaner, agency, admin) keep email and password. Emails go through a free provider (Brevo); tests use a throw-away SMTP service (Ethereal) and never send real email.
 - Payment via Midtrans Sandbox leads to exactly one of: successful, failed, cancelled. Order status matches payment status in every case, including webhook retries (idempotent).
 
 **Check-in (P0)**
