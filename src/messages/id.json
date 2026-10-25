@@ -268,6 +268,99 @@
     "privacy": "Hanya Anda dan tim pemantau HomeKlin yang dapat menonton. Rekaman tersimpan 7 hari.",
     "watch": "Tonton langsung"
   },
+  "ServiceCard": {
+    "book": "Pesan",
+    "bookLabel": "Pesan {service}"
+  },
+  "BookPage": {
+    "title": "Pesan layanan",
+    "description": "Periksa layanan dan jadwalnya, isi alamat Anda, lalu pesan."
+  },
+  "Booking": {
+    "formLabel": "Pesan layanan",
+    "serviceTitle": "Layanan",
+    "areaLabel": "Area",
+    "priceLabel": "Harga",
+    "changeService": "Ganti layanan",
+    "windowTitle": "Jadwal kedatangan",
+    "windowValue": "{window} WIB",
+    "noWindow": "Belum ada jadwal yang dipilih",
+    "noWindowHint": "Pilih salah satu jadwal kosong di bawah.",
+    "arrivalNote": "Petugas HomeKlin tiba dalam rentang waktu ini. Waktu dalam WIB (waktu Jakarta).",
+    "changeWindow": "Ganti jadwal",
+    "windowsLegend": "Jadwal kosong di {area}",
+    "takenTitle": "Jadwal ini sudah tidak kosong",
+    "takenBody": "{day} pukul {time} WIB sudah terisi. Pilih jadwal lain di bawah, atau kembali ke daftar layanan.",
+    "justTakenTitle": "Jadwal ini baru saja terisi",
+    "backToServices": "Kembali ke daftar layanan",
+    "addressTitle": "Alamat",
+    "addressLabel": "Alamat lengkap",
+    "addressHint": "Jalan, nomor rumah, RT/RW, kelurahan, dan patokan bila perlu. 10 sampai 300 karakter.",
+    "streamTitle": "Siaran langsung",
+    "streamFacts": {
+      "phone": "Selama bekerja, ponsel Petugas HomeKlin menyiarkan pekerjaannya secara langsung.",
+      "viewers": "Hanya Anda dan tim pemantau HomeKlin yang dapat menontonnya.",
+      "recording": "Rekamannya disimpan 7 hari, lalu dihapus."
+    },
+    "consentLabel": "Saya setuju pekerjaan di rumah saya disiarkan langsung dan direkam",
+    "totalLabel": "Total",
+    "totalNote": "Harga penuh, tanpa biaya tambahan. Anda membayar setelah pesanan dibuat.",
+    "submit": "Pesan sekarang",
+    "pending": "Memesan…",
+    "submitHint": "Nyalakan persetujuan siaran di atas untuk memesan.",
+    "errorSummary": "{count, plural, other {Periksa # isian yang ditandai.}}",
+    "errors": {
+      "serviceInvalid": "Layanan ini tidak dapat dipesan. Pilih layanan dari daftar layanan.",
+      "areaInvalid": "Area ini tidak dapat dipesan. Pilih area dari daftar layanan.",
+      "slotInvalid": "Pilih jadwal kedatangan.",
+      "addressTooShort": "Tulis alamat lengkap, paling sedikit 10 karakter.",
+      "addressTooLong": "Alamat terlalu panjang. Persingkat menjadi paling banyak 300 karakter.",
+      "consentRequired": "Nyalakan persetujuan siaran untuk memesan."
+    },
+    "formErrors": {
+      "notCustomer": "Hanya akun pelanggan yang dapat memesan. Masuk dengan akun pelanggan Anda, lalu coba lagi.",
+      "slotUnavailable": "Pelanggan lain memesan tempat terakhir pada jadwal ini sesaat sebelum Anda. Pilih jadwal lain di bawah. Alamat dan persetujuan Anda tetap tersimpan.",
+      "serviceUnavailable": "Layanan ini sudah tidak ditawarkan. Pilih layanan lain dari daftar layanan.",
+      "unavailable": "Pesanan belum dapat dibuat karena ada gangguan. Coba lagi sebentar lagi."
+    }
+  },
+  "BookingUnavailable": {
+    "serviceTitle": "Layanan ini tidak dapat dipesan",
+    "serviceBody": "Layanan yang Anda pilih tidak ada atau sedang tidak ditawarkan. Pilih layanan lain dari daftar layanan.",
+    "areaTitle": "Area ini belum dapat dipesan",
+    "areaBody": "HomeKlin belum melayani area ini, atau alamat halaman ini tidak lengkap. Pilih area dan layanan dari daftar layanan.",
+    "fullTitle": "Semua jadwal di {area} sudah terisi",
+    "fullBody": "Belum ada jadwal kosong untuk {days, plural, other {# hari}} ke depan. Coba lagi nanti, atau pilih area lain.",
+    "errorTitle": "Halaman pemesanan tidak dapat dimuat",
+    "errorBody": "Ada gangguan saat membaca layanan dan jadwal. Muat ulang halaman untuk mencoba lagi.",
+    "retry": "Muat ulang",
+    "back": "Kembali ke daftar layanan"
+  },
+  "OrderConfirmation": {
+    "title": "Pesanan Anda sudah dibuat",
+    "lead": "Jadwal ini sudah kami simpan untuk Anda.",
+    "status": {
+      "pending_payment": "Menunggu pembayaran",
+      "paid": "Sudah dibayar",
+      "failed": "Pembayaran gagal",
+      "cancelled": "Dibatalkan"
+    },
+    "fields": {
+      "service": "Layanan",
+      "window": "Jadwal kedatangan",
+      "area": "Area",
+      "address": "Alamat",
+      "total": "Total"
+    },
+    "windowValue": "{day}, {window} WIB",
+    "serviceFallback": "Layanan HomeKlin",
+    "nextTitle": "Langkah berikutnya: pembayaran",
+    "nextBody": "Pembayaran akan segera dapat dilakukan dari halaman ini. Setelah pesanan dibayar, Petugas HomeKlin ditugaskan, dan nama serta fotonya tampil di pesanan Anda.",
+    "streamNote": "Anda menyetujui siaran langsung. Hanya Anda dan tim pemantau HomeKlin yang dapat menontonnya, dan rekamannya disimpan 7 hari.",
+    "errorTitle": "Pesanan tidak dapat ditampilkan",
+    "errorBody": "Ada gangguan saat membaca pesanan Anda. Muat ulang halaman untuk mencoba lagi.",
+    "retry": "Muat ulang"
+  },
   "PreviewData": {
     "jobService": "Pembersihan Rutin",
     "cleanerPhotoAlt": "Foto {name}",

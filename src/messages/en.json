@@ -268,6 +268,99 @@
     "privacy": "Only you and the HomeKlin monitoring team can watch. The recording is kept for 7 days.",
     "watch": "Watch live"
   },
+  "ServiceCard": {
+    "book": "Book",
+    "bookLabel": "Book {service}"
+  },
+  "BookPage": {
+    "title": "Book a cleaning",
+    "description": "Check the service and the time, add your address, then book."
+  },
+  "Booking": {
+    "formLabel": "Book a cleaning",
+    "serviceTitle": "Service",
+    "areaLabel": "Area",
+    "priceLabel": "Price",
+    "changeService": "Change service",
+    "windowTitle": "Arrival time",
+    "windowValue": "{window} WIB",
+    "noWindow": "No time chosen yet",
+    "noWindowHint": "Choose one of the free slots below.",
+    "arrivalNote": "Your HomeKlin cleaner arrives within this time. Times are in Jakarta time (WIB).",
+    "changeWindow": "Change time",
+    "windowsLegend": "Free slots in {area}",
+    "takenTitle": "This slot is no longer free",
+    "takenBody": "{day} at {time} WIB has been taken. Choose another slot below, or go back to the services.",
+    "justTakenTitle": "This slot was just taken",
+    "backToServices": "Back to the services",
+    "addressTitle": "Address",
+    "addressLabel": "Full address",
+    "addressHint": "Street, house number, RT/RW, neighbourhood and a landmark if needed. 10 to 300 characters.",
+    "streamTitle": "Live stream",
+    "streamFacts": {
+      "phone": "While working, your HomeKlin cleaner’s phone streams the job live.",
+      "viewers": "Only you and the HomeKlin monitoring team can watch it.",
+      "recording": "The recording is kept for 7 days, then deleted."
+    },
+    "consentLabel": "I agree to the work in my home being streamed live and recorded",
+    "totalLabel": "Total",
+    "totalNote": "The full price, with no extra fees. You pay after the order is made.",
+    "submit": "Book now",
+    "pending": "Booking…",
+    "submitHint": "Turn on the streaming consent above to book.",
+    "errorSummary": "{count, plural, one {Check the field that is marked.} other {Check the # fields that are marked.}}",
+    "errors": {
+      "serviceInvalid": "This service cannot be booked. Choose a service from the services list.",
+      "areaInvalid": "This area cannot be booked. Choose an area from the services list.",
+      "slotInvalid": "Choose an arrival time.",
+      "addressTooShort": "Write your full address, at least 10 characters.",
+      "addressTooLong": "The address is too long. Shorten it to 300 characters at most.",
+      "consentRequired": "Turn on the streaming consent to book."
+    },
+    "formErrors": {
+      "notCustomer": "Only customer accounts can book. Sign in with your customer account, then try again.",
+      "slotUnavailable": "Another customer booked the last place in this slot just before you. Choose another slot below. Your address and consent are kept.",
+      "serviceUnavailable": "This service is no longer offered. Choose another service from the services list.",
+      "unavailable": "The order could not be made because something went wrong. Try again in a moment."
+    }
+  },
+  "BookingUnavailable": {
+    "serviceTitle": "This service cannot be booked",
+    "serviceBody": "The service you chose does not exist or is not offered right now. Choose another service from the services list.",
+    "areaTitle": "This area cannot be booked yet",
+    "areaBody": "HomeKlin does not serve this area yet, or this page’s address is incomplete. Choose an area and a service from the services list.",
+    "fullTitle": "Every slot in {area} is taken",
+    "fullBody": "There are no free slots for the next {days, plural, one {# day} other {# days}}. Try again later, or choose another area.",
+    "errorTitle": "The booking page could not be loaded",
+    "errorBody": "Something went wrong while reading the services and free slots. Reload the page to try again.",
+    "retry": "Reload",
+    "back": "Back to the services"
+  },
+  "OrderConfirmation": {
+    "title": "Your order has been placed",
+    "lead": "We are holding this slot for you.",
+    "status": {
+      "pending_payment": "Awaiting payment",
+      "paid": "Paid",
+      "failed": "Payment failed",
+      "cancelled": "Cancelled"
+    },
+    "fields": {
+      "service": "Service",
+      "window": "Arrival time",
+      "area": "Area",
+      "address": "Address",
+      "total": "Total"
+    },
+    "windowValue": "{day}, {window} WIB",
+    "serviceFallback": "HomeKlin service",
+    "nextTitle": "Next step: payment",
+    "nextBody": "You will soon be able to pay from this page. Once the order is paid, a HomeKlin cleaner is assigned, and their name and photo appear in your order.",
+    "streamNote": "You agreed to the live stream. Only you and the HomeKlin monitoring team can watch it, and the recording is kept for 7 days.",
+    "errorTitle": "Your order could not be shown",
+    "errorBody": "Something went wrong while reading your order. Reload the page to try again.",
+    "retry": "Reload"
+  },
   "PreviewData": {
     "jobService": "Regular Cleaning",
     "cleanerPhotoAlt": "Photo of {name}",

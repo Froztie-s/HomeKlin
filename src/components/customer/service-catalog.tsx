@@ -9,6 +9,8 @@ import type { CatalogFilters, Service, ServiceArea } from "@/lib/catalog/catalog
 import { catalogQuery, defaultAreaId, resolveArea } from "@/lib/catalog/customer-filters";
 import { parseCatalogFilters } from "@/lib/validation/catalog";
 import { AreaPicker } from "./area-picker";
+import { bookingHref } from "./booking-query";
+import { loadFreeSlots } from "./free-slots";
 import { CatalogForm } from "./catalog-form";
 import { CatalogSearch, CatalogTypeFilter } from "./catalog-filters";
 import { FreeWindows, FreeWindowsSkeleton } from "./free-windows";
@@ -51,6 +53,11 @@ export async function ServiceCatalog({ searchParams }: { searchParams: Promise<S
 
   const area = resolveArea(areas, filters.areaId);
   if (!area) return <CatalogError retryHref={`${action}${catalogQuery(filters)}`} />;
+  // "Pesan" on each card opens the booking page in the area's earliest free window (read once per
+  // request, shared with the windows panel). No free window, or none readable: no booking button.
+  const earliest = area.isServed ? ((await loadFreeSlots(area.id))?.[0] ?? null) : null;
+  const bookHrefFor = (service: Service) =>
+    earliest ? bookingHref({ serviceId: service.id, areaId: area.id, startsAt: earliest.startsAt }) : undefined;
   const areaName = area.name[locale];
   // Links name the area unless it is the default, so the default address stays plain (as the form does).
   const areaId = area.id === defaultAreaId ? undefined : area.id;
@@ -123,7 +130,7 @@ export async function ServiceCatalog({ searchParams }: { searchParams: Promise<S
             <ul aria-labelledby="daftar-harga" className="mt-4 grid gap-4 md:grid-cols-2 md:gap-5">
               {services.map((service) => (
                 <li key={service.id}>
-                  <ServiceCard service={service} />
+                  <ServiceCard service={service} bookHref={bookHrefFor(service)} />
                 </li>
               ))}
             </ul>

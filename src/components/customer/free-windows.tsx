@@ -1,42 +1,29 @@
 import { CalendarClock, CalendarX2, ChevronDown, CircleAlert, LoaderCircle } from "lucide-react";
-import { unstable_rethrow } from "next/navigation";
-import { connection } from "next/server";
 import { getLocale, getTranslations } from "next-intl/server";
-import { listFreeSlots, type FreeSlot } from "@/lib/catalog/catalog";
-import { formatJakartaDay, formatJakartaTime, groupSlotsByJakartaDay, type SlotDay } from "@/lib/catalog/slots-days";
-import { createSupabasePublicClient } from "@/lib/supabase/public";
+import { groupSlotsByJakartaDay } from "@/lib/catalog/slots-days";
+import { freeWindowDays, loadFreeSlots } from "./free-slots";
+import { getSlotLabels } from "./slot-labels";
 
 // The free arrival windows of the chosen area on /services: the earliest one up front, every one of
 // the next two weeks one tap away (a native <details>, so it opens without JavaScript), grouped by day
 // and written in Jakarta time whatever the browser's time zone (the server writes them).
 // Free slots change with every booking (T9), so they are read at request time, never cached
-// (connection() keeps them out of every prerender), behind the <Suspense> of the page with
+// (loadFreeSlots, shared with the cards' "Pesan" buttons), behind the <Suspense> of the page with
 // FreeWindowsSkeleton as the fallback. The windows are combined over everyone serving the area: the
 // customer sees times, never who provides them (markdown/PRODUCT.md principle 6).
 
-/** How far ahead the page looks for free windows. */
-export const freeWindowDays = 14;
-
 export async function FreeWindows({ areaId, areaName }: { areaId: string; areaName: string }) {
-  await connection();
-  const [t, locale] = await Promise.all([getTranslations("FreeWindows"), getLocale()]);
+  const locale = await getLocale();
+  const [slots, t, labels] = await Promise.all([
+    loadFreeSlots(areaId),
+    getTranslations("FreeWindows"),
+    getSlotLabels(locale),
+  ]);
   const now = new Date();
+  const dayLabel = labels.day;
+  const windowLabel = labels.window;
 
-  const dayLabel = (day: SlotDay) => {
-    const parts = formatJakartaDay(day.date, locale);
-    if (day.relative === "today") return t("today", parts);
-    if (day.relative === "tomorrow") return t("tomorrow", parts);
-    return t("day", parts);
-  };
-  const windowLabel = (slot: FreeSlot) =>
-    t("window", { start: formatJakartaTime(slot.startsAt, locale), end: formatJakartaTime(slot.endsAt, locale) });
-
-  let slots: FreeSlot[];
-  try {
-    slots = await listFreeSlots(createSupabasePublicClient(), areaId, { days: freeWindowDays, now });
-  } catch (error) {
-    unstable_rethrow(error);
-    console.error(error);
+  if (!slots) {
     return (
       <p role="alert" className="flex items-start gap-2 text-sm text-danger">
         <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
