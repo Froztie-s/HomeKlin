@@ -60,8 +60,18 @@ function smtpFromEnv(): SmtpSettings | undefined {
 /** Sends with the settings from the environment (server only). */
 export function sendAppEmail(message: EmailMessage): Promise<SendResult> {
   const smtp = smtpFromEnv();
-  const from = process.env.EMAIL_FROM ?? `HomeKlin <${smtp?.user ?? "no-reply@homeklin.invalid"}>`;
-  return sendEmail(message, { smtp, from });
+  return sendEmail(message, { smtp, from: senderOf(process.env.EMAIL_FROM, smtp?.user) });
+}
+
+/**
+ * The From header. Gmail sends only from the account's own address, so the address is always the SMTP
+ * user; EMAIL_FROM gives the display name ("HomeKlin", or "HomeKlin <address>" whose address is ignored).
+ */
+export function senderOf(emailFrom: string | undefined, smtpUser: string | undefined): string {
+  const value = (emailFrom ?? "").trim();
+  const named = /^(.*?)\s*<[^>]*>$/.exec(value);
+  const name = (named ? named[1] : value.includes("@") ? "" : value) || "HomeKlin";
+  return `${name} <${smtpUser ?? "no-reply@homeklin.invalid"}>`;
 }
 
 export type ConfirmationOrder = {
@@ -135,13 +145,35 @@ export function orderConfirmationEmail(order: ConfirmationOrder, locale: Locale)
     [t.total, formatRupiah(order.priceIdr, locale)],
   ];
   const text = [t.intro, "", ...rows.map(([label, value]) => `${label}: ${value}`), "", `${t.open}: ${order.orderUrl}`, "", t.note].join("\n");
-  const html = [
-    `<p>${escapeHtml(t.intro)}</p>`,
-    "<table>",
-    ...rows.map(([label, value]) => `<tr><th align="left">${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`),
-    "</table>",
-    `<p><a href="${escapeHtml(order.orderUrl)}">${escapeHtml(t.open)}</a></p>`,
-    `<p>${escapeHtml(t.note)}</p>`,
-  ].join("\n");
+  // Email HTML: tables and inline styles only (mail apps ignore <style> blocks), no images, the site's
+  // evergreen brand colour; the same look as the sign-in code email (scripts/supabase.mjs).
+  const detailRows = rows
+    .map(
+      ([label, value]) =>
+        `<tr><td style="padding:10px 0;border-bottom:1px solid #e3e9e6;font-size:13px;color:#5b6862;width:38%;vertical-align:top;">${escapeHtml(label)}</td>` +
+        `<td style="padding:10px 0;border-bottom:1px solid #e3e9e6;font-size:15px;color:#17231e;font-weight:bold;vertical-align:top;">${escapeHtml(value)}</td></tr>`,
+    )
+    .join("");
+  const html = `<!doctype html>
+<html lang="${locale}">
+<body style="margin:0;padding:0;background:#f2f6f4;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f6f4;padding:24px 12px;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:16px;font-family:Arial,Helvetica,sans-serif;color:#17231e;">
+<tr><td style="background:#1d6f55;border-radius:16px 16px 0 0;padding:20px 28px;"><span style="font-size:20px;font-weight:bold;color:#ffffff;">HomeKlin</span></td></tr>
+<tr><td style="padding:28px 28px 8px;">
+<p style="margin:0 0 8px;font-size:18px;font-weight:bold;">${escapeHtml(t.subject)}</p>
+<p style="margin:0 0 16px;font-size:15px;line-height:22px;color:#3d4a44;">${escapeHtml(t.intro)}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0">${detailRows}</table>
+</td></tr>
+<tr><td style="padding:16px 28px 8px;">
+<a href="${escapeHtml(order.orderUrl)}" style="display:inline-block;background:#1d6f55;color:#ffffff;text-decoration:none;font-size:15px;font-weight:bold;padding:12px 24px;border-radius:999px;">${escapeHtml(t.open)}</a>
+</td></tr>
+<tr><td style="padding:12px 28px 28px;"><p style="margin:0;font-size:13px;line-height:20px;color:#5b6862;">${escapeHtml(t.note)}</p></td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
   return { subject: t.subject, html, text };
 }

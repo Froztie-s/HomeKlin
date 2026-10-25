@@ -101,17 +101,44 @@ async function query(ref, sql) {
 
 // The email with the sign-in code (T9b). Supabase fills in {{ .Token }}. Both languages in one email,
 // because the code is asked for before the customer has an account with a language.
-const codeSubject = "Kode masuk HomeKlin / HomeKlin sign-in code";
-const codeTemplate = `<p>Kode masuk HomeKlin Anda:</p>
-<p style="font-size:28px;font-weight:bold;letter-spacing:6px">{{ .Token }}</p>
-<p>Ketik kode ini di halaman HomeKlin. Kode berlaku 10 menit. Jika Anda tidak meminta kode ini, abaikan email ini.</p>
-<hr>
-<p>Your HomeKlin sign-in code is <strong>{{ .Token }}</strong>. Type it on the HomeKlin page. It is valid for 10 minutes. If you did not ask for it, ignore this email.</p>`;
+// Email HTML: tables and inline styles only (mail apps ignore <style> blocks and most CSS), no images
+// (often blocked), the site's evergreen brand colour, and the code large in its own box so it can be
+// read and typed at a glance. Indonesian first, then English.
+const codeSubject = "Kode masuk HomeKlin Anda / Your HomeKlin sign-in code";
+const codeTemplate = `<!doctype html>
+<html lang="id">
+<body style="margin:0;padding:0;background:#f2f6f4;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f2f6f4;padding:24px 12px;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:16px;font-family:Arial,Helvetica,sans-serif;color:#17231e;">
+<tr><td style="background:#1d6f55;border-radius:16px 16px 0 0;padding:20px 28px;">
+<span style="font-size:20px;font-weight:bold;color:#ffffff;">HomeKlin</span>
+</td></tr>
+<tr><td style="padding:28px 28px 8px;">
+<p style="margin:0 0 8px;font-size:18px;font-weight:bold;">Kode masuk Anda</p>
+<p style="margin:0 0 20px;font-size:15px;line-height:22px;color:#3d4a44;">Ketik kode ini di halaman HomeKlin untuk melanjutkan pesanan atau masuk ke akun Anda.</p>
+<p style="margin:0 0 20px;padding:16px;background:#e8f3ee;border-radius:12px;text-align:center;font-size:34px;font-weight:bold;letter-spacing:10px;color:#124d3a;font-family:'Courier New',Courier,monospace;">{{ .Token }}</p>
+<p style="margin:0 0 4px;font-size:13px;line-height:20px;color:#5b6862;">Kode berlaku 10 menit dan hanya dapat dipakai sekali. Jangan berikan kode ini kepada siapa pun, termasuk petugas HomeKlin.</p>
+<p style="margin:0 0 24px;font-size:13px;line-height:20px;color:#5b6862;">Tidak meminta kode ini? Abaikan email ini; akun Anda tetap aman.</p>
+</td></tr>
+<tr><td style="padding:0 28px 28px;border-top:1px solid #e3e9e6;">
+<p style="margin:20px 0 6px;font-size:14px;font-weight:bold;">Your sign-in code</p>
+<p style="margin:0;font-size:13px;line-height:20px;color:#5b6862;">Type <strong style="color:#124d3a;">{{ .Token }}</strong> on the HomeKlin page to continue your order or sign in. It is valid for 10 minutes and works once. Never share it with anyone, HomeKlin staff included. Did not ask for it? Ignore this email.</p>
+</td></tr>
+</table>
+<p style="margin:16px 0 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;color:#7a8781;">HomeKlin, jasa kebersihan rumah yang bisa Anda tonton langsung.</p>
+</td></tr>
+</table>
+</body>
+</html>`;
 
 /** "Name <address>" or a bare address -> { name, address }. */
 function parseSender(from) {
-  const match = /^\s*(.*?)\s*<([^>]+)>\s*$/.exec(from ?? "");
-  return match ? { name: match[1] || "HomeKlin", address: match[2] } : { name: "HomeKlin", address: (from ?? "").trim() };
+  const value = (from ?? "").trim();
+  const match = /^(.*?)\s*<([^>]+)>$/.exec(value);
+  if (match) return { name: match[1] || "HomeKlin", address: match[2] };
+  // A bare address, or just a display name.
+  return value.includes("@") ? { name: "HomeKlin", address: value } : { name: value || "HomeKlin", address: "" };
 }
 
 const commands = {
@@ -203,7 +230,9 @@ const commands = {
             host: process.env.SMTP_HOST ?? "smtp.gmail.com",
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_PASS,
-            sender: parseSender(process.env.EMAIL_FROM ?? `HomeKlin <${process.env.SMTP_USER ?? ""}>`),
+            // Gmail sends only from its own address: SMTP_USER is the sender; EMAIL_FROM gives the name
+            // ("HomeKlin" or "HomeKlin <address>").
+            sender: { name: parseSender(process.env.EMAIL_FROM).name, address: process.env.SMTP_USER },
           }
         : {
             host: "smtp.ethereal.email",

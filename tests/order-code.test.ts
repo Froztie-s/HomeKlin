@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { orderConfirmationEmail, sendEmail } from "@/lib/email/send";
+import { orderConfirmationEmail, sendEmail, senderOf } from "@/lib/email/send";
 import { normalisePhone, parseCode, parseGuestOrder } from "@/lib/validation/booking";
 
 // Ordering without sign-up (T9b): the guest order form's validation (phone, email, the emailed code)
@@ -107,6 +107,15 @@ describe("sendEmail", () => {
       },
     }));
     expect(await sendEmail(message, { smtp, from: "x@example.com", createTransport })).toEqual({ sent: false, reason: "failed" });
+  });
+});
+
+describe("senderOf", () => {
+  it("always sends from the Gmail account, with the name from EMAIL_FROM", () => {
+    expect(senderOf("HomeKlin", "demo@gmail.com")).toBe("HomeKlin <demo@gmail.com>");
+    expect(senderOf("HomeKlin Demo <other@example.com>", "demo@gmail.com")).toBe("HomeKlin Demo <demo@gmail.com>");
+    expect(senderOf("other@example.com", "demo@gmail.com")).toBe("HomeKlin <demo@gmail.com>");
+    expect(senderOf(undefined, "demo@gmail.com")).toBe("HomeKlin <demo@gmail.com>");
   });
 });
 
