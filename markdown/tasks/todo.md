@@ -56,7 +56,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: mobile-first browse/search/filter of HomeKlin's services; price shown clearly with no hidden fees; free slots for the chosen area visible; no agency shown or named anywhere; empty state when no slot is free in the area; loading states.
   - Verify: Playwright mobile: find a service by area and type; the no-agency-wording test still passes.
   - Deps: T7. Skills: `frontend-ui-engineering`.
-- [ ] **T9 Booking with streaming consent and automatic routing** (M)
+- [x] **T9 Booking with streaming consent and automatic routing** (M) — done 2026-10-25: `book_slot()` routes race-safely (integration-tested: 5 two-way races, a three-way race, one/several/none free); `/book` with address and consent, confirmation on `/orders?booked=`, "no longer free" handling; e2e happy path (no agency in the HTML) and rejection
   - Accept: customer books a service and a free slot with address; the booking is routed automatically to one partner agency in that area with the slot free; routing is race-safe (two simultaneous bookings for the last free capacity: exactly one succeeds, the other is told the slot is no longer free); consent toggle must be on to submit; order status `pending_payment`; the customer's response never contains the agency.
   - Verify: Vitest concurrent-booking test and routing tests (one agency free, several free, none free); Playwright booking happy path and rejection.
   - Deps: T8. Skills: `api-and-interface-design`, `doubt-driven-development` (routing race).
