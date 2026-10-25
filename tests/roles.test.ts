@@ -45,6 +45,7 @@ describe("rolesFor", () => {
 
   it("gives each protected section to one role, including its sub-pages", () => {
     expect(rolesFor("/orders")).toEqual(["customer"]);
+    expect(rolesFor("/book")).toEqual(["customer"]);
     expect(rolesFor("/account")).toEqual(["customer"]);
     expect(rolesFor("/cleaner")).toEqual(["cleaner"]);
     expect(rolesFor("/cleaner/account")).toEqual(["cleaner"]);

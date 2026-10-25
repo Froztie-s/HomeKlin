@@ -28,6 +28,7 @@ export const authPaths = ["/login", "/signup"] as const;
 // page, the app home and services (browsing needs no account), help, and the sign-in pages.
 const protectedSections: readonly { prefix: string; roles: readonly AppRole[] }[] = [
   { prefix: "/orders", roles: ["customer"] },
+  { prefix: "/book", roles: ["customer"] },
   { prefix: "/account", roles: ["customer"] },
   { prefix: "/cleaner", roles: ["cleaner"] },
   { prefix: "/agency", roles: ["agency"] },
