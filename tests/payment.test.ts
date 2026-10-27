@@ -14,7 +14,7 @@ const order = {
   phone: "+6281234567890",
 };
 const finishUrl = "https://home-klin.vercel.app/orders?booked=0b8f3c1e-1111-4222-8333-944455556666";
-const sandboxKey = "SB-Mid-server-abc123";
+const sandboxKey = "Mid-server-sandbox-abc123";
 
 describe("snapPayload", () => {
   it("charges exactly the order's stored price, for one item, with the customer's contact and the way back", () => {
@@ -50,9 +50,9 @@ describe("createSnapTransaction", () => {
     expect(JSON.parse(String(init.body)).transaction_details.gross_amount).toBe(85000);
   });
 
-  it("refuses any key that is not a sandbox key, before calling anyone (no real money)", async () => {
+  it("refuses to start without a server key, before calling anyone", async () => {
     const fetchFn = vi.fn();
-    for (const serverKey of [undefined, "", "Mid-server-production-key"]) {
+    for (const serverKey of [undefined, ""]) {
       await expect(createSnapTransaction(snapPayload(order, finishUrl), { serverKey, fetchFn })).rejects.toMatchObject({
         reason: "not_configured",
       });

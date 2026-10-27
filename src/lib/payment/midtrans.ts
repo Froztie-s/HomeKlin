@@ -1,13 +1,13 @@
 // Midtrans Snap (T10): the hosted payment page of Midtrans, here always the Sandbox, where payments
 // are simulated and no money moves (markdown/SPEC.md: "Payment via Midtrans Sandbox"). The server key
-// stays on the server (MIDTRANS_SERVER_KEY); a key that is not a Sandbox key (SB-Mid-server-...) is
-// refused before anything is sent, so a production key put in by mistake can never charge anyone.
+// stays on the server (MIDTRANS_SERVER_KEY). Requests only ever go to the Sandbox address below, and
+// the Sandbox refuses production keys, so a production key put in by mistake can never charge anyone.
+// (Sandbox keys of newer Midtrans accounts no longer start with "SB-", so the key itself is not checked.)
 // Plain HTTPS, no SDK.
 // Sources: https://docs.midtrans.com/reference/backend-integration ("Create Snap Transaction") and
 // https://docs.midtrans.com/docs/snap-snap-integration-guide
 
 const snapUrl = "https://app.sandbox.midtrans.com/snap/v1/transactions";
-const sandboxKey = /^SB-Mid-server-/;
 const paymentPage = /^https:\/\/app\.sandbox\.midtrans\.com\//;
 
 export type PaymentErrorReason = "not_configured" | "refused" | "unexpected" | "network";
@@ -62,7 +62,7 @@ export async function createSnapTransaction(
   payload: SnapPayload,
   { serverKey, fetchFn = fetch }: CreateOptions,
 ): Promise<{ token: string; redirectUrl: string }> {
-  if (!serverKey || !sandboxKey.test(serverKey)) throw new PaymentError("not_configured");
+  if (!serverKey) throw new PaymentError("not_configured");
 
   let response: Response;
   try {
