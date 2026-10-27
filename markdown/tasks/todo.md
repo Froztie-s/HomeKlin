@@ -64,7 +64,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: landing and `/services` service clicks open `/pesan?layanan=<id>`; one form (service, area, window, address, phone, email, consent); "Kirim kode" emails a 6-digit code; the code places the order (account created for a new email, signed in); a signed-in customer skips the code; `/login` signs customers in by code, with password login kept for staff; `/signup` removed; phone stored on the order; order confirmation emailed (Gmail SMTP, nodemailer); tests never send real email (Ethereal SMTP on the test project, codes via the admin API).
   - Verify: unit tests for validation, actions and the email sender; integration test for `book_slot` with the phone; e2e: guest order end to end, wrong code, resend, returning customer by code, signed-in customer, staff password login, window taken between steps, English, 360 px.
   - Deps: T9, the user's Gmail app password. Skills: `security-and-hardening`, `frontend-ui-engineering`, `test-driven-development`.
-- [ ] **T10 Midtrans Sandbox payment start** (S)
+- [x] **T10 Midtrans Sandbox payment start** (S) — done 2026-10-27: `startPayment` creates a Snap transaction from the stored order price (Sandbox only) and reuses it; "Bayar sekarang" on the order confirmation; e2e lands on the Sandbox page; the status changes only with T11
   - Accept: server creates a Snap transaction for an order; pay screen opens the sandbox payment; keys only in env vars.
   - Verify: manual sandbox payment; unit test for payload.
   - Deps: T9, human Midtrans keys. Skills: `source-driven-development`.

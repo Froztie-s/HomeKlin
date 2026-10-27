@@ -118,9 +118,8 @@ test.describe("as a signed-in customer", () => {
       await expect(confirmation.getByText(price, { exact: true })).toBeVisible();
       await expect(confirmation.getByText(`${dayText(target.startsAt)}, ${windowText(target)} WIB`)).toBeVisible();
       await expect(confirmation.getByText(address)).toBeVisible();
-      await expect(confirmation.getByText(/Pembayaran akan segera dapat dilakukan/)).toBeVisible();
-      // No pretend payment button before payment exists (T10).
-      await expect(page.getByRole("button", { name: /bayar/i })).toHaveCount(0);
+      // The next step is paying (T10, e2e/payment.mobile.spec.ts).
+      await expect(confirmation.getByRole("button", { name: "Bayar sekarang" })).toBeVisible();
 
       // One brand: neither the page nor the data sent to the browser names or identifies the agency.
       const marks = await agencyMarks();
