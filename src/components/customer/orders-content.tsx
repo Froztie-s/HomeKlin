@@ -8,25 +8,28 @@ import type { Service, ServiceArea } from "@/lib/catalog/catalog";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { parseBookedOrderId } from "./booking-query";
 import { OrderConfirmation } from "./order-confirmation";
+import { cameBackFromPayment } from "./payment-query";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
 // The content of /orders for a signed-in customer, inside the page's role check. Right after booking
 // (/orders?booked=<order id>, where bookService sends the customer) it shows that order and what
-// happens next (T9). The order is read with the customer's own session through listMyOrders, which
-// returns only their own orders and never the agency, so another customer's id in the address finds
-// nothing. Otherwise the page says what will appear here; the full order list comes with T12.
+// happens next (T9), with the payment (T10); Midtrans sends the customer back to the same address.
+// The order is read with the customer's own session through listMyOrders, which returns only their
+// own orders and never the agency, so another customer's id in the address finds nothing. Otherwise
+// the page says what will appear here; the full order list comes with T12.
 export async function OrdersContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
-  const bookedId = parseBookedOrderId(await searchParams);
+  const params = await searchParams;
+  const bookedId = parseBookedOrderId(params);
   if (bookedId) {
-    const confirmation = await bookedOrder(bookedId);
+    const confirmation = await bookedOrder(bookedId, cameBackFromPayment(params));
     if (confirmation) return confirmation;
   }
   return <NoOrdersYet />;
 }
 
 /** The confirmation of one of the customer's orders, or null when they have no order with that id. */
-async function bookedOrder(id: string) {
+async function bookedOrder(id: string, returned: boolean) {
   const locale = await getLocale();
   let order: CustomerOrder | undefined;
   let services: Service[] = [];
@@ -66,6 +69,7 @@ async function bookedOrder(id: string) {
       order={order}
       serviceName={service?.name[locale]}
       areaName={area?.name[locale] ?? order.areaId}
+      cameBackFromPayment={returned}
     />
   );
 }

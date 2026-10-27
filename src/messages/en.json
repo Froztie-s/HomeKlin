@@ -393,12 +393,26 @@
     },
     "windowValue": "{day}, {window} WIB",
     "serviceFallback": "HomeKlin service",
-    "nextTitle": "Next step: payment",
-    "nextBody": "You will soon be able to pay from this page. Once the order is paid, a HomeKlin cleaner is assigned, and their name and photo appear in your order.",
+    "nextTitle": "After payment",
+    "nextBody": "A HomeKlin cleaner is assigned to your order, and their name and photo appear here.",
     "streamNote": "You agreed to the live stream. Only you and the HomeKlin monitoring team can watch it, and the recording is kept for 7 days.",
     "errorTitle": "Your order could not be shown",
     "errorBody": "Something went wrong while reading your order. Reload the page to try again.",
     "retry": "Reload"
+  },
+  "Payment": {
+    "secureNote": "Payment opens on Midtrans’ secure payment page.",
+    "sandboxNote": "Simulated payment, no real money.",
+    "submit": "Pay now",
+    "pending": "Opening the payment…",
+    "returnedTitle": "Your payment is being confirmed",
+    "returnedBody": "The status of this order will change shortly. Reload the page to see it. Not finished paying? Carry on with Pay now.",
+    "errors": {
+      "notCustomer": "Your session has ended. Log in again to pay for this order.",
+      "notFound": "This order was not found in your account.",
+      "notPayable": "This order is no longer awaiting payment. Reload the page to see its status.",
+      "paymentUnavailable": "The payment page could not be opened. Please try again in a moment."
+    }
   },
   "PreviewData": {
     "jobService": "Regular Cleaning",

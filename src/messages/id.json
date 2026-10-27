@@ -393,12 +393,26 @@
     },
     "windowValue": "{day}, {window} WIB",
     "serviceFallback": "Layanan HomeKlin",
-    "nextTitle": "Langkah berikutnya: pembayaran",
-    "nextBody": "Pembayaran akan segera dapat dilakukan dari halaman ini. Setelah pesanan dibayar, Petugas HomeKlin ditugaskan, dan nama serta fotonya tampil di pesanan Anda.",
+    "nextTitle": "Setelah pembayaran",
+    "nextBody": "Petugas HomeKlin ditugaskan untuk pesanan Anda, dan nama serta fotonya tampil di pesanan ini.",
     "streamNote": "Anda menyetujui siaran langsung. Hanya Anda dan tim pemantau HomeKlin yang dapat menontonnya, dan rekamannya disimpan 7 hari.",
     "errorTitle": "Pesanan tidak dapat ditampilkan",
     "errorBody": "Ada gangguan saat membaca pesanan Anda. Muat ulang halaman untuk mencoba lagi.",
     "retry": "Muat ulang"
+  },
+  "Payment": {
+    "secureNote": "Pembayaran dibuka di halaman pembayaran aman Midtrans.",
+    "sandboxNote": "Pembayaran simulasi, tidak ada uang sungguhan.",
+    "submit": "Bayar sekarang",
+    "pending": "Membuka pembayaran…",
+    "returnedTitle": "Pembayaran sedang dikonfirmasi",
+    "returnedBody": "Status pesanan ini akan berubah dalam beberapa saat. Muat ulang halaman untuk melihatnya. Belum selesai membayar? Lanjutkan dengan tombol Bayar sekarang.",
+    "errors": {
+      "notCustomer": "Sesi Anda sudah berakhir. Masuk lagi untuk membayar pesanan ini.",
+      "notFound": "Pesanan ini tidak ditemukan di akun Anda.",
+      "notPayable": "Pesanan ini tidak lagi menunggu pembayaran. Muat ulang halaman untuk melihat statusnya.",
+      "paymentUnavailable": "Halaman pembayaran belum dapat dibuka. Coba lagi dalam beberapa saat."
+    }
   },
   "PreviewData": {
     "jobService": "Pembersihan Rutin",
