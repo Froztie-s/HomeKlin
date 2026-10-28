@@ -51,3 +51,18 @@ export async function chooseWindow(page: Page, window: Window, language: "id" | 
     windowText(window),
   );
 }
+
+/**
+ * Books a window as the signed-in customer, the way a customer does on the order form (the window
+ * given in the address), and returns the new order's id.
+ */
+export async function bookSignedIn(page: Page, serviceId: string, areaId: string, window: Window): Promise<string> {
+  await page.goto(orderPath(serviceId, areaId, window.startsAt));
+  await page.getByLabel("Alamat lengkap").fill("Jl. Contoh Raya No. 12, RT 03/RW 05, Kembangan, Jakarta Barat");
+  await page.getByLabel("Nomor HP").fill("0812 3456 7890");
+  await page.getByRole("switch", { name: /Saya setuju/ }).check();
+  await page.getByRole("button", { name: "Pesan sekarang" }).click();
+  // Booking and the redirect run on the server; under a full parallel run that can take over 5 s.
+  await expect(page).toHaveURL(/\/orders\?booked=[0-9a-f-]{36}$/, { timeout: 15_000 });
+  return new URL(page.url()).searchParams.get("booked") ?? "";
+}

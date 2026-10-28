@@ -68,7 +68,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: server creates a Snap transaction for an order; pay screen opens the sandbox payment; keys only in env vars.
   - Verify: manual sandbox payment; unit test for payload.
   - Deps: T9, human Midtrans keys. Skills: `source-driven-development`.
-- [ ] **T11 Payment webhook with status mapping** (M)
+- [x] **T11 Payment webhook with status mapping** (M) — done 2026-10-28: `POST /api/payments/midtrans` checks Midtrans' signature, maps settlement/capture → paid, deny/failure → failed, cancel/expire → cancelled; `apply_payment_result()` moves an order once, gives the place back on failed/cancelled, answers repeats with the same status; e2e plays Midtrans with signed notifications (Midtrans cannot reach a local run; the real Sandbox round trip is checked live at Checkpoint 2)
   - Accept: signature verified; `successful`, `failed`, `cancelled` each set the correct order status; repeated webhooks give the same result (idempotent); unknown signature rejected.
   - Verify: Vitest tests for all three statuses plus replay; Playwright with sandbox.
   - Deps: T10. Skills: `security-and-hardening`, `doubt-driven-development`.

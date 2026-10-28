@@ -1,6 +1,7 @@
 // The Supabase project the app talks to. Both values are public by design: the publishable key
 // (sb_publishable_...) is safe in the browser, and row-level security decides what it may read.
-// The secret key never appears in app code; only scripts and tests use it.
+// The secret key is for scripts and tests, and in the app only for Midtrans' payment notification
+// (src/lib/supabase/service.ts), which has no signed-in user.
 // Source: https://supabase.com/docs/guides/api/api-keys
 
 export type SupabaseConfig = { url: string; publishableKey: string };

@@ -10,10 +10,13 @@ if (existsSync(".env")) process.loadEnvFile(".env");
 
 // The suite signs up and signs in, so it must run against the test project, never the live one
 // (markdown/SPEC.md, "Testing Strategy"). Missing keys fail the run instead of skipping it. The setup
-// project also needs TEST_SUPABASE_SECRET_KEY to create its users (tests/integration/test-project.ts).
+// project needs TEST_SUPABASE_SECRET_KEY to create its users (tests/integration/test-project.ts), and
+// the app under test gets it in place of the live secret key (below).
 const testSupabaseUrl = process.env.TEST_SUPABASE_URL;
-if (!testSupabaseUrl || !process.env.TEST_SUPABASE_PUBLISHABLE_KEY) {
-  throw new Error("End-to-end tests need TEST_SUPABASE_URL and TEST_SUPABASE_PUBLISHABLE_KEY (see .env.example).");
+if (!testSupabaseUrl || !process.env.TEST_SUPABASE_PUBLISHABLE_KEY || !process.env.TEST_SUPABASE_SECRET_KEY) {
+  throw new Error(
+    "End-to-end tests need TEST_SUPABASE_URL, TEST_SUPABASE_PUBLISHABLE_KEY and TEST_SUPABASE_SECRET_KEY (see .env.example).",
+  );
 }
 // Hosts compared, so a trailing slash or different capitals cannot hide the same project.
 const liveSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -73,6 +76,9 @@ export default defineConfig({
     env: {
       NEXT_PUBLIC_SUPABASE_URL: testSupabaseUrl,
       NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.TEST_SUPABASE_PUBLISHABLE_KEY,
+      // The payment notification (T11) writes with the secret key: the test project's, never the
+      // live one that Next.js would otherwise read from .env.
+      SUPABASE_SECRET_KEY: process.env.TEST_SUPABASE_SECRET_KEY,
       // The app under test never sends real email (T9b): empty SMTP settings override the ones that
       // Next.js would read from .env, so the order confirmation is skipped ("not_configured"). The
       // sign-in codes go through the test project's Ethereal SMTP, which delivers nothing.

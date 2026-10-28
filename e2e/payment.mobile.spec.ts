@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { adminClient, createTestUser, deleteTestUsers, type TestUser } from "../tests/integration/test-project";
 import { cancelOrder, lateWindow, ordersAt, type Window } from "./booking-test-data";
-import { orderPath } from "./order-test-data";
+import { bookSignedIn } from "./order-test-data";
 import { readTestUsers, signedInAs } from "./setup/auth-state";
 
 // T10 on a phone: paying for an order with the Midtrans Sandbox (simulated, no real money). From the
@@ -17,7 +17,6 @@ import { readTestUsers, signedInAs } from "./setup/auth-state";
 const area = "jakarta-barat";
 const service = "regular";
 const address = "Jl. Contoh Raya No. 12, RT 03/RW 05, Kembangan, Jakarta Barat";
-const phone = "0812 3456 7890";
 const sandboxPage = /^https:\/\/app\.sandbox\.midtrans\.com\/snap\//;
 // Starting a payment asks Midtrans for a transaction, and Midtrans' page then has to load.
 const paymentWait = 30_000;
@@ -41,17 +40,7 @@ test.afterAll(async () => {
 const payButton = (page: Page) => page.getByRole("button", { name: "Bayar sekarang" });
 const confirmation = (page: Page) => page.getByRole("region", { name: "Pesanan Anda sudah dibuat" });
 
-/** Books the window as the signed-in customer, the way a customer does, and returns the order's id. */
-async function book(page: Page, window: Window): Promise<string> {
-  await page.goto(orderPath(service, area, window.startsAt));
-  await page.getByLabel("Alamat lengkap").fill(address);
-  await page.getByLabel("Nomor HP").fill(phone);
-  await page.getByRole("switch", { name: /Saya setuju/ }).check();
-  await page.getByRole("button", { name: "Pesan sekarang" }).click();
-  // Booking and the redirect run on the server; under a full parallel run that can take over 5 s.
-  await expect(page).toHaveURL(/\/orders\?booked=[0-9a-f-]{36}$/, { timeout: 15_000 });
-  return new URL(page.url()).searchParams.get("booked") ?? "";
-}
+const book = (page: Page, window: Window) => bookSignedIn(page, service, area, window);
 
 /** Waits until React has taken over the payment form (hydration), so a press runs the action in place. */
 async function formReady(page: Page) {

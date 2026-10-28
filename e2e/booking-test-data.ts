@@ -76,14 +76,18 @@ export function bookPath(serviceId: string, areaId: string, startsAt: string, pr
   return `${prefix}/book?${params.toString()}`;
 }
 
-/** Deletes an order and gives its place in the window back. */
+/**
+ * Deletes an order and gives its place in the window back, unless a failed or cancelled payment has
+ * given it back already (T11).
+ */
 export async function cancelOrder(orderId: string): Promise<void> {
   const admin = adminClient();
-  const { data: order, error } = await admin.from("orders").select("slot_id").eq("id", orderId).maybeSingle();
+  const { data: order, error } = await admin.from("orders").select("slot_id, status").eq("id", orderId).maybeSingle();
   if (error) throw new Error(`Could not read the test order: ${error.message}`);
   if (!order) return;
   const removed = await admin.from("orders").delete().eq("id", orderId);
   if (removed.error) throw new Error(`Could not delete the test order: ${removed.error.message}`);
+  if (order.status === "failed" || order.status === "cancelled") return;
   const { data: slot } = await admin.from("availability_slots").select("booked").eq("id", order.slot_id).single();
   if (slot && slot.booked > 0) {
     await admin.from("availability_slots").update({ booked: slot.booked - 1 }).eq("id", order.slot_id);
