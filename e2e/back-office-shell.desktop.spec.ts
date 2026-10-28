@@ -53,7 +53,9 @@ for (const shell of shells) {
 
       for (const { label, path } of [...shell.items.slice(1), shell.items[0]]) {
         await nav.getByRole("link", { name: label, exact: true }).click();
-        await expect(page).toHaveURL(path);
+        // The section is a signed-in page rendered on the server; on a loaded CI runner it can take longer
+        // than the default 5 s to arrive.
+        await expect(page).toHaveURL(path, { timeout: 15_000 });
         await expect(page.getByRole("heading", { level: 1, name: label })).toBeVisible();
         await expect(nav.getByRole("link", { name: label, exact: true })).toHaveAttribute(
           "aria-current",
