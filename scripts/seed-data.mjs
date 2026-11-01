@@ -149,3 +149,15 @@ export const slotPattern = {
   closedWeekday: 0,
   capacity: 2,
 };
+
+/**
+ * Finished jobs of the demo customer, so replay can be shown without doing a whole job first (T13).
+ * Fixed ids: each seed run replaces these orders, and only these, so real test orders are never touched.
+ */
+export const demoJobs = [
+  { id: "d3a0c1e2-0001-4000-8000-000000000001", serviceId: "regular", areaId: "jakarta-selatan", agency: "kilau-teratai", daysAgo: 1 },
+  { id: "d3a0c1e2-0002-4000-8000-000000000002", serviceId: "deep", areaId: "jakarta-pusat", agency: "cemara-rapi", daysAgo: 3 },
+];
+
+export const demoJobAddress = "Jl. Melati Contoh No. 12, Jakarta";
+export const demoJobPhone = "+6281200000000";

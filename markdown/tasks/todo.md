@@ -78,11 +78,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Deps: T11.
 
 ### Checkpoint 2: Booking and payment
-- [ ] Booking -> payment -> status works end to end on the deployed URL; all three payment outcomes tested; review.
+- [ ] Booking -> payment -> status works end to end on the deployed URL; all three payment outcomes tested; review. (Postponed by the user on 2026-11-01: paid is confirmed live; the failed and cancelled runs on live are still to do.)
 
 ## Phase 3: Customer recording replay (top priority)
 
-- [ ] **T13 Recordings storage and attach seam** (M)
+- [x] **T13 Recordings storage and attach seam** (M) — done 2026-11-01, tested with stand-in bytes on the test project: the seed adds the completed jobs once the user's clips are in the git-ignored `clips/` folder and `npm run db:seed` runs; a job here is a paid order, and `orders.completed_at` is added for T18
   - Accept: `recordings` table (job, agency, file path, created, expires = +7 days); private bucket; storage policies deny direct public access; `attachRecording(jobId)` attaches a clip from a small clip library; seed includes completed jobs with clips (clips supplied by you).
   - Verify: Vitest for expiry date; bucket not readable without a signed link.
   - Deps: T12, human clips. Skills: `source-driven-development`, `security-and-hardening`.

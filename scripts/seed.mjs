@@ -19,8 +19,22 @@
 // .../auth-admin-listusers and .../auth-admin-updateuserbyid
 
 import { createClient } from "@supabase/supabase-js";
-import { existsSync } from "node:fs";
-import { agencies, agencyAreas, demoAccounts, seedAreas, seedServices, slotPattern } from "./seed-data.mjs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { attachRecording, clipFolder, recordingsBucket } from "../src/lib/recordings/attach.ts";
+import {
+  agencies,
+  agencyAreas,
+  demoAccounts,
+  demoJobAddress,
+  demoJobPhone,
+  demoJobs,
+  seedAreas,
+  seedServices,
+  slotPattern,
+} from "./seed-data.mjs";
+
+/** Where the user keeps the demo clips: git-ignored, because the repository is public and clips are large. */
+const clipsDirectory = "clips";
 
 /** The app_metadata key that marks an account as made by this seed. */
 export const SEED_MARKER = "homeklin_seed";
@@ -224,6 +238,12 @@ export async function seed({ client, password, emailPrefix = "", onResult = () =
 const hourMs = 3_600_000;
 const jakartaOffsetHours = 7; // Asia/Jakarta is UTC+7 all year (no daylight saving time)
 
+/** The year, month and day of the Jakarta calendar: shift by the offset and read the UTC fields. */
+function jakartaDate(now) {
+  const jakartaNow = new Date(now.getTime() + jakartaOffsetHours * hourMs);
+  return [jakartaNow.getUTCFullYear(), jakartaNow.getUTCMonth(), jakartaNow.getUTCDate()];
+}
+
 /**
  * The arrival windows of slotPattern from tomorrow (Jakarta date) on, as ISO times, without the closed
  * weekday. Pure, so the tests can pin "now".
@@ -233,9 +253,7 @@ const jakartaOffsetHours = 7; // Asia/Jakarta is UTC+7 all year (no daylight sav
  * @returns {{ startsAt: string, endsAt: string }[]}
  */
 export function slotTimes(now, pattern = slotPattern) {
-  // The Jakarta calendar date: shift by the offset and read the UTC fields.
-  const jakartaNow = new Date(now.getTime() + jakartaOffsetHours * hourMs);
-  const [year, month, day] = [jakartaNow.getUTCFullYear(), jakartaNow.getUTCMonth(), jakartaNow.getUTCDate()];
+  const [year, month, day] = jakartaDate(now);
   const at = (dayOffset, hour) => new Date(Date.UTC(year, month, day + dayOffset, hour - jakartaOffsetHours));
 
   const slots = [];
@@ -361,6 +379,126 @@ export async function seedCatalog({ client, agencyUserIds, keyPrefix = "", now =
   };
 }
 
+/** Turns a clip's file name into one storage accepts: lower case, with dashes for anything unusual. */
+export function clipFileName(source) {
+  const dot = source.lastIndexOf(".");
+  const stem = source
+    .slice(0, dot)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+  return `${stem}${source.slice(dot).toLowerCase()}`;
+}
+
+/**
+ * The videos among the files of the local clips folder.
+ *
+ * @param {string[]} names
+ * @returns {{ source: string, name: string, contentType: string }[]}
+ */
+export function clipFiles(names) {
+  const types = { ".mp4": "video/mp4", ".webm": "video/webm" };
+  return names.flatMap((source) => {
+    const type = Object.entries(types).find(([extension]) => source.toLowerCase().endsWith(extension));
+    return type ? [{ source, name: clipFileName(source), contentType: type[1] }] : [];
+  });
+}
+
+/**
+ * Adds clips to the bucket's library (T13). A clip that is already there is kept.
+ *
+ * @param {{ client: import("@supabase/supabase-js").SupabaseClient, files: { name: string, bytes: Uint8Array, contentType: string }[] }} options
+ * @returns {Promise<{ added: number, kept: number }>}
+ */
+export async function uploadClips({ client, files }) {
+  const counts = { added: 0, kept: 0 };
+  for (const { name, bytes, contentType } of files) {
+    const { error } = await client.storage.from(recordingsBucket).upload(`${clipFolder}/${name}`, bytes, { contentType });
+    if (!error) counts.added += 1;
+    else if (/already exists/i.test(error.message)) counts.kept += 1;
+    else throw new Error(`Could not upload the clip ${name}: ${error.message}`);
+  }
+  return counts;
+}
+
+/**
+ * Gives the demo customer finished jobs with replayable recordings (T13). Each run starts them over, so
+ * the recordings are fresh for a demo: a job ended days ago and expires 7 days after it ended. Without
+ * clips in the library it adds nothing, because a job's recording needs one.
+ *
+ * @param {{ client: import("@supabase/supabase-js").SupabaseClient, customerId: string, jobs: { id: string, serviceId: string, areaId: string, agencyId: string, daysAgo: number }[], now?: Date }} options
+ * @returns {Promise<{ added: number }>}
+ */
+export async function seedCompletedJobs({ client, customerId, jobs, now = new Date() }) {
+  const library = await must("clip library", client.storage.from(recordingsBucket).list(clipFolder, { limit: 100 }));
+  if (!library.some((file) => /\.(mp4|webm)$/.test(file.name))) return { added: 0 };
+
+  const ids = jobs.map((job) => job.id);
+  const old = await must("old recordings", client.from("recordings").select("file_path").in("order_id", ids));
+  if (old.length > 0) {
+    await must("old files", client.storage.from(recordingsBucket).remove(old.map((row) => row.file_path)));
+  }
+  await must("old jobs", client.from("orders").delete().in("id", ids));
+
+  const [year, month, date] = jakartaDate(now);
+  for (const job of jobs) {
+    const startsAt = new Date(Date.UTC(year, month, date - job.daysAgo, 8 - jakartaOffsetHours));
+    const endsAt = new Date(startsAt.getTime() + 2 * hourMs);
+    const slot = await must(
+      "past window",
+      client
+        .from("availability_slots")
+        .upsert(
+          {
+            agency_id: job.agencyId,
+            area_id: job.areaId,
+            starts_at: startsAt.toISOString(),
+            ends_at: endsAt.toISOString(),
+            capacity: slotPattern.capacity,
+            booked: 1,
+          },
+          { onConflict: "agency_id,area_id,starts_at" },
+        )
+        .select("id")
+        .single(),
+    );
+    const service = await must("job's service", client.from("services").select("price_idr").eq("id", job.serviceId).single());
+    await must(
+      "completed job",
+      client.from("orders").insert({
+        id: job.id,
+        customer_id: customerId,
+        service_id: job.serviceId,
+        area_id: job.areaId,
+        agency_id: job.agencyId,
+        slot_id: slot.id,
+        starts_at: startsAt.toISOString(),
+        ends_at: endsAt.toISOString(),
+        address: demoJobAddress,
+        contact_phone: demoJobPhone,
+        price_idr: service.price_idr,
+        stream_consent: true,
+        status: "paid",
+        payment_result_at: endsAt.toISOString(),
+        completed_at: endsAt.toISOString(),
+      }),
+    );
+    const retentionDays = (endsAt.getTime() + 7 * 24 * hourMs - now.getTime()) / (24 * hourMs);
+    await attachRecording(client, job.id, { retentionDays });
+  }
+  return { added: jobs.length };
+}
+
+/** The clips in the local, git-ignored clips folder, ready for uploadClips. */
+function localClips() {
+  if (!existsSync(clipsDirectory)) return [];
+  return clipFiles(readdirSync(clipsDirectory)).map(({ source, name, contentType }) => ({
+    name,
+    contentType,
+    bytes: readFileSync(`${clipsDirectory}/${source}`),
+  }));
+}
+
 async function main() {
   if (existsSync(".env")) process.loadEnvFile(".env");
   const target = seedTarget(process.argv[2], process.env);
@@ -389,6 +527,21 @@ async function main() {
   console.log(
     `Catalog: ${catalog.areas} areas, ${catalog.servicesAdded} services added (existing ones kept), ` +
       `${catalog.agencies} agencies, ${catalog.windowsAdded} new arrival windows.`,
+  );
+
+  const clips = await uploadClips({ client, files: localClips() });
+  const customer = results.find((result) => result.role === "customer");
+  if (!customer) throw new Error("The demo customer was not seeded.");
+  const rows = await must("agencies", client.from("agencies").select("id, key"));
+  const jobs = demoJobs.map(({ agency, ...job }) => {
+    const row = rows.find((entry) => entry.key === agency);
+    if (!row) throw new Error(`The agency ${agency} was not saved.`);
+    return { ...job, agencyId: row.id };
+  });
+  const completed = await seedCompletedJobs({ client, customerId: customer.id, jobs });
+  console.log(
+    `Clips: ${clips.added} added, ${clips.kept} already there. Completed jobs with a recording: ${completed.added}` +
+      (completed.added === 0 ? ` (no clips yet: put .mp4 or .webm files in ${clipsDirectory}/ and seed again).` : "."),
   );
 }
 
