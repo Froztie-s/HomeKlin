@@ -1,11 +1,10 @@
-import { Ban, CircleCheck, CircleX, Clock, Hourglass, RefreshCw, Video, type LucideIcon } from "lucide-react";
+import { CircleCheck, ClipboardList, Clock, RefreshCw, Video } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { ClientMessages } from "@/i18n/client-messages";
-import type { CustomerOrder, OrderStatus } from "@/lib/booking/orders";
+import type { CustomerOrder } from "@/lib/booking/orders";
 import { formatRupiah } from "@/lib/format";
-import { jakartaDayOf } from "./booking-query";
+import { getOrderWords, OrderStatusPill } from "./order-status";
 import { PaymentForm } from "./payment-form";
-import { getSlotLabels } from "./slot-labels";
 
 type OrderConfirmationProps = {
   order: CustomerOrder;
@@ -14,14 +13,8 @@ type OrderConfirmationProps = {
   areaName: string;
   /** The customer has just come back from Midtrans' payment page (./payment-query.ts). */
   cameBackFromPayment?: boolean;
-};
-
-// The order's status, always as a word with an icon, never by colour alone.
-const statusStyles: Record<OrderStatus, { Icon: LucideIcon; pill: string }> = {
-  pending_payment: { Icon: Hourglass, pill: "bg-warning-surface text-warning" },
-  paid: { Icon: CircleCheck, pill: "bg-success-surface text-success" },
-  failed: { Icon: CircleX, pill: "bg-danger-surface text-danger" },
-  cancelled: { Icon: Ban, pill: "bg-surface-sunken text-ink-muted" },
+  /** "booked": the confirmation (/orders?booked=<id>). "details": opened from the list (/orders?order=<id>). */
+  variant?: "booked" | "details";
 };
 
 // What the customer sees right after booking (T9, on /orders?booked=<id>): that the order is made,
@@ -32,27 +25,28 @@ const statusStyles: Record<OrderStatus, { Icon: LucideIcon; pill: string }> = {
 // notification arrives (T11), so the page says the payment is being confirmed rather than claiming it
 // is paid, and keeps the button for a customer who left before paying. It speaks as HomeKlin only:
 // the order as the customer reads it never carries the agency (listMyOrders).
+// Opened from the list (T12) the same facts carry their own title and a line for the order's status,
+// since the order was not just made and a failed or cancelled one holds no window any more.
 export async function OrderConfirmation({
   order,
   serviceName,
   areaName,
   cameBackFromPayment = false,
+  variant = "booked",
 }: OrderConfirmationProps) {
   const locale = await getLocale();
-  const [t, tPayment, labels] = await Promise.all([
+  const [t, tPayment, words] = await Promise.all([
     getTranslations("OrderConfirmation"),
     getTranslations("Payment"),
-    getSlotLabels(locale),
+    getOrderWords(locale),
   ]);
-  const status = statusStyles[order.status];
+  const details = variant === "details";
   const awaitingPayment = order.status === "pending_payment";
-  const windowValue = t("windowValue", {
-    day: labels.day(jakartaDayOf(order.startsAt, new Date())),
-    window: labels.window(order),
-  });
+  const goingAhead = awaitingPayment || order.status === "paid";
+  const HeaderIcon = details ? ClipboardList : CircleCheck;
   const facts = [
-    { label: t("fields.service"), value: serviceName ?? t("serviceFallback") },
-    { label: t("fields.window"), value: windowValue },
+    { label: t("fields.service"), value: words.service(serviceName) },
+    { label: t("fields.window"), value: words.arrival(order) },
     { label: t("fields.area"), value: areaName },
     { label: t("fields.address"), value: order.address },
   ];
@@ -64,22 +58,19 @@ export async function OrderConfirmation({
     >
       <div className="flex flex-col gap-4 p-5 md:p-6">
         <div className="flex items-start gap-3">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-success-surface text-success">
-            <CircleCheck className="size-5" aria-hidden="true" />
+          <span
+            className={`flex size-10 shrink-0 items-center justify-center rounded-full ${details ? "bg-brand-50 text-brand-700" : "bg-success-surface text-success"}`}
+          >
+            <HeaderIcon className="size-5" aria-hidden="true" />
           </span>
           <div className="flex min-w-0 flex-col gap-1">
             <h2 id="order-confirmation-title" className="font-display text-xl font-semibold text-ink">
-              {t("title")}
+              {details ? t("detailsTitle") : t("title")}
             </h2>
-            <p className="text-sm text-ink-muted">{t("lead")}</p>
+            <p className="text-sm text-ink-muted">{details ? t(`detailsLead.${order.status}`) : t("lead")}</p>
           </div>
         </div>
-        <p
-          className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${status.pill}`}
-        >
-          <status.Icon className="size-4 shrink-0" aria-hidden="true" />
-          {t(`status.${order.status}`)}
-        </p>
+        <OrderStatusPill status={order.status} label={words.status(order.status)} />
         {awaitingPayment && cameBackFromPayment ? (
           <div role="status" className="flex items-start gap-3 rounded-md bg-info-surface px-4 py-3">
             <RefreshCw className="mt-0.5 size-5 shrink-0 text-info" aria-hidden="true" />
@@ -117,21 +108,23 @@ export async function OrderConfirmation({
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-3 border-t border-border p-5 md:p-6">
-        {awaitingPayment || order.status === "paid" ? (
-          <div className="flex items-start gap-3 rounded-md bg-surface-sunken px-4 py-3">
-            <Clock className="mt-0.5 size-5 shrink-0 text-brand-700" aria-hidden="true" />
-            <div className="text-sm text-ink">
-              <h3 className="font-semibold">{t("nextTitle")}</h3>
-              <p className="mt-1">{t("nextBody")}</p>
+      {goingAhead || !details ? (
+        <div className="flex flex-col gap-3 border-t border-border p-5 md:p-6">
+          {goingAhead ? (
+            <div className="flex items-start gap-3 rounded-md bg-surface-sunken px-4 py-3">
+              <Clock className="mt-0.5 size-5 shrink-0 text-brand-700" aria-hidden="true" />
+              <div className="text-sm text-ink">
+                <h3 className="font-semibold">{t("nextTitle")}</h3>
+                <p className="mt-1">{t("nextBody")}</p>
+              </div>
             </div>
-          </div>
-        ) : null}
-        <p className="flex items-start gap-3 px-1 text-sm text-ink-muted">
-          <Video className="mt-0.5 size-4 shrink-0 text-brand-700" aria-hidden="true" />
-          <span>{t("streamNote")}</span>
-        </p>
-      </div>
+          ) : null}
+          <p className="flex items-start gap-3 px-1 text-sm text-ink-muted">
+            <Video className="mt-0.5 size-4 shrink-0 text-brand-700" aria-hidden="true" />
+            <span>{t("streamNote")}</span>
+          </p>
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -4,6 +4,7 @@ import {
   jakartaDayOf,
   parseBookedOrderId,
   parseBookingQuery,
+  parseOpenedOrderId,
 } from "@/components/customer/booking-query";
 
 // The booking screens (T9) read the old booking address /book?service=&area=&starts= (which now
@@ -76,8 +77,42 @@ describe("parseBookedOrderId", () => {
   });
 });
 
+describe("parseOpenedOrderId", () => {
+  const id = "3f6c1d2e-8a4b-4c5d-9e6f-0a1b2c3d4e5f";
+
+  it("reads the id of the order opened from the list", () => {
+    expect(parseOpenedOrderId({ order: id })).toBe(id);
+    expect(parseOpenedOrderId({ order: id.toUpperCase() })).toBe(id);
+    expect(parseOpenedOrderId({ order: [id, "other"] })).toBe(id);
+  });
+
+  it("ignores anything that is not an order id", () => {
+    expect(parseOpenedOrderId({ order: "1 or 1=1" })).toBeUndefined();
+    expect(parseOpenedOrderId({ order: "" })).toBeUndefined();
+    expect(parseOpenedOrderId({})).toBeUndefined();
+  });
+
+  it("does not read the confirmation's address, and the confirmation does not read this one", () => {
+    expect(parseOpenedOrderId({ booked: id })).toBeUndefined();
+    expect(parseBookedOrderId({ order: id })).toBeUndefined();
+  });
+});
+
 describe("jakartaDayOf", () => {
   const now = new Date("2026-11-05T02:00:00.000Z"); // Thursday 5 November, 09.00 in Jakarta
+
+  it("never calls a past window today or tomorrow", () => {
+    expect(jakartaDayOf("2026-11-04T08:00:00.000Z", now)).toEqual({ date: "2026-11-04", relative: null });
+    expect(jakartaDayOf("2026-09-30T08:00:00.000Z", now)).toEqual({ date: "2026-09-30", relative: null });
+    expect(jakartaDayOf("2025-11-05T08:00:00.000Z", now)).toEqual({ date: "2025-11-05", relative: null });
+  });
+
+  it("still says today for a window earlier the same day", () => {
+    expect(jakartaDayOf("2026-11-05T01:00:00.000Z", new Date("2026-11-05T09:00:00.000Z"))).toEqual({
+      date: "2026-11-05",
+      relative: "today",
+    });
+  });
 
   it("gives a window's day in Jakarta, and whether it is today or tomorrow", () => {
     expect(jakartaDayOf(nov6At15, now)).toEqual({ date: "2026-11-06", relative: "tomorrow" });

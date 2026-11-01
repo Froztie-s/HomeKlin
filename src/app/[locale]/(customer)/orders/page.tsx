@@ -16,7 +16,8 @@ export async function generateMetadata(): Promise<Metadata> {
 // Customers only (T5). The title is prerendered; everything else renders inside the role check, which
 // every protected page makes itself, because a layout's check does not protect its pages
 // (node_modules/next/dist/docs/01-app/02-guides/authentication.md, "Layouts and auth checks").
-// After booking (T9) the address is /orders?booked=<order id>, and the content confirms that order.
+// The content lists the customer's orders (T12); /orders?booked=<order id> confirms one (T9) and
+// /orders?order=<order id> opens one from the list.
 export default function OrdersPage({ searchParams }: PageProps<"/[locale]/orders">) {
   const t = useTranslations("OrdersPage");
   return (

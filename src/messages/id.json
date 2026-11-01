@@ -248,6 +248,8 @@
   },
   "OrdersPage": {
     "title": "Pesanan",
+    "listLabel": "Daftar pesanan",
+    "backToList": "Kembali ke daftar pesanan",
     "emptyTitle": "Belum ada pesanan",
     "emptyBody": "Pesanan Anda muncul di sini dengan statusnya, dari dibayar sampai selesai. Saat petugas bekerja, Anda dapat menonton siaran langsung dari halaman ini."
   },
@@ -378,6 +380,13 @@
   "OrderConfirmation": {
     "title": "Pesanan Anda sudah dibuat",
     "lead": "Jadwal ini sudah kami simpan untuk Anda.",
+    "detailsTitle": "Detail pesanan",
+    "detailsLead": {
+      "pending_payment": "Bayar pesanan ini agar jadwalnya tetap untuk Anda.",
+      "paid": "Jadwal ini sudah kami simpan untuk Anda.",
+      "failed": "Pembayaran tidak berhasil, jadi jadwal ini tidak lagi kami simpan.",
+      "cancelled": "Pesanan ini dibatalkan, jadi jadwal ini tidak lagi kami simpan."
+    },
     "status": {
       "pending_payment": "Menunggu pembayaran",
       "paid": "Sudah dibayar",

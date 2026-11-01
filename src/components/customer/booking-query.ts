@@ -4,9 +4,9 @@ import { groupSlotsByJakartaDay, type SlotDay } from "@/lib/catalog/slots-days";
 // The addresses of the booking screens (T9, T9b). The old booking address,
 // /book?service=<id>&area=<id>&starts=<ISO start of the window>, now leads to the order page
 // (./order-query.ts, which reads its own address with the same rules); the confirmation is
-// /orders?booked=<order id>. Whatever the address says is only a suggestion: the
-// page checks it against the catalog and the free windows, and the booking action checks every field
-// again on the server (src/lib/validation/booking.ts).
+// /orders?booked=<order id>, and an order opened from the list is /orders?order=<order id>. Whatever
+// the address says is only a suggestion: the page checks it against the catalog and the free windows,
+// and the booking action checks every field again on the server (src/lib/validation/booking.ts).
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -60,10 +60,19 @@ export function findFreeWindow(slots: readonly FreeSlot[], startsAt: string | un
   return slots.find((slot) => Date.parse(slot.startsAt) === time) ?? null;
 }
 
+function orderId(value: string | string[] | undefined): string | undefined {
+  const text = first(value)?.toLowerCase();
+  return text && uuidPattern.test(text) ? text : undefined;
+}
+
 /** The id of the order the confirmation shows (/orders?booked=<id>), or undefined. */
 export function parseBookedOrderId(params: SearchParams): string | undefined {
-  const text = first(params.booked)?.toLowerCase();
-  return text && uuidPattern.test(text) ? text : undefined;
+  return orderId(params.booked);
+}
+
+/** The id of the order opened from the list (/orders?order=<id>), or undefined. */
+export function parseOpenedOrderId(params: SearchParams): string | undefined {
+  return orderId(params.order);
 }
 
 /** A window's day in Jakarta (YYYY-MM-DD) and whether that is today or tomorrow there. */

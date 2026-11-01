@@ -24,6 +24,15 @@ export function orderPath(serviceId: string, areaId?: string, startsAt?: string,
   return `${prefix}/pesan?${params.toString()}`;
 }
 
+/** Signs a test user in with their password, on that page's browser context. */
+export async function signInWithPassword(page: Page, user: { email: string; password: string }) {
+  await page.goto("/login?cara=sandi");
+  await page.getByLabel("Email", { exact: true }).fill(user.email);
+  await page.getByLabel("Kata sandi", { exact: true }).fill(user.password);
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+  await page.waitForURL((url) => !url.pathname.endsWith("/login"));
+}
+
 /** Gives back every place the accounts booked, then deletes the accounts (their orders go with them). */
 export async function removeGuests(emails: string[]): Promise<void> {
   const wanted = new Set(emails.splice(0).map((email) => email.toLowerCase()));

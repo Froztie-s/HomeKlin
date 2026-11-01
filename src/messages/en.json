@@ -248,6 +248,8 @@
   },
   "OrdersPage": {
     "title": "Orders",
+    "listLabel": "Your orders",
+    "backToList": "Back to your orders",
     "emptyTitle": "No orders yet",
     "emptyBody": "Your orders appear here with their status, from paid to done. While your cleaner works, you can watch the live stream from this page."
   },
@@ -378,6 +380,13 @@
   "OrderConfirmation": {
     "title": "Your order has been placed",
     "lead": "We are holding this slot for you.",
+    "detailsTitle": "Order details",
+    "detailsLead": {
+      "pending_payment": "Pay for this order to keep this slot.",
+      "paid": "We are holding this slot for you.",
+      "failed": "The payment did not go through, so we are no longer holding this slot.",
+      "cancelled": "This order was cancelled, so we are no longer holding this slot."
+    },
     "status": {
       "pending_payment": "Awaiting payment",
       "paid": "Paid",

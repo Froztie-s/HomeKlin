@@ -1,8 +1,8 @@
-import { createHash } from "node:crypto";
-import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import { adminClient } from "../tests/integration/test-project";
 import { cancelOrder, lateWindow, ordersAt, type Window } from "./booking-test-data";
 import { bookSignedIn } from "./order-test-data";
+import { notification, notify, orderRow } from "./payment-test-data";
 import { readTestUsers, signedInAs } from "./setup/auth-state";
 
 // T11 on a phone: Midtrans' payment notification decides the order's status. The test plays Midtrans:
@@ -19,12 +19,6 @@ const day = 6;
 const usedStarts: string[] = [];
 const customerId = () => readTestUsers().find((user) => user.role === "customer")?.id;
 
-function serverKey(): string {
-  const key = process.env.MIDTRANS_SERVER_KEY;
-  if (!key) throw new Error("MIDTRANS_SERVER_KEY (Sandbox) is not set: the notification tests sign with it (see .env.example).");
-  return key;
-}
-
 async function windowAt(time: string): Promise<Window> {
   const window = await lateWindow(area, time, day);
   usedStarts.push(window.startsAt);
@@ -37,39 +31,9 @@ test.afterAll(async () => {
   for (const orderId of await ordersAt(id, area, usedStarts)) await cancelOrder(orderId);
 });
 
-async function orderRow(orderId: string) {
-  const { data, error } = await adminClient().from("orders").select("status, price_idr, slot_id").eq("id", orderId).single();
-  if (error || !data) throw new Error(`Could not read the test order: ${error?.message}`);
-  return data as { status: string; price_idr: number; slot_id: string };
-}
-
 async function placesTaken(slotId: string): Promise<number> {
   const { data } = await adminClient().from("availability_slots").select("booked").eq("id", slotId).single();
   return data?.booked;
-}
-
-/** A notification as Midtrans sends it for this order, signed with the given key. */
-async function notification(orderId: string, transactionStatus: string, statusCode: string, key = serverKey()) {
-  const amount = `${(await orderRow(orderId)).price_idr}.00`;
-  return {
-    transaction_time: "2026-10-28 10:15:00",
-    transaction_status: transactionStatus,
-    transaction_id: crypto.randomUUID(),
-    status_message: "midtrans payment notification",
-    status_code: statusCode,
-    signature_key: createHash("sha512").update(orderId + statusCode + amount + key).digest("hex"),
-    payment_type: "bank_transfer",
-    order_id: orderId,
-    merchant_id: "G000000000",
-    gross_amount: amount,
-    fraud_status: "accept",
-    currency: "IDR",
-  };
-}
-
-async function notify(request: APIRequestContext, body: object) {
-  const response = await request.post("/api/payments/midtrans", { data: body });
-  return { status: response.status(), body: await response.json() };
 }
 
 const confirmation = (page: Page) => page.getByRole("region", { name: "Pesanan Anda sudah dibuat" });

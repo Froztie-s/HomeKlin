@@ -1,6 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-// The signed-in customer's own orders (T9, read by the booking confirmation; the order list is T12),
+// The signed-in customer's own orders (T9, read by the booking confirmation and the order list),
 // through my_orders() (supabase/migrations/20261025090000_orders.sql), which returns them without the
 // agency. Pass the customer's session client (createSupabaseServerClient), behind <Suspense>.
 

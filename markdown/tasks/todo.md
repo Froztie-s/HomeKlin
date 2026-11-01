@@ -72,7 +72,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: signature verified; `successful`, `failed`, `cancelled` each set the correct order status; repeated webhooks give the same result (idempotent); unknown signature rejected.
   - Verify: Vitest tests for all three statuses plus replay; Playwright with sandbox.
   - Deps: T10. Skills: `security-and-hardening`, `doubt-driven-development`.
-- [ ] **T12 Customer order list and status** (S)
+- [x] **T12 Customer order list and status** (S) — done 2026-11-01: `/orders` lists the customer's own orders newest first with status; a paid order shows "Jadwal kedatangan"; each row opens `/orders?order=<id>`; `/orders?booked=<id>` stays the confirmation and Midtrans return; the RLS check is `tests/integration/booking.test.ts` ("lists a customer's own orders through my_orders()")
   - Accept: customer sees only own orders with status; paid orders show the job slot.
   - Verify: Playwright; RLS test that another customer's orders are hidden.
   - Deps: T11.
