@@ -1,10 +1,10 @@
 # Implementation Plan: HomeKlin Web Platform
 
 ## Overview
-Build the HomeKlin website: a hosted, bilingual (Indonesian/English) middleman between customers and partner cleaning agencies. **To the customer, HomeKlin is one cleaning company** with its own services and one price list (set by admin); bookings are routed automatically to a partner agency in the customer's area with the slot free, and agencies are never shown on customer pages (decision of 2026-10-18). Visitors land on a landing page at `/`; the customer app home is `/home`. Customers and cleaners use mobile-first pages. Agencies and admins use desktop-first pages. Scope is everything the Quality Plan tests, built in the spec's priority order. Deadline: Contract end, **9 Nov 2026** (about 3 weeks from 17 Oct). Free tiers only. Demo footage is pre-recorded clips you supply.
+Build the HomeKlin website: a hosted, bilingual (Indonesian/English) middleman between customers and partner cleaning agencies. **To the customer, HomeKlin is one cleaning company** with its own services and one price list (set by admin); bookings are routed automatically to a partner agency in the customer's area with the slot free, and agencies are never shown on customer pages (decision of 2026-10-18). Visitors land on a landing page at `/`; the customer app home is `/home`. Customers and cleaners use mobile-first pages. Agencies, admins and the owner use desktop-first pages (the owner dashboard, added 2026-11-03, covers business numbers, partner agency oversight and admin accounts; HomeKlin is in effect a remote cleaning agency whose cleaning is done by partner agencies). Scope is everything the Quality Plan tests, built in the spec's priority order. Deadline: Contract end, **9 Nov 2026** (about 3 weeks from 17 Oct). Free tiers only. Demo footage is pre-recorded clips you supply.
 
 ## Architecture decisions
-- **Next.js (App Router) + TypeScript + Tailwind, on Vercel.** One codebase with route groups per role: `(customer)`, `(cleaner)`, `(agency)`, `(admin)`.
+- **Next.js (App Router) + TypeScript + Tailwind, on Vercel.** One codebase with route groups per role: `(customer)`, `(cleaner)`, `(agency)`, `(admin)`, `(owner)`.
 - **Supabase** for Postgres, Auth, Realtime (chat), Storage (recordings). **Row-level security (RLS) is the real access control**; UI checks are only a convenience.
 - **Vertical slices.** Each task delivers schema + API + UI + test for one user-visible behaviour, and leaves the app working. Migrations are added per slice, not all up front.
 - **Stream source seam.** The live viewer reads from a `StreamSource` interface. Demo source = looped pre-recorded clip. LiveKit source is built last (task 31-33) and swapped in.
@@ -37,7 +37,7 @@ Figma skills are skipped: the Figma connection failed earlier.
 | Functional correctness (100% critical) | all slices; T37 full e2e suite |
 | Streaming performance (<=3 s) | T32-T33 (real LiveKit only) |
 | Streaming reliability | T32 (adaptive bitrate, reconnect) |
-| Security and privacy | T5, T14, T23, T29, T34 |
+| Security and privacy | T5, T14, T23, T29, T29c, T34 |
 | Availability (>=99%) | T2, T37 (uptime monitor) |
 | Usability (>=90% book unaided) | T8-T9, T35 (3-person trial) |
 | Compatibility | T35 |
@@ -53,6 +53,7 @@ T12 -> recordings (T13-T16)           [customer replay = top priority]
 T12 -> cleaner jobs + check-in (T17,T18) -> attaches recording at check-out
 T5 -> support (T19-T21)               [independent of orders; can run in parallel]
 T18 -> stream seam + live viewer (T22,T23) -> admin (T24-T26) -> agency (T27-T29)
+T12, T9 -> owner dashboard (T29b,T29c)  [needs only orders and the agencies table; built after the agency back office]
 T12 -> reviews (T30)
 T23 -> LiveKit (T31-T33)
 all -> hardening and ship (T34-T39)
@@ -78,6 +79,8 @@ If behind schedule, work stops at the lowest-priority task reached (spec's Build
 | Midtrans webhook retries cause wrong status | Med | idempotent handler + unit tests (T11) |
 | No partner agency free in an area (or two customers take the last free capacity at once) | Med | only offer slots at least one agency in the area can serve (T7); race-safe routing that re-checks capacity in one transaction (T9); honest "no free slot in your area" empty state (T8); seed overlapping coverage for the demo (T6) |
 | An agency name leaks onto a customer page | Med | e2e test that no customer page contains "agensi", "agency" or "mitra" (T3b, kept green in every later task); customer APIs never return agency identity (T7, T9) |
+| Owner role is new (2026-11-03), late, and not part of the Quality Plan | Med | built after the agency back office (T29b, T29c); cut after reviews and real LiveKit but before the agency back office and admin grid; no Quality Plan scenario depends on it |
+| Admin creation by the owner is a privilege-escalation path | High | owner-only server action (`authorize(["owner"])`), secret key on the server only, roles never taken from sign-up metadata (existing `handle_new_user` rule), tests that every other role is refused (T29b, T29c, T34) |
 | Website vs Contract's Android app | Med | ADR (T38); the client agreed, get it in writing as Pasal 8 addendum |
 | WebRTC latency/recovery can't be shown with clips | Med | explicit T33 measurement once LiveKit exists |
 | Chrome DevTools MCP / accounts not set up | Low | human setup list below |

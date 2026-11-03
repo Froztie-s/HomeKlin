@@ -1,6 +1,6 @@
 # HomeKlin
 
-A website that connects customers with partner cleaning agencies. To the customer, HomeKlin is one cleaning company: they book a HomeKlin service in their area, pay (simulated), and can watch their cleaner's live camera feed during the job. They can replay the recording for 7 days afterwards. Behind the scenes each booking is routed to a partner agency with the slot free; agencies manage their cleaners and availability, and admins set the prices, monitor jobs and answer support chats.
+A website that connects customers with partner cleaning agencies. To the customer, HomeKlin is one cleaning company: they book a HomeKlin service in their area, pay (simulated), and can watch their cleaner's live camera feed during the job. They can replay the recording for 7 days afterwards. Behind the scenes each booking is routed to a partner agency with the slot free; agencies manage their cleaners and availability, and admins set the prices, monitor jobs and answer support chats. In effect HomeKlin is a remote cleaning agency whose cleaning is done by partner companies; the owner of HomeKlin sees the business numbers, decides which partners to work with and manages the admins. Besides the landing page there are four dashboards: customer, partner agency, admin and owner.
 
 This is a university project for **Software Audit and Quality Assurance** (Semester 5). We build the product as the software house, and the client group assesses it against their Contract and Quality Plan.
 
@@ -14,6 +14,7 @@ Planning is done. **No code has been written yet.**
 | Cleaner | phone (mobile-first) | see jobs, check in and out, stream camera |
 | Agency (partner, back office only) | desktop | manage own cleaners, availability and assignments of routed jobs, view own cleaners' video |
 | Admin | desktop | support inbox, multi-feed live grid, recording replay |
+| Owner | desktop | business numbers, partner agency oversight, admin accounts |
 
 The site is available in Indonesian (default) and English.
 
@@ -31,7 +32,7 @@ Project markdown is in `markdown/`; the client documents are in `docx/`. `CLAUDE
 | `docx/HomeKlin Development and Quality Plan.docx` | the client's development and quality plan |
 | `markdown/SPEC.md` | what we are building and how we'll know it's done |
 | `markdown/tasks/plan.md` | the implementation plan, risks, and which skills to use when |
-| `markdown/tasks/todo.md` | the 39 tasks with acceptance criteria |
+| `markdown/tasks/todo.md` | the 41 tasks with acceptance criteria |
 | `markdown/Progress.md` | progress notes and decisions, for resuming in a new session |
 | `CLAUDE.md` | standing instructions that Claude reads at the start of each session |
 

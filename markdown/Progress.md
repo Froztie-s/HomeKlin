@@ -1,6 +1,6 @@
 # HomeKlin: Progress and Handoff Notes
 
-Last updated: 2026-11-01. Written so that a **brand-new Claude session with no memory** can pick up exactly where we stopped.
+Last updated: 2026-11-03. Written so that a **brand-new Claude session with no memory** can pick up exactly where we stopped.
 
 ## Instructions for the next Claude session (read this first)
 1. Read, in this order: this file, `README.md`, `markdown/SPEC.md`, `markdown/tasks/plan.md`, `markdown/tasks/todo.md`. Do not read the two `.docx` files unless you need to check a Contract detail (see "Reading the source documents").
@@ -60,12 +60,12 @@ Last updated: 2026-11-01. Written so that a **brand-new Claude session with no m
 |---|---|---|
 | Interview (what the user actually wants) | done | summarised below |
 | Spec | done, approved | `markdown/SPEC.md` |
-| Plan and task list (39 tasks, 11 phases) | done, approved | `markdown/tasks/plan.md`, `markdown/tasks/todo.md` |
+| Plan and task list (41 tasks, 12 phases; T29b and T29c added 2026-11-03) | done, approved | `markdown/tasks/plan.md`, `markdown/tasks/todo.md` |
 | Build | **in progress: T1–T13 done (Checkpoint 2 postponed by the user); next T14 (authorized signed-link endpoint)** | `markdown/tasks/todo.md` |
 
 ## Decisions made (do not re-ask these)
 - **Platform:** a website, not the Android app the Contract names. The client agreed, but it should still be written as a Contract addendum (Pasal 8).
-- **Layout:** customer and cleaner pages are mobile-first. Agency and admin pages are desktop-first (a real desktop site, not a mobile view).
+- **Layout:** customer and cleaner pages are mobile-first. Agency, admin and owner pages are desktop-first (a real desktop site, not a mobile view).
 - **Scope:** everything the Quality Plan tests: booking, simulated payment, cleaner check-in/out, live viewing, FAQ with escalation to admin chat, admin monitoring (multi-feed grid), recording replay, agency back office, reviews.
 - **Stack (free tiers only):** Next.js + TypeScript + Tailwind on Vercel; Supabase (Postgres, Auth, Realtime, Storage); Midtrans Sandbox for simulated payment; LiveKit Cloud for the real live stream, built last. The user left the stack choice to Claude.
 - **Streaming:** the demo uses **pre-recorded short clips supplied by the user**, as a stand-in for a real live stream. The code uses a swappable stream source so real LiveKit can replace the clips (task priority 10). The user will present the user-side UI/UX flow and explain the clips stand in for live video.
@@ -91,12 +91,13 @@ Last updated: 2026-11-01. Written so that a **brand-new Claude session with no m
 - **Dependencies approved:** `nodemailer` (T9b, order confirmation over Gmail SMTP; user, 2026-10-25); `lucide-react` (icons); `next-intl` (named in the approved stack in `markdown/SPEC.md`; installed at T4 after the user said on 2026-10-22 to work through the build without stopping to ask).
 - **Security settings (Checkpoint 1, user, 2026-10-24):** (1) Supabase Auth rate limits stay at their defaults: the site is a demo with fewer than 5 users at a time. (2) Session cookies keep the `@supabase/ssr` defaults (readable by the browser, needed for a browser Realtime client at T20). (3) No extra migration for the `profiles` grants ("revoke all, grant select" skipped as low value).
 - **Ordering without sign-up (user, 2026-10-25; task T9b):** clicking a service opens one order form (`/pesan`): service, area, window, address, phone (contact only), email, consent. A 6-digit code emailed to the customer is typed on the form; it creates the customer account for a new email, signs them in and places the order. Returning customers sign in at `/login` by emailed code (no password); staff keep email + password; `/signup` goes. Phone OTP was considered and dropped (SMS is never free). Email: Gmail SMTP (user decision 2026-10-25, replacing Brevo): Supabase sends the codes through it and the app sends the order confirmation with nodemailer (dependency approved by the user); the test project uses Ethereal (throw-away SMTP) so tests never send real email. Recordings and live viewing stay tied to the account.
+- **What HomeKlin is, and the owner role (user, 2026-11-03):** HomeKlin is a remote cleaning agency that works with third-party partner cleaning companies; the customer sees only an ordinary cleaning brand (already the rule above, now written as "What HomeKlin Is" in `markdown/PRODUCT.md`). The product is the landing page plus **four dashboards**: customer, partner agency, admin and **owner**. Cleaners are not a dashboard; they keep their phone work screens (jobs, check-in/out, stream). The **owner** is a new role (not in the T5 role enum): business numbers (revenue, orders, trends, per partner agency), partner agency oversight (add, suspend, reactivate, performance) and admin account management; no admin powers of its own. Added to the plan as **T29b** (role, migration, seed, business numbers) and **T29c** (partner agencies, admin accounts), Phase 8b, after the agency back office; `SPEC.md`, `plan.md` and `todo.md` updated. The cut order, if time runs short, is now: real LiveKit stream, reviews, owner dashboard, agency back office, admin grid (a default, the user can reorder). Nothing is built yet; the next task is still T14.
 - **Not required:** the Development Plan's Scrum process, cost estimates, iOS app, store submission, wearable camera hardware.
 
 One answer was ambiguous and I interpreted it: the user said replay "should not include the livestreaming". I took that to mean no recording of the live stream is captured and live streaming stays. The user later clarified they do want recording storage with demo clips, so the spec now reflects that.
 
 ## Build priority (from the spec)
-1. Foundation  2. Catalog and ordering with payment  3. Customer recording replay  4. Check-in  5. Support (FAQ and chat)  6. Live viewer with demo clips  7. Admin console and grid  8. Agency back office  9. Reviews  10. Real LiveKit stream.
+1. Foundation  2. Catalog and ordering with payment  3. Customer recording replay  4. Check-in  5. Support (FAQ and chat)  6. Live viewer with demo clips  7. Admin console and grid  8. Agency back office  8b. Owner dashboard  9. Reviews  10. Real LiveKit stream.
 
 ## Things only the user can do
 - Create accounts and keys: Vercel and Supabase (needed at T2), Midtrans Sandbox (T10), LiveKit Cloud (T31).
@@ -149,5 +150,5 @@ All project markdown lives in `markdown/` and the client Word files in `docx/`. 
 | `AGENTS.md` | Next.js 16 agent notes (generated by Next.js) plus a pointer to `markdown/CONSTRAINTS.md` |
 | `markdown/SPEC.md` | what we are building and how we'll know it's done |
 | `markdown/tasks/plan.md` | the implementation plan, risks, and which skills to use when |
-| `markdown/tasks/todo.md` | the 39 tasks with acceptance criteria |
+| `markdown/tasks/todo.md` | the 41 tasks with acceptance criteria |
 | `docx/HomeKlin Contract.docx`, `docx/HomeKlin Development and Quality Plan.docx` | the client's documents |

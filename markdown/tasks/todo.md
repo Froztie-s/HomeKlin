@@ -184,6 +184,20 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 ### Checkpoint 8: Agency
 - [ ] Agency flows work; cross-agency access refused; review.
 
+## Phase 8b: Owner dashboard (user request 2026-11-03)
+
+- [ ] **T29b Owner role and business numbers** (M)
+  - Accept: `owner` is added to the role enum by its own migration (`ALTER TYPE ... ADD VALUE` cannot share a transaction with statements that use the new value); `/owner` is a protected section in `src/lib/auth/roles.ts` with `RoleGate` on every owner page, so `tests/protected-pages.test.ts` stays green; the seed adds one fictional owner, marked in `app_metadata` like the other privileged users; the desktop dashboard shows revenue from paid orders, orders by status, a 30-day trend, and jobs and revenue per partner agency, read through a function that only the owner role can call and that returns no customer personal data; both languages.
+  - Verify: integration tests that a customer, cleaner, agency and admin cannot call the function or open `/owner`, and that sign-up cannot create an owner; Playwright desktop: owner signs in and the numbers match the seeded paid orders.
+  - Deps: T12, T6. Skills: `security-and-hardening`, `frontend-ui-engineering`, `test-driven-development`.
+- [ ] **T29c Owner: partner agencies and admin accounts** (M)
+  - Accept: the owner lists partner agencies with their performance, adds one, and suspends or reactivates one (a status column on `agencies`); `book_slot` and `free_slots` skip suspended agencies, and an area served only by suspended agencies shows the existing empty state; the owner lists, creates and removes admin accounts through a server action with `authorize(["owner"])`, the Supabase secret key used on the server only, the role marked in `app_metadata` and never read from sign-up metadata (the seed's rules); removing an admin takes the role away.
+  - Verify: integration tests that a suspended agency receives no booking and its windows vanish, that the routing race tests still pass, and that only the owner can create or remove admins (each other role is refused); Playwright desktop; the no-agency-wording test stays green (owner pages are not customer pages).
+  - Deps: T29b, T9. Skills: `security-and-hardening`, `doubt-driven-development` (privilege escalation, changing the routing), `frontend-ui-engineering`.
+
+### Checkpoint 8b: Owner
+- [ ] Owner flows work; no other role can reach owner pages or create admins; review.
+
 ## Phase 9: Reviews
 
 - [ ] **T30 Rating and review after completed job** (S)

@@ -6,7 +6,7 @@ Sources: `docx/HomeKlin Contract.docx`, `docx/HomeKlin Development and Quality P
 ## Assumptions (correct me before planning starts)
 
 1. The product is a **hosted website**, not a native app. This departs from the Contract's wording ("Android mobile app"). The client has agreed to this; the addendum (Contract Pasal 8) should still be written down.
-2. Customer and cleaner pages are **mobile-first**. Agency and admin pages are **desktop-first** (confirmed).
+2. Customer and cleaner pages are **mobile-first**. Agency, admin and owner pages are **desktop-first** (confirmed; owner added 2026-11-03).
 3. "Everything the Quality Plan tests" is the scope: booking, simulated payment, cleaner check-in/out, live streaming, FAQ with escalation to admin chat, admin monitoring. Ratings and reviews are lowest priority.
 4. All infrastructure runs on **free tiers**. The deadline is the Contract end date, **9 Nov 2026**.
 5. The UI is **bilingual: Indonesian (default) and English**, with a language switch. Code, commits and docs are in English.
@@ -16,7 +16,7 @@ Sources: `docx/HomeKlin Contract.docx`, `docx/HomeKlin Development and Quality P
 
 ## Objective
 
-A website that acts as the middleman between **customers** who want cleaning services and **partner cleaning agencies** who provide the cleaners. **To the customer, HomeKlin is one cleaning company** with its own services and one price list; partner agencies are never shown or named on customer pages (decision of 2026-10-18). Customers choose a HomeKlin service and a free time slot in their area, book, and pay (simulated). HomeKlin routes each booking automatically to a partner agency in that area with the slot free, and the agency assigns one of its cleaners. Cleaners check in at the job and stream live video from their phone, so the customer feels safe. Customers can reach an admin through FAQ-to-chat escalation. Admins set the services and prices, monitor live sessions and handle support. Visitors arrive on a landing page at `/`; the customer app home is `/home`.
+A website that acts as the middleman between **customers** who want cleaning services and **partner cleaning agencies** who provide the cleaners. **To the customer, HomeKlin is one cleaning company** with its own services and one price list; partner agencies are never shown or named on customer pages (decision of 2026-10-18). Customers choose a HomeKlin service and a free time slot in their area, book, and pay (simulated). HomeKlin routes each booking automatically to a partner agency in that area with the slot free, and the agency assigns one of its cleaners. Cleaners check in at the job and stream live video from their phone, so the customer feels safe. Customers can reach an admin through FAQ-to-chat escalation. Admins set the services and prices, monitor live sessions and handle support. In effect HomeKlin is a remote cleaning agency: it employs no cleaners, and the partner agencies do the cleaning without the customer ever knowing. The owner of HomeKlin runs the business from an owner dashboard (business numbers, partner agency oversight, admin accounts). Visitors arrive on a landing page at `/`; the customer app home is `/home`. Besides the landing page the product has four dashboards (customer, partner agency, admin, owner); cleaners use their own phone work screens, which are not a dashboard.
 
 Success means the client group can open the public URL, run every critical scenario in the Quality Plan, and hit no blocker.
 
@@ -29,6 +29,7 @@ Success means the client group can open the public URL, run every critical scena
 | cleaner | phone (mobile-first) | see assigned jobs, check in/out, stream video. Shown to the customer as "Petugas HomeKlin" (name and photo) |
 | agency (partner) | desktop-first | back office only: manage own cleaners and availability (schedule slots per area), assign own cleaners to jobs routed to the agency, watch own cleaners' video. Does not set customer prices |
 | admin | desktop-first | manage HomeKlin's services and price list, monitor live feed, answer chat tickets, review incidents, manage FAQ |
+| owner | desktop-first | see business numbers (revenue, orders, trends, per partner agency), add, suspend and reactivate partner agencies, create and remove admin accounts. Does not run day-to-day operations (that is admin) |
 
 ## Capability map
 
@@ -42,6 +43,7 @@ Success means the client group can open the public URL, run every critical scena
 | support | FAQ with search, escalation to admin chat, ticket inbox | foundation |
 | admin-monitor | multi-feed live grid, recording replay, admin dashboard | streaming, support |
 | reviews | rating and review after job (lowest priority) | order |
+| owner | owner dashboard: business numbers, partner agency oversight, admin accounts | order, admin-monitor |
 
 Build order: foundation, catalog, order, checkin, support, streaming, admin-monitor, reviews.
 
@@ -90,6 +92,7 @@ src/app/[locale]/      every page, per language (Indonesian at /..., English at 
   (cleaner)/           cleaner pages (mobile-first)
   (agency)/            agency back office (desktop-first)
   (admin)/             admin console (desktop-first)
+  (owner)/             owner dashboard (desktop-first)
 src/app/api/           route handlers (Midtrans webhook, LiveKit token)
 src/i18n/              next-intl routing, navigation and request config
 src/proxy.ts           language routing in front of every page (Next.js 16 "proxy", formerly middleware)
@@ -135,7 +138,7 @@ Conventions: kebab-case files, PascalCase components, camelCase variables, snake
 
 - **Unit (Vitest):** validation schemas, price and status logic, payment-status mapping.
 - **Integration (Vitest):** route handlers and RLS policies against a test Supabase project.
-- **End-to-end (Playwright):** one spec per Quality Plan scenario, run in a mobile viewport for customer and cleaner flows and a desktop viewport for agency and admin flows.
+- **End-to-end (Playwright):** one spec per Quality Plan scenario, run in a mobile viewport for customer and cleaner flows and a desktop viewport for agency, admin and owner flows.
 - Streaming is verified manually with two real devices plus a latency measurement (documented in `docs/`), since WebRTC is hard to automate.
 - Internal test results are saved in `docs/` as evidence, because the Contract requires internal testing before handing features to the client group for UAT.
 - Coverage: the critical paths must have e2e tests. No fixed percentage target.
@@ -191,6 +194,12 @@ Priority: P0 must work at hand-over, P1 should work, P2 stretch.
 **Agency (P1)**
 - A partner agency manages its own cleaners and its availability (schedule slots per service area), and assigns its own cleaners to the jobs routed to it. Agencies do not set customer prices or manage services.
 
+**Owner (P1; added 2026-11-03)**
+- `/owner` is open to the owner role only, checked on the server and by RLS. Nobody can become an owner by signing up.
+- Business numbers: revenue from paid orders, orders by status, a 30-day trend, and jobs and revenue per partner agency. No customer personal data is shown.
+- Partner agencies: the owner lists them with their performance, adds one, and suspends or reactivates one. A suspended agency gets no new bookings and its windows are not offered; jobs already booked stay with it.
+- Admin accounts: the owner lists, creates and removes admins. This is the only place admins are created; sign-up never grants a role.
+
 **Reviews (P2)**
 - Customer can rate and review a completed job: the HomeKlin service and the cleaner ("Petugas HomeKlin"). Reviews never name a partner agency on customer pages.
 
@@ -234,6 +243,11 @@ Resolved on 2026-10-18 (user decisions; they override anything older in this fil
 6. **Photos:** free stock photos (Unsplash or Pexels licence), stored in the repo and credited in `markdown/image-sources.md`.
 7. **Theme:** light only.
 
+Resolved on 2026-11-03 (user decision):
+8. **HomeKlin is a remote cleaning agency** that works with third-party partner cleaning companies; the customer sees an ordinary cleaning brand.
+9. **Four dashboards plus the landing page:** customer, partner agency, admin and owner. Cleaners are not a dashboard; they keep phone work screens (jobs, check-in/out, stream).
+10. **The owner dashboard** covers business numbers, partner agency oversight and admin account management. It is built as T29b and T29c (Phase 8b), after the agency back office.
+
 ## Build Priority
 
 If time runs out, whatever is lower on this list is what is unfinished. Everything stays in scope.
@@ -246,6 +260,7 @@ If time runs out, whatever is lower on this list is what is unfinished. Everythi
 6. live viewer for the customer, using the demo clip source, with the access rules
 7. admin console and the multi-feed grid
 8. agency back office, including agency video access and recording replay
+8b. owner dashboard (business numbers, partner agency oversight, admin accounts), after the agency back office
 9. reviews
 10. real LiveKit stream source (cleaner's phone to viewers), replacing the demo clip source
 
