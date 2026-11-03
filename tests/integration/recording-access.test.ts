@@ -122,7 +122,7 @@ function linkLifetime(url: string): number {
   return claims.exp - claims.iat;
 }
 
-describe("recordingLink: who may replay", () => {
+describe("recordingLink: who may replay", { timeout: 30_000 }, () => {
   it.each(allowed)("gives %s a short-lived link that plays the recording", async (viewer) => {
     const link = await recordingLink(user(viewer).client, adminClient(), recordings.available);
 

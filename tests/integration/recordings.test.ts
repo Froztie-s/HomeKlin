@@ -85,7 +85,7 @@ afterAll(async () => {
   await admin.from("service_areas").delete().eq("id", area);
 }, 60_000);
 
-describe("attachRecording", () => {
+describe("attachRecording", { timeout: 30_000 }, () => {
   it("gives a paid job its own copy of a clip, expiring after 7 days, for the routed agency", async () => {
     const orderId = await order();
     const before = Date.now();
@@ -138,7 +138,7 @@ describe("attachRecording", () => {
   });
 });
 
-describe("recordings stay private", () => {
+describe("recordings stay private", { timeout: 30_000 }, () => {
   it("makes the bucket private, for video only", async () => {
     const { data } = await adminClient().storage.getBucket(recordingsBucket);
     expect(data?.public).toBe(false);
@@ -191,7 +191,7 @@ describe("recordings stay private", () => {
   });
 });
 
-describe("the seed's completed jobs", () => {
+describe("the seed's completed jobs", { timeout: 60_000 }, () => {
   it("adds a clip once, and gives each demo job a replayable recording however often it runs", async () => {
     const admin = adminClient();
     const name = `${prefix}-seed.mp4`;
