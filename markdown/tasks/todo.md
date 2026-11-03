@@ -86,7 +86,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: `recordings` table (job, agency, file path, created, expires = +7 days); private bucket; storage policies deny direct public access; `attachRecording(jobId)` attaches a clip from a small clip library; seed includes completed jobs with clips (clips supplied by you).
   - Verify: Vitest for expiry date; bucket not readable without a signed link.
   - Deps: T12, human clips. Skills: `source-driven-development`, `security-and-hardening`.
-- [ ] **T14 Authorized signed-link endpoint** (S)
+- [x] **T14 Authorized signed-link endpoint** (S) — done 2026-11-03: `GET /api/recordings/<id>/link` and `recordingLink` (`src/lib/recordings/link.ts`); `recording_for_viewer()` lets in the booking's customer, the routed agency and admin; everyone else gets not found (404), an expired recording gone (410); links last at most 10 minutes and never past the recording's expiry
   - Accept: returns a short-lived signed link only for the booking's customer, the owning agency, or admin; other customers/agencies refused; expired entries refused.
   - Verify: Vitest authorization matrix (each role x own/other x expired).
   - Deps: T13. Skills: `api-and-interface-design`, `security-and-hardening`, `doubt-driven-development`.
