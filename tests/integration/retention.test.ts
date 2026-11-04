@@ -6,9 +6,10 @@ import { adminClient } from "./test-project";
 import { createWorld, hours, type World } from "./world";
 
 // The 7-day retention (T16, src/lib/recordings/retention.ts) against the real test project, with a
-// 1-minute retention: once it has passed, the cleanup deletes the file and marks the entry, and the
-// server refuses the entry. Recordings still inside their retention are left alone. Instead of waiting,
-// the cleanup is given a "now" a few minutes ahead.
+// 2-second retention: once it has passed, the cleanup deletes the file and marks the entry, and the
+// server refuses the entry. Recordings still inside their retention are left alone. The cleanup runs on
+// the real clock: other test files keep recordings that expire within minutes, and a "now" in the
+// future would delete their files too.
 
 let world: World;
 const clipName = "t16-clip.mp4";
@@ -34,13 +35,14 @@ const fileExists = async (path: string) => {
 describe("deleteExpiredRecordings", { timeout: 60_000 }, () => {
   it("deletes a recording whose retention has passed, and the server then refuses it", async () => {
     const short = await attachRecording(adminClient(), await world.job({ startsAt: new Date(Date.now() - hours(3)), completed: true }), {
-      retentionDays: 1 / (24 * 60),
+      retentionDays: 2 / (24 * 60 * 60),
     });
     const kept = await attachRecording(adminClient(), await world.job({ startsAt: new Date(Date.now() - hours(3)), completed: true }));
     files.push(short.filePath, kept.filePath);
     expect(await fileExists(short.filePath)).toBe(true);
 
-    const result = await deleteExpiredRecordings(adminClient(), new Date(Date.now() + 5 * 60_000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    const result = await deleteExpiredRecordings(adminClient());
     expect(result.deleted).toBeGreaterThanOrEqual(1);
 
     expect(await fileExists(short.filePath)).toBe(false);
@@ -59,7 +61,7 @@ describe("deleteExpiredRecordings", { timeout: 60_000 }, () => {
     await adminClient().from("recordings").update({ deleted_at: new Date().toISOString() }).eq("id", recording.id);
     await expect(recordingLink(world.users.admin.client, adminClient(), recording.id)).rejects.toMatchObject({ reason: "recording_expired" });
 
-    const again = await deleteExpiredRecordings(adminClient(), new Date(Date.now() + 5 * 60_000));
+    const again = await deleteExpiredRecordings(adminClient());
     const { data } = await adminClient().from("recordings").select("id").eq("id", recording.id).is("deleted_at", null);
     expect(data).toEqual([]);
     expect(again.deleted).toBeGreaterThanOrEqual(0);
