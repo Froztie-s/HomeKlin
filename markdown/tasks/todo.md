@@ -94,7 +94,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: completed jobs list shows "available until" countdown; player plays the clip; expired state shown clearly; mobile-first; both languages.
   - Verify: Playwright mobile: play own recording; expired job shows message.
   - Deps: T14. Skills: `frontend-ui-engineering`, `browser-testing-with-devtools`.
-- [ ] **T16 7-day retention cleanup** (S)
+- [x] **T16 7-day retention cleanup** (S) — done 2026-11-04: `deleteExpiredRecordings` (`src/lib/recordings/retention.ts`) deletes the files of expired recordings and marks them `deleted_at`; daily Vercel Cron `GET /api/cron/recordings` (`vercel.json`, needs `CRON_SECRET` in Vercel); `RECORDING_RETENTION_DAYS` shortens the retention; integration test with a 1-minute retention (`tests/integration/retention.test.ts`)
   - Accept: scheduled job deletes files and marks entries expired after 7 days; retention length configurable for testing.
   - Verify: Vitest/integration with a 1-minute retention: file gone from storage and server refuses entry.
   - Deps: T13.
@@ -207,7 +207,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 10: Real live stream (LiveKit)
 
-- [ ] **T31 LiveKit token endpoint and rooms** (S)
+- [x] **T31 LiveKit token endpoint and rooms** (S) — done 2026-11-04 without real keys: `GET /api/streams/<order id>/token` signs a 10-minute LiveKit token (HS256 with node:crypto, no new dependency) for room `job-<order id>`; publishing only for the job's cleaner during the job (`can_publish_stream()`), watching for whom `stream_for_viewer()` allows; 503 `not_configured` until `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `LIVEKIT_URL` are set; matrix in `tests/livekit-token.test.ts` and `tests/integration/streams.test.ts`
   - Accept: server-issued, short-lived tokens scoped to one room per job; same access matrix as T23/T29/T25; no token for unauthorized users.
   - Verify: Vitest matrix.
   - Deps: T23, T29, T25, human LiveKit keys. Skills: `source-driven-development`, `security-and-hardening`.
