@@ -70,7 +70,12 @@ export async function attachRecording(
   const row = (data as { recording_id: string; file_path: string; expires_at: string }[])[0];
   if (!row) throw new RecordingError(null, "the database returned no recording");
 
-  const copied = await client.storage.from(recordingsBucket).copy(`${clipFolder}/${clip}`, row.file_path);
+  let copied = await client.storage.from(recordingsBucket).copy(`${clipFolder}/${clip}`, row.file_path);
+  if (copied.error && /not found/i.test(copied.error.message)) {
+    // The clip left the library after it was listed: copy another one into the same place, once.
+    const other = pickClip((await listClips(client)).filter((name) => name !== clip), orderId);
+    if (other) copied = await client.storage.from(recordingsBucket).copy(`${clipFolder}/${other}`, row.file_path);
+  }
   if (copied.error && !isAlreadyThere(copied.error)) throw new RecordingError(null, copied.error.message);
 
   return { id: row.recording_id, filePath: row.file_path, expiresAt: new Date(row.expires_at).toISOString() };

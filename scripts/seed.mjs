@@ -27,10 +27,12 @@ import {
   demoAccounts,
   demoJobAddress,
   demoJobPhone,
+  cleanerPhotos,
   demoJobs,
   seedAreas,
   seedServices,
   slotPattern,
+  todayJob,
 } from "./seed-data.mjs";
 
 /** Where the user keeps the demo clips: git-ignored, because the repository is public and clips are large. */
@@ -426,7 +428,7 @@ export async function uploadClips({ client, files }) {
  * the recordings are fresh for a demo: a job ended days ago and expires 7 days after it ended. Without
  * clips in the library it adds nothing, because a job's recording needs one.
  *
- * @param {{ client: import("@supabase/supabase-js").SupabaseClient, customerId: string, jobs: { id: string, serviceId: string, areaId: string, agencyId: string, daysAgo: number }[], now?: Date }} options
+ * @param {{ client: import("@supabase/supabase-js").SupabaseClient, customerId: string, jobs: { id: string, serviceId: string, areaId: string, agencyId: string, cleanerId?: string, daysAgo: number }[], now?: Date }} options
  * @returns {Promise<{ added: number }>}
  */
 export async function seedCompletedJobs({ client, customerId, jobs, now = new Date() }) {
@@ -480,6 +482,10 @@ export async function seedCompletedJobs({ client, customerId, jobs, now = new Da
         stream_consent: true,
         status: "paid",
         payment_result_at: endsAt.toISOString(),
+        cleaner_id: job.cleanerId ?? null,
+        checked_in_at: job.cleanerId ? startsAt.toISOString() : null,
+        check_in_lat: job.cleanerId ? demoJobLocation.lat : null,
+        check_in_lng: job.cleanerId ? demoJobLocation.lng : null,
         completed_at: endsAt.toISOString(),
       }),
     );
@@ -487,6 +493,69 @@ export async function seedCompletedJobs({ client, customerId, jobs, now = new Da
     await attachRecording(client, job.id, { retentionDays });
   }
   return { added: jobs.length };
+}
+
+/** Where the demo jobs' check-in was recorded: a made-up point in South Jakarta. */
+const demoJobLocation = { lat: -6.2615, lng: 106.8106 };
+
+/**
+ * Links each demo cleaner to their agency, with a name and a photo for the customer (T17, T28).
+ *
+ * @param {{ client: import("@supabase/supabase-js").SupabaseClient, cleaners: { id: string, fullName: string, agencyId: string, photoUrl?: string | null }[] }} options
+ */
+export async function seedCleaners({ client, cleaners }) {
+  await must(
+    "cleaners",
+    client.from("cleaners").upsert(
+      cleaners.map(({ id, fullName, agencyId, photoUrl }) => ({ user_id: id, agency_id: agencyId, full_name: fullName, photo_url: photoUrl ?? null })),
+      { onConflict: "user_id" },
+    ),
+  );
+  return { cleaners: cleaners.length };
+}
+
+/**
+ * Starts the demo's upcoming job over: paid, assigned, not checked in, starting a few minutes from now.
+ *
+ * @param {{ client: import("@supabase/supabase-js").SupabaseClient, customerId: string, job: { id: string, serviceId: string, areaId: string, agencyId: string, cleanerId: string, startsInMinutes: number, hours: number }, now?: Date }} options
+ */
+export async function seedUpcomingJob({ client, customerId, job, now = new Date() }) {
+  const old = await must("old recording", client.from("recordings").select("file_path").eq("order_id", job.id));
+  if (old.length > 0) await must("old file", client.storage.from(recordingsBucket).remove(old.map((row) => row.file_path)));
+  await must("old upcoming job", client.from("orders").delete().eq("id", job.id));
+
+  const startsAt = new Date(Math.ceil((now.getTime() + job.startsInMinutes * 60_000) / 60_000) * 60_000);
+  const endsAt = new Date(startsAt.getTime() + job.hours * hourMs);
+  const slot = await must(
+    "upcoming window",
+    client
+      .from("availability_slots")
+      .insert({ agency_id: job.agencyId, area_id: job.areaId, starts_at: startsAt.toISOString(), ends_at: endsAt.toISOString(), capacity: 1, booked: 1 })
+      .select("id")
+      .single(),
+  );
+  const service = await must("job's service", client.from("services").select("price_idr").eq("id", job.serviceId).single());
+  await must(
+    "upcoming job",
+    client.from("orders").insert({
+      id: job.id,
+      customer_id: customerId,
+      service_id: job.serviceId,
+      area_id: job.areaId,
+      agency_id: job.agencyId,
+      slot_id: slot.id,
+      starts_at: startsAt.toISOString(),
+      ends_at: endsAt.toISOString(),
+      address: demoJobAddress,
+      contact_phone: demoJobPhone,
+      price_idr: service.price_idr,
+      stream_consent: true,
+      status: "paid",
+      payment_result_at: now.toISOString(),
+      cleaner_id: job.cleanerId,
+    }),
+  );
+  return { startsAt: startsAt.toISOString() };
 }
 
 /** The clips in the local, git-ignored clips folder, ready for uploadClips. */
@@ -533,12 +602,36 @@ async function main() {
   const customer = results.find((result) => result.role === "customer");
   if (!customer) throw new Error("The demo customer was not seeded.");
   const rows = await must("agencies", client.from("agencies").select("id, key"));
-  const jobs = demoJobs.map(({ agency, ...job }) => {
+  const agencyIdOf = (agency) => {
     const row = rows.find((entry) => entry.key === agency);
     if (!row) throw new Error(`The agency ${agency} was not saved.`);
-    return { ...job, agencyId: row.id };
-  });
+    return row.id;
+  };
+  const cleanerIdOf = (localPart) => {
+    const found = results.find((result) => result.role === "cleaner" && result.email.startsWith(`${localPart}@`));
+    if (!found) throw new Error(`The demo cleaner ${localPart} was not seeded.`);
+    return found.id;
+  };
+  const cleaners = results
+    .filter((result) => result.role === "cleaner" && result.agency)
+    .map((result) => ({
+      id: result.id,
+      fullName: result.fullName,
+      agencyId: agencyIdOf(result.agency),
+      photoUrl: cleanerPhotos[result.email.split("@")[0]] ?? null,
+    }));
+  await seedCleaners({ client, cleaners });
+  console.log(`Cleaners: ${cleaners.length} linked to their agencies.`);
+
+  const jobs = demoJobs.map(({ agency, cleaner, ...job }) => ({ ...job, agencyId: agencyIdOf(agency), cleanerId: cleanerIdOf(cleaner) }));
   const completed = await seedCompletedJobs({ client, customerId: customer.id, jobs });
+  const { agency: todayAgency, cleaner: todayCleaner, ...today } = todayJob;
+  const upcoming = await seedUpcomingJob({
+    client,
+    customerId: customer.id,
+    job: { ...today, agencyId: agencyIdOf(todayAgency), cleanerId: cleanerIdOf(todayCleaner) },
+  });
+  console.log(`Upcoming demo job for ${todayCleaner}: starts ${upcoming.startsAt} (check-in opens 15 minutes before).`);
   console.log(
     `Clips: ${clips.added} added, ${clips.kept} already there. Completed jobs with a recording: ${completed.added}` +
       (completed.added === 0 ? ` (no clips yet: put .mp4 or .webm files in ${clipsDirectory}/ and seed again).` : "."),

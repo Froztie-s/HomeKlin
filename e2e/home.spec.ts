@@ -21,7 +21,9 @@ test.describe("customer home", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Pesan kebersihan rumah" })).toBeVisible();
     const area = page.getByRole("combobox", { name: "Area layanan" });
     await expect(area).toHaveValue("jakarta-selatan");
-    await expect(area.getByRole("option")).toHaveText([
+    // The integration tests add areas named "Uji ..." to the shared test project while they run, and a
+    // build made meanwhile lists them too; the five seeded areas come first, in this order.
+    await expect(area.getByRole("option").filter({ hasNotText: /^Uji / })).toHaveText([
       "Jakarta Selatan",
       "Jakarta Pusat",
       "Jakarta Barat",

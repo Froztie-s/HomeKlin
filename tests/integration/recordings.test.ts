@@ -228,14 +228,20 @@ describe("the seed's completed jobs", { timeout: 60_000 }, () => {
   }, 60_000);
 
   it("adds nothing when there are no clips yet", async () => {
-    const { data: library } = await adminClient().storage.from(recordingsBucket).list(clipFolder);
-    const held = (library ?? []).map((file) => `${clipFolder}/${file.name}`);
-    await adminClient().storage.from(recordingsBucket).remove(held);
+    // The shared library is never emptied (other test files use it at the same time): the seed is given
+    // a client whose library is empty and that fails on anything else.
+    const admin = adminClient();
+    const emptyLibrary = new Proxy(admin, {
+      get(target, property) {
+        if (property === "storage") return { from: () => ({ list: async () => ({ data: [], error: null }) }) };
+        if (property === "from") return () => { throw new Error("the seed wrote a job without a clip"); };
+        return Reflect.get(target, property);
+      },
+    });
     const job = { id: randomUUID(), serviceId, areaId: area, agencyId, daysAgo: 2 };
-    const result = await seedCompletedJobs({ client: adminClient(), customerId: user(customer).id, jobs: [job], now: new Date() });
+    const result = await seedCompletedJobs({ client: emptyLibrary, customerId: user(customer).id, jobs: [job], now: new Date() });
     expect(result).toEqual({ added: 0 });
-    const { count } = await adminClient().from("orders").select("id", { count: "exact" }).eq("id", job.id);
+    const { count } = await admin.from("orders").select("id", { count: "exact" }).eq("id", job.id);
     expect(count).toBe(0);
-    await adminClient().storage.from(recordingsBucket).upload(`${clipFolder}/${clipName}`, clipBytes, { contentType: "video/mp4" });
   });
 });

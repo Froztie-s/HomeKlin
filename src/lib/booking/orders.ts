@@ -1,8 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 // The signed-in customer's own orders (T9, read by the booking confirmation and the order list),
-// through my_orders() (supabase/migrations/20261025090000_orders.sql), which returns them without the
-// agency. Pass the customer's session client (createSupabaseServerClient), behind <Suspense>.
+// through my_orders() (supabase/migrations/20261104090000_jobs.sql), which returns them without the
+// agency: the cleaner appears only by name and photo, as "Petugas HomeKlin". Pass the customer's session client (createSupabaseServerClient), behind <Suspense>.
 
 export type OrderStatus = "pending_payment" | "paid" | "failed" | "cancelled";
 
@@ -20,6 +20,17 @@ export type CustomerOrder = {
   priceIdr: number;
   status: OrderStatus;
   createdAt: string;
+  /** The cleaner the job was given to (T28), or null until then. */
+  cleanerName: string | null;
+  cleanerPhotoUrl: string | null;
+  checkedInAt: string | null;
+  /** When the cleaner finished the job (T18). */
+  completedAt: string | null;
+  /** The job's recording (T13), or null when it has none. */
+  recordingId: string | null;
+  recordingExpiresAt: string | null;
+  /** The 7-day cleanup (T16) has deleted the file: it can no longer be played. */
+  recordingDeleted: boolean;
 };
 
 type OrderRow = {
@@ -33,7 +44,16 @@ type OrderRow = {
   price_idr: number;
   status: OrderStatus;
   created_at: string;
+  cleaner_name: string | null;
+  cleaner_photo_url: string | null;
+  checked_in_at: string | null;
+  completed_at: string | null;
+  recording_id: string | null;
+  recording_expires_at: string | null;
+  recording_deleted: boolean | null;
 };
+
+const isoOrNull = (value: string | null) => (value ? new Date(value).toISOString() : null);
 
 export class OrdersError extends Error {
   constructor(cause: { message: string }) {
@@ -57,5 +77,12 @@ export async function listMyOrders(client: SupabaseClient): Promise<CustomerOrde
     priceIdr: row.price_idr,
     status: row.status,
     createdAt: new Date(row.created_at).toISOString(),
+    cleanerName: row.cleaner_name,
+    cleanerPhotoUrl: row.cleaner_photo_url,
+    checkedInAt: isoOrNull(row.checked_in_at),
+    completedAt: isoOrNull(row.completed_at),
+    recordingId: row.recording_id,
+    recordingExpiresAt: isoOrNull(row.recording_expires_at),
+    recordingDeleted: row.recording_deleted === true,
   }));
 }

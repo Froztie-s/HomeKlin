@@ -155,9 +155,27 @@ export const slotPattern = {
  * Fixed ids: each seed run replaces these orders, and only these, so real test orders are never touched.
  */
 export const demoJobs = [
-  { id: "d3a0c1e2-0001-4000-8000-000000000001", serviceId: "regular", areaId: "jakarta-selatan", agency: "kilau-teratai", daysAgo: 1 },
-  { id: "d3a0c1e2-0002-4000-8000-000000000002", serviceId: "deep", areaId: "jakarta-pusat", agency: "cemara-rapi", daysAgo: 3 },
+  { id: "d3a0c1e2-0001-4000-8000-000000000001", serviceId: "regular", areaId: "jakarta-selatan", agency: "kilau-teratai", cleaner: "petugas.yuliana", daysAgo: 1 },
+  { id: "d3a0c1e2-0002-4000-8000-000000000002", serviceId: "deep", areaId: "jakarta-pusat", agency: "cemara-rapi", cleaner: "petugas.ratna", daysAgo: 3 },
 ];
+
+/**
+ * A paid job of the demo customer that starts 10 minutes after the seed runs, assigned to a demo
+ * cleaner who has not checked in yet (T17, T18): seed shortly before a demo to show check-in, the live
+ * view and check-out. Check-in opens 15 minutes before the window.
+ */
+export const todayJob = {
+  id: "d3a0c1e2-0003-4000-8000-000000000003",
+  serviceId: "regular",
+  areaId: "jakarta-selatan",
+  agency: "kilau-teratai",
+  cleaner: "petugas.yuliana",
+  startsInMinutes: 10,
+  hours: 3,
+};
+
+/** The photo each demo cleaner shows the customer, a file in public/images. */
+export const cleanerPhotos = { "petugas.yuliana": "/images/cleaner-portrait.jpg", "petugas.ratna": "/images/cleaner-avatar.jpg" };
 
 export const demoJobAddress = "Jl. Melati Contoh No. 12, Jakarta";
 export const demoJobPhone = "+6281200000000";

@@ -21,7 +21,7 @@ const day = 86_400_000;
 const roles = ["owner", "otherCustomer", "agency", "otherAgency", "admin", "cleaner"] as const;
 type Viewer = (typeof roles)[number];
 const users: Partial<Record<Viewer, TestUser>> = {};
-const recordings = { available: "", expired: "", endingSoon: "" };
+const recordings = { available: "", expired: "" };
 let agencyId = "";
 let nextWindow = Date.UTC(2031, 3, 1, 1);
 const filesMade: string[] = [];
@@ -94,11 +94,8 @@ beforeAll(async () => {
   await admin.storage.from(recordingsBucket).upload(`${clipFolder}/${clipName}`, clipBytes, { contentType: "video/mp4" });
 
   const available = await attachRecording(admin, await paidOrder());
-  // Expires in 2 minutes: its link may not outlive it.
-  const endingSoon = await attachRecording(admin, await paidOrder(), { retentionDays: 2 / (24 * 60) });
-  filesMade.push(available.filePath, endingSoon.filePath);
+  filesMade.push(available.filePath);
   recordings.available = available.id;
-  recordings.endingSoon = endingSoon.id;
   recordings.expired = await expiredRecording();
 }, 120_000);
 
@@ -163,8 +160,11 @@ describe("recordingLink: who may replay", { timeout: 30_000 }, () => {
   });
 
   it("never gives a link that outlives the recording", async () => {
-    const link = await recordingLink(user("owner").client, adminClient(), recordings.endingSoon);
-    expect(linkLifetime(link.url)).toBeLessThanOrEqual(120);
+    // Made here, not in beforeAll, so a slow setup cannot let it expire first: it expires in 3 minutes.
+    const endingSoon = await attachRecording(adminClient(), await paidOrder(), { retentionDays: 3 / (24 * 60) });
+    filesMade.push(endingSoon.filePath);
+    const link = await recordingLink(user("owner").client, adminClient(), endingSoon.id);
+    expect(linkLifetime(link.url)).toBeLessThanOrEqual(180);
   });
 
   it("follows the agency the job was routed to, not just any agency", async () => {

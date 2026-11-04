@@ -9,6 +9,7 @@
 //   keys <live|test>       write the project's secret key into .env (SUPABASE_SECRET_KEY / TEST_...)
 //   autoconfirm <live|test> switch off email confirmation: sign-up signs the user in at once
 //                          (Supabase's built-in email reaches only the project team, 2 per hour)
+//   test-rate-limits       let the test project accept the test suites' many sign-ins (test only)
 //   migrate <live|test>    apply the files in supabase/migrations that the project has not had yet
 //   ethereal               create a throw-away Ethereal SMTP account (mail is accepted, never
 //                          delivered) and write it into .env as ETHEREAL_SMTP_USER / _PASS
@@ -142,6 +143,15 @@ function parseSender(from) {
 }
 
 const commands = {
+  // The test project only: the integration and e2e suites sign in dozens of fresh test users within a
+  // few minutes, from one address, which Supabase's default per-IP limits (150 sign-ins per 5 minutes)
+  // refuse with 429. The live project keeps its defaults (decision at Checkpoint 1).
+  async "test-rate-limits"() {
+    const limits = { rate_limit_token_refresh: 1500, rate_limit_verify: 1500, rate_limit_otp: 300 };
+    await api("PATCH", `/projects/${projectRef("test")}/config/auth`, limits);
+    console.log(`The test project now allows ${limits.rate_limit_token_refresh} sign-ins per 5 minutes per address.`);
+  },
+
   async orgs() {
     for (const org of await api("GET", "/organizations")) console.log(`${org.slug}  ${org.name}`);
   },
