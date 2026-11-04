@@ -21,6 +21,7 @@ const ownPage = {
   cleaner: "/cleaner",
   agency: "/agency",
   admin: "/admin",
+  owner: "/owner",
 } as const satisfies Record<AppRole, string>;
 
 /**

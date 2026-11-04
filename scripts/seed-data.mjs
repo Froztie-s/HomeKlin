@@ -15,11 +15,13 @@ export const agencies = [
  * One entry per demo user: the part of the e-mail before "@example.com", the role
  * (public.app_role) and the display name. An agency user is named after its agency.
  *
- * @type {readonly { localPart: string, role: "customer" | "cleaner" | "agency" | "admin", fullName?: string, agency?: string }[]}
+ * @type {readonly { localPart: string, role: "customer" | "cleaner" | "agency" | "admin" | "owner", fullName?: string, agency?: string }[]}
  */
 export const demoAccounts = [
   { localPart: "pelanggan", role: "customer", fullName: "Nadia Puspitasari" },
   { localPart: "admin", role: "admin", fullName: "Galih Prasetyo" },
+  // The owner of HomeKlin (T29b): business numbers, partner agencies and admin accounts.
+  { localPart: "pemilik", role: "owner", fullName: "Rahmat Hidayat" },
   { localPart: "agensi.kilau", role: "agency", agency: "kilau-teratai" },
   { localPart: "agensi.cemara", role: "agency", agency: "cemara-rapi" },
   { localPart: "petugas.yuliana", role: "cleaner", fullName: "Yuliana Sembiring", agency: "kilau-teratai" },

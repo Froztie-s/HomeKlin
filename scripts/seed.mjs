@@ -45,7 +45,7 @@ export const SEED_MARKER = "homeklin_seed";
 const emailDomain = "example.com";
 
 /**
- * @typedef {"customer" | "cleaner" | "agency" | "admin"} Role
+ * @typedef {"customer" | "cleaner" | "agency" | "admin" | "owner"} Role
  * @typedef {{ email: string, role: Role, fullName: string, agency?: string }} DemoUser
  * @typedef {{ id: string, email?: string, app_metadata?: Record<string, unknown>, user_metadata?: Record<string, unknown> }} ExistingUser
  * @typedef {{ action: "create", user: DemoUser } | { action: "update" | "refuse", user: DemoUser, id: string }} SeedStep

@@ -604,6 +604,11 @@
     "emptyTitle": "No questions yet",
     "emptyBody": "The common questions shown on the customer Help page appear here. You can add and edit them."
   },
+  "OwnerDashboardPage": {
+    "title": "Owner dashboard",
+    "emptyTitle": "Business numbers coming soon",
+    "emptyBody": "Revenue, orders and partner performance will appear here."
+  },
   "LoginPage": {
     "metaTitle": "Log in",
     "title": "Log in to HomeKlin",

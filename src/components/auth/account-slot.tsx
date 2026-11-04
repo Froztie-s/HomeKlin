@@ -21,6 +21,7 @@ const destinations = {
   cleaner: { href: "/cleaner/account", label: "account" },
   agency: { href: "/agency", label: "dashboard" },
   admin: { href: "/admin", label: "dashboard" },
+  owner: { href: "/owner", label: "dashboard" },
 } as const satisfies Record<AppRole, { href: string; label: "account" | "dashboard" }>;
 
 const tones = {

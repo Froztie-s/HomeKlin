@@ -5,7 +5,7 @@ import { routing } from "@/i18n/routing";
 // Pure functions, shared by the proxy (sign-in redirect), safeNextPath (where to go after signing in)
 // and tests/protected-pages.test.ts (which pages need a RoleGate, and with which roles).
 
-export const appRoles = ["customer", "cleaner", "agency", "admin"] as const;
+export const appRoles = ["customer", "cleaner", "agency", "admin", "owner"] as const;
 export type AppRole = (typeof appRoles)[number];
 
 /** Narrows a value read from the database (or anywhere untyped) to a known role. */
@@ -19,6 +19,7 @@ export const roleHome = {
   cleaner: "/cleaner",
   agency: "/agency",
   admin: "/admin",
+  owner: "/owner",
 } as const satisfies Record<AppRole, string>;
 
 /** Sign-in pages: a signed-in user is never sent back to them. */
@@ -32,6 +33,7 @@ const protectedSections: readonly { prefix: string; roles: readonly AppRole[] }[
   { prefix: "/cleaner", roles: ["cleaner"] },
   { prefix: "/agency", roles: ["agency"] },
   { prefix: "/admin", roles: ["admin"] },
+  { prefix: "/owner", roles: ["owner"] },
 ];
 
 function trimTrailingSlash(path: string): string {

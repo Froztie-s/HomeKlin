@@ -26,6 +26,7 @@ export const signedInAs = {
   cleaner: { storageState: stateFile("cleaner") },
   agency: { storageState: stateFile("agency") },
   admin: { storageState: stateFile("admin") },
+  owner: { storageState: stateFile("owner") },
 } as const satisfies Record<AppRole, { storageState: string }>;
 
 /**

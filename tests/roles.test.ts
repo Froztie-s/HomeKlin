@@ -11,8 +11,8 @@ import {
 // Who may open which page (T5). Public pages stay open to everyone; each protected section belongs to
 // one role. These rules drive the proxy's sign-in redirect and the server-side role check.
 describe("roles", () => {
-  it("has the four roles from the spec", () => {
-    expect(appRoles).toEqual(["customer", "cleaner", "agency", "admin"]);
+  it("has the five roles from the spec (owner added 2026-11-03)", () => {
+    expect(appRoles).toEqual(["customer", "cleaner", "agency", "admin", "owner"]);
   });
 
   it("sends each role to its own home after signing in", () => {
@@ -21,6 +21,7 @@ describe("roles", () => {
       cleaner: "/cleaner",
       agency: "/agency",
       admin: "/admin",
+      owner: "/owner",
     });
   });
 });

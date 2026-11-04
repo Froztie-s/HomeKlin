@@ -604,6 +604,11 @@
     "emptyTitle": "Belum ada pertanyaan",
     "emptyBody": "Pertanyaan umum yang tampil di halaman Bantuan pelanggan muncul di sini. Anda dapat menambah dan mengubahnya."
   },
+  "OwnerDashboardPage": {
+    "title": "Dasbor pemilik",
+    "emptyTitle": "Angka bisnis segera hadir",
+    "emptyBody": "Pendapatan, pesanan, dan kinerja mitra akan tampil di sini."
+  },
   "LoginPage": {
     "metaTitle": "Masuk",
     "title": "Masuk ke HomeKlin",
