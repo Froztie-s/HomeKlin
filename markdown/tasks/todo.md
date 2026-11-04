@@ -118,15 +118,15 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 5: Customer support (can run in parallel after T5)
 
-- [ ] **T19 FAQ with keyword search** (S)
+- [x] **T19 FAQ with keyword search** (S) — done 2026-11-04: `/support` searches the bilingual FAQ (`search_faq`, cached per search under the tag `faq`), works without JavaScript, shows the contact panel when nothing matches; e2e `support.mobile.spec.ts`; screenshots `docs/screenshots/t19/`
   - Accept: bilingual FAQ entries from the database; keyword search returns matches; "Contact admin" appears when nothing satisfies the user.
   - Verify: Playwright search finds a known entry; no-match shows escalation.
   - Deps: T5. Skills: `frontend-ui-engineering`.
-- [ ] **T20 Escalation to chat ticket (customer side)** (M)
+- [x] **T20 Escalation to chat ticket (customer side)** (M) — done 2026-11-04: a signed-in customer turns the question into a ticket (urgency, optional own order) and lands on `/support?ticket=<id>`, a chat updating over Realtime (the browser hands over its session before joining, so row-level security applies); RLS and Realtime in `tests/integration/support.test.ts`
   - Accept: escalation creates a ticket with the question; customer chat updates in real time; customer sees only own tickets.
   - Verify: Playwright; RLS test.
   - Deps: T19. Skills: `source-driven-development` (Supabase Realtime).
-- [ ] **T21 Admin ticket inbox and reply** (M)
+- [x] **T21 Admin ticket inbox and reply** (M) — done 2026-11-04: `/admin/tickets` lists waiting, urgent, oldest first, updates live, opens the chat beside the list, replies and closes (with a confirm step); two-session e2e `support-realtime.desktop.spec.ts`
   - Accept: desktop inbox lists tickets by urgency/age; admin replies appear for the customer in real time; every escalation scenario reaches the inbox.
   - Verify: Playwright two-session test (customer and admin).
   - Deps: T20. Skills: `frontend-ui-engineering`.
