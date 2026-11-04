@@ -150,15 +150,15 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 7: Admin console
 
-- [ ] **T24 Admin dashboard** (M)
+- [x] **T24 Admin dashboard** (M) — done 2026-11-04: `/admin` tiles (jobs today, in progress, waiting for a cleaner, open tickets with urgent count), today's jobs with check-in status, latest open tickets; e2e `admin-console.desktop.spec.ts`; screenshots `docs/screenshots/t24/`
   - Accept: desktop dashboard shows active jobs, check-in status, open tickets.
   - Verify: Playwright desktop viewport.
   - Deps: T18, T21. Skills: `frontend-ui-engineering`.
-- [ ] **T25 Multi-feed live grid** (M)
+- [x] **T25 Multi-feed live grid** (M) — done 2026-11-04: `/admin/monitor` grid of every live feed (1 to 4 columns), status polled every 10 s, one fresh-link retry; customers and agencies redirected with nothing in the HTML (e2e); the list itself refreshes with "Perbarui daftar"
   - Accept: admin sees all active feeds at once; non-admins refused; layout works at desktop widths.
   - Verify: Playwright with two active jobs; authorization test.
   - Deps: T23, T24.
-- [ ] **T26 Admin recording replay** (S)
+- [x] **T26 Admin recording replay** (S) — done 2026-11-04: `/admin/recordings` lists jobs finished in the last 30 days with recording state; `?recording=<id>` plays an available one; expired or deleted shows the message and the link API answers 410 (e2e)
   - Accept: admin lists past jobs and plays recordings still within 7 days.
   - Verify: Playwright; expired entry refused.
   - Deps: T14, T24.
