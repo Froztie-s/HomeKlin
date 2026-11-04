@@ -90,7 +90,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: returns a short-lived signed link only for the booking's customer, the owning agency, or admin; other customers/agencies refused; expired entries refused.
   - Verify: Vitest authorization matrix (each role x own/other x expired).
   - Deps: T13. Skills: `api-and-interface-design`, `security-and-hardening`, `doubt-driven-development`.
-- [ ] **T15 Customer recording replay UI** (M)
+- [x] **T15 Customer recording replay UI** (M) — done 2026-11-04 (frontend agent): order details show the Petugas HomeKlin with progress steps and a Rekaman section (signed link made on the server, "tersedia sampai" with a countdown, fresh link on a playback error, clear expired and no-recording states); list rows say whether the recording is available; e2e `recording-replay.mobile.spec.ts`; screenshots `docs/screenshots/t15/`
   - Accept: completed jobs list shows "available until" countdown; player plays the clip; expired state shown clearly; mobile-first; both languages.
   - Verify: Playwright mobile: play own recording; expired job shows message.
   - Deps: T14. Skills: `frontend-ui-engineering`, `browser-testing-with-devtools`.
@@ -104,11 +104,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 4: Cleaner check-in
 
-- [ ] **T17 Cleaner job list** (S)
+- [x] **T17 Cleaner job list** (S) — done 2026-11-04: `/cleaner` lists the cleaner's own jobs (today, upcoming, just finished); the seed links cleaners to agencies and gives the demo cleaner a job starting now; RLS in `tests/integration/jobs.test.ts`; e2e `cleaner-jobs.mobile.spec.ts`; screenshots `docs/screenshots/t17/`
   - Accept: cleaner sees only own assigned jobs for today/upcoming; seed assigns cleaners to paid orders.
   - Verify: Playwright cleaner login; RLS test hides other cleaners' jobs.
   - Deps: T12. Skills: `frontend-ui-engineering`.
-- [ ] **T18 Check-in/out with location, completes job** (M)
+- [x] **T18 Check-in/out with location, completes job** (M) — done 2026-11-04: check-in with the browser's location only from 15 minutes before the window until it closes, check-out with a confirm step completes the job and attaches the recording; read-only status on `/agency/orders` and `/admin`; e2e `cleaner-jobs.mobile.spec.ts`, `job-status.desktop.spec.ts`
   - Accept: check-in allowed only in the job's time window and records location and time; check-out completes the job and calls `attachRecording`; status visible read-only to admin and agency.
   - Verify: Vitest for window logic; Playwright check-in/out flow.
   - Deps: T17, T13. Skills: `doubt-driven-development` (time-window edge cases).
