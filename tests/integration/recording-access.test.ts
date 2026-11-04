@@ -164,7 +164,8 @@ describe("recordingLink: who may replay", { timeout: 30_000 }, () => {
     const endingSoon = await attachRecording(adminClient(), await paidOrder(), { retentionDays: 3 / (24 * 60) });
     filesMade.push(endingSoon.filePath);
     const link = await recordingLink(user("owner").client, adminClient(), endingSoon.id);
-    expect(linkLifetime(link.url)).toBeLessThanOrEqual(180);
+    // The expiry comes from the database clock, which may run a few seconds ahead of this machine.
+    expect(linkLifetime(link.url)).toBeLessThanOrEqual(185);
   });
 
   it("follows the agency the job was routed to, not just any agency", async () => {
