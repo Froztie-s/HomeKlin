@@ -111,3 +111,14 @@ describe("listing live streams", { timeout: 30_000 }, () => {
     }
   });
 });
+
+describe("who may publish (T31)", { timeout: 30_000 }, () => {
+  it("is only the job's cleaner while the job is in progress", async () => {
+    const orderId = await world.job({ startsAt: now(), checkedIn: true });
+    const ask = (viewer: keyof World["users"]) => world.users[viewer].client.rpc("can_publish_stream", { p_order: orderId });
+    expect((await ask("cleanerA")).data).toBe(true);
+    for (const viewer of ["cleanerA2", "cleanerB", "customer", "agencyA", "admin"] as const) expect((await ask(viewer)).data).toBe(false);
+    await adminClient().from("orders").update({ completed_at: new Date().toISOString() }).eq("id", orderId);
+    expect((await ask("cleanerA")).data).toBe(false);
+  });
+});
