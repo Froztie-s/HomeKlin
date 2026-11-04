@@ -3,8 +3,11 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { ClientMessages } from "@/i18n/client-messages";
 import type { CustomerOrder } from "@/lib/booking/orders";
 import { formatRupiah } from "@/lib/format";
+import { OrderJob } from "./order-job";
+import { OrderRecording } from "./order-recording";
 import { getOrderWords, OrderStatusPill } from "./order-status";
 import { PaymentForm } from "./payment-form";
+import { recordingState } from "./recording-time";
 
 type OrderConfirmationProps = {
   order: CustomerOrder;
@@ -15,6 +18,8 @@ type OrderConfirmationProps = {
   cameBackFromPayment?: boolean;
   /** "booked": the confirmation (/orders?booked=<id>). "details": opened from the list (/orders?order=<id>). */
   variant?: "booked" | "details";
+  /** The moment the page is rendered: whether the recording is still kept, and its countdown. */
+  now: Date;
 };
 
 // What the customer sees right after booking (T9, on /orders?booked=<id>): that the order is made,
@@ -27,12 +32,15 @@ type OrderConfirmationProps = {
 // the order as the customer reads it never carries the agency (listMyOrders).
 // Opened from the list (T12) the same facts carry their own title and a line for the order's status,
 // since the order was not just made and a failed or cancelled one holds no window any more.
+// A paid order shows its Petugas HomeKlin and the job's progress (./order-job.tsx), and a finished job
+// its recording, with until when it is kept (T15, ./order-recording.tsx).
 export async function OrderConfirmation({
   order,
   serviceName,
   areaName,
   cameBackFromPayment = false,
   variant = "booked",
+  now,
 }: OrderConfirmationProps) {
   const locale = await getLocale();
   const [t, tPayment, words] = await Promise.all([
@@ -44,6 +52,8 @@ export async function OrderConfirmation({
   const awaitingPayment = order.status === "pending_payment";
   const goingAhead = awaitingPayment || order.status === "paid";
   const HeaderIcon = details ? ClipboardList : CircleCheck;
+  const recording = recordingState(order, now.getTime());
+  const lead = details ? (order.completedAt ? t("detailsLeadCompleted") : t(`detailsLead.${order.status}`)) : t("lead");
   const facts = [
     { label: t("fields.service"), value: words.service(serviceName) },
     { label: t("fields.window"), value: words.arrival(order) },
@@ -67,7 +77,7 @@ export async function OrderConfirmation({
             <h2 id="order-confirmation-title" className="font-display text-xl font-semibold text-ink">
               {details ? t("detailsTitle") : t("title")}
             </h2>
-            <p className="text-sm text-ink-muted">{details ? t(`detailsLead.${order.status}`) : t("lead")}</p>
+            <p className="text-sm text-ink-muted">{lead}</p>
           </div>
         </div>
         <OrderStatusPill status={order.status} label={words.status(order.status)} />
@@ -81,6 +91,9 @@ export async function OrderConfirmation({
           </div>
         ) : null}
       </div>
+
+      {order.status === "paid" ? <OrderJob order={order} /> : null}
+      {recording !== "none" ? <OrderRecording recordingId={order.recordingId} state={recording} now={now} /> : null}
 
       <dl className="flex flex-col border-t border-border px-5 md:px-6">
         {facts.map((fact) => (
@@ -108,9 +121,10 @@ export async function OrderConfirmation({
         </div>
       ) : null}
 
-      {goingAhead || !details ? (
+      {/* A finished job's recording section already says who can see it and for how long. */}
+      {(goingAhead || !details) && recording === "none" ? (
         <div className="flex flex-col gap-3 border-t border-border p-5 md:p-6">
-          {goingAhead ? (
+          {goingAhead && !order.cleanerName ? (
             <div className="flex items-start gap-3 rounded-md bg-surface-sunken px-4 py-3">
               <Clock className="mt-0.5 size-5 shrink-0 text-brand-700" aria-hidden="true" />
               <div className="text-sm text-ink">

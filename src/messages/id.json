@@ -407,7 +407,65 @@
     "streamNote": "Anda menyetujui siaran langsung. Hanya Anda dan tim pemantau HomeKlin yang dapat menontonnya, dan rekamannya disimpan 7 hari.",
     "errorTitle": "Pesanan tidak dapat ditampilkan",
     "errorBody": "Ada gangguan saat membaca pesanan Anda. Muat ulang halaman untuk mencoba lagi.",
-    "retry": "Muat ulang"
+    "retry": "Muat ulang",
+    "detailsLeadCompleted": "Pekerjaan ini sudah selesai.",
+    "job": {
+      "region": "Petugas HomeKlin",
+      "role": "Petugas HomeKlin",
+      "photoAlt": "Foto {name}",
+      "unassignedName": "Petugas sedang kami tugaskan",
+      "unassignedBody": "Nama dan fotonya tampil di sini setelah ditugaskan.",
+      "progressLabel": "Perkembangan pekerjaan",
+      "state": {
+        "done": "Sudah:",
+        "current": "Sekarang:",
+        "upcoming": "Berikutnya:"
+      },
+      "steps": {
+        "assigned": {
+          "done": "Petugas ditugaskan",
+          "current": "Menugaskan petugas",
+          "upcoming": "Petugas ditugaskan"
+        },
+        "checkedIn": {
+          "done": "Check-in di alamat Anda pukul {time} WIB",
+          "current": "Check-in di alamat Anda",
+          "upcoming": "Check-in di alamat Anda"
+        },
+        "completed": {
+          "done": "Selesai pukul {time} WIB",
+          "current": "Sedang dikerjakan",
+          "upcoming": "Pekerjaan selesai"
+        }
+      }
+    }
+  },
+  "Recording": {
+    "title": "Rekaman",
+    "availableUntil": "Tersedia sampai {day}, {time} WIB",
+    "left": {
+      "days": "{days, plural, other {# hari}}{hours, plural, =0 {} other { # jam}} lagi",
+      "hours": "{hours, plural, other {# jam}}{minutes, plural, =0 {} other { # menit}} lagi",
+      "minutes": "{minutes, plural, other {# menit}} lagi",
+      "ended": "Masa simpan sudah berakhir"
+    },
+    "privacy": "Hanya Anda dan tim HomeKlin yang dapat memutar rekaman ini. Rekaman dihapus otomatis 7 hari setelah pekerjaan selesai.",
+    "playerLabel": "Rekaman pekerjaan di rumah Anda",
+    "unsupported": "Browser Anda tidak dapat memutar video ini.",
+    "loading": "Memuat rekaman…",
+    "unplayable": "Video tidak dapat diputar saat ini.",
+    "failed": "Video belum dapat dimuat. Periksa koneksi Anda, lalu coba lagi.",
+    "reload": "Muat ulang video",
+    "reloading": "Memuat ulang video…",
+    "expiredTitle": "Rekaman sudah dihapus",
+    "expiredBody": "Demi privasi Anda, rekaman dihapus otomatis 7 hari setelah pekerjaan selesai.",
+    "noneTitle": "Rekaman tidak tersedia",
+    "noneBody": "Pekerjaan ini tidak memiliki rekaman.",
+    "errorBody": "Rekaman belum dapat dimuat. Muat ulang halaman untuk mencoba lagi.",
+    "retry": "Muat ulang halaman",
+    "listAvailable": "Rekaman tersedia sampai {day}, {time} WIB",
+    "listExpired": "Rekaman sudah dihapus",
+    "listNone": "Rekaman tidak tersedia"
   },
   "Payment": {
     "secureNote": "Pembayaran dibuka di halaman pembayaran aman Midtrans.",

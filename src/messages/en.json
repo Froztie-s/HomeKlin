@@ -407,7 +407,65 @@
     "streamNote": "You agreed to the live stream. Only you and the HomeKlin monitoring team can watch it, and the recording is kept for 7 days.",
     "errorTitle": "Your order could not be shown",
     "errorBody": "Something went wrong while reading your order. Reload the page to try again.",
-    "retry": "Reload"
+    "retry": "Reload",
+    "detailsLeadCompleted": "This job is done.",
+    "job": {
+      "region": "HomeKlin cleaner",
+      "role": "HomeKlin cleaner",
+      "photoAlt": "Photo of {name}",
+      "unassignedName": "We are assigning your cleaner",
+      "unassignedBody": "Their name and photo appear here once they are assigned.",
+      "progressLabel": "Job progress",
+      "state": {
+        "done": "Done:",
+        "current": "Now:",
+        "upcoming": "Next:"
+      },
+      "steps": {
+        "assigned": {
+          "done": "Cleaner assigned",
+          "current": "Assigning a cleaner",
+          "upcoming": "Cleaner assigned"
+        },
+        "checkedIn": {
+          "done": "Checked in at your address at {time} WIB",
+          "current": "Check-in at your address",
+          "upcoming": "Check-in at your address"
+        },
+        "completed": {
+          "done": "Finished at {time} WIB",
+          "current": "Cleaning in progress",
+          "upcoming": "Job finished"
+        }
+      }
+    }
+  },
+  "Recording": {
+    "title": "Recording",
+    "availableUntil": "Available until {day}, {time} WIB",
+    "left": {
+      "days": "{days, plural, one {# day} other {# days}}{hours, plural, =0 {} one { # hour} other { # hours}} left",
+      "hours": "{hours, plural, one {# hour} other {# hours}}{minutes, plural, =0 {} one { # minute} other { # minutes}} left",
+      "minutes": "{minutes, plural, one {# minute} other {# minutes}} left",
+      "ended": "The 7 days are over"
+    },
+    "privacy": "Only you and the HomeKlin team can play this recording. It is deleted automatically 7 days after the job ends.",
+    "playerLabel": "Recording of the job at your home",
+    "unsupported": "Your browser cannot play this video.",
+    "loading": "Loading the recording…",
+    "unplayable": "The video cannot be played right now.",
+    "failed": "The video could not be loaded. Check your connection, then try again.",
+    "reload": "Reload video",
+    "reloading": "Reloading the video…",
+    "expiredTitle": "The recording has been deleted",
+    "expiredBody": "For your privacy, recordings are deleted automatically 7 days after the job ends.",
+    "noneTitle": "No recording available",
+    "noneBody": "This job has no recording.",
+    "errorBody": "The recording could not be loaded. Reload the page to try again.",
+    "retry": "Reload page",
+    "listAvailable": "Recording available until {day}, {time} WIB",
+    "listExpired": "Recording deleted",
+    "listNone": "No recording"
   },
   "Payment": {
     "secureNote": "Payment opens on Midtrans’ secure payment page.",

@@ -39,6 +39,8 @@ export async function OrdersContent({ searchParams }: { searchParams: Promise<Se
     return <OrdersUnavailable />;
   }
 
+  // One clock for the whole page: whether a recording is still kept, and its countdown (T15).
+  const now = new Date();
   // A service switched off since booking is no longer in the catalog; the order keeps its price.
   const serviceName = (order: CustomerOrder) =>
     services.find((candidate) => candidate.id === order.serviceId)?.name[locale];
@@ -55,12 +57,13 @@ export async function OrdersContent({ searchParams }: { searchParams: Promise<Se
           areaName={area?.name[locale] ?? order.areaId}
           cameBackFromPayment={bookedId ? cameBackFromPayment(params) : false}
           variant={bookedId ? "booked" : "details"}
+          now={now}
         />
       </div>
     );
   }
   if (orders.length === 0) return <NoOrdersYet />;
-  return <OrderList orders={orders} serviceName={serviceName} />;
+  return <OrderList orders={orders} serviceName={serviceName} now={now} />;
 }
 
 async function BackToList() {
