@@ -255,8 +255,122 @@
   },
   "SupportPage": {
     "title": "Help",
-    "emptyTitle": "Common questions appear here",
-    "emptyBody": "You can search for answers by keyword. If the answer is not there, you can chat with an admin from this page."
+    "description": "Search the answers to common questions. If yours is not there, ask the HomeKlin team directly.",
+    "search": {
+      "formLabel": "Search Help",
+      "label": "Search the questions",
+      "placeholder": "For example: payment, recording, schedule",
+      "submit": "Search",
+      "clear": "Show all questions"
+    },
+    "faq": {
+      "allTitle": "Common questions",
+      "resultsTitle": "{count, plural, one {# answer} other {# answers}} for “{query}”",
+      "emptyTitle": "No answer for this search yet",
+      "emptyBody": "Try a broader word, or ask admin directly below.",
+      "noEntriesTitle": "No common questions yet",
+      "noEntriesBody": "Common questions and their answers appear here. Meanwhile, you can ask admin directly below.",
+      "errorTitle": "The common questions could not be loaded",
+      "errorBody": "Please reload the page. You can still contact admin below.",
+      "retry": "Reload"
+    },
+    "contact": {
+      "title": "Still need help? Contact admin",
+      "body": "The HomeKlin team reads every question and replies in a chat on this page.",
+      "loading": "Loading…",
+      "signedOutBody": "Sign in with your customer account to send a question. Admin’s reply appears on this page.",
+      "signIn": "Sign in to ask",
+      "staffTitle": "Help chat is for customer accounts",
+      "staffBody": "You are signed in with a staff account. Customer questions are answered from your work pages.",
+      "staffLink": "Go to your work pages",
+      "adminLink": "Open the ticket inbox"
+    },
+    "tickets": {
+      "title": "Your questions to admin",
+      "emptyTitle": "No questions to admin yet",
+      "emptyBody": "The questions you send appear here, with the HomeKlin team’s replies.",
+      "updated": "Updated {time}",
+      "errorTitle": "Your questions could not be loaded",
+      "errorBody": "Please reload the page."
+    },
+    "ticket": {
+      "back": "Back to Help",
+      "notFoundTitle": "Chat not found",
+      "notFoundBody": "This address does not match a question in your account. Your questions are on the Help page.",
+      "errorTitle": "The chat could not be loaded",
+      "errorBody": "Please reload the page.",
+      "retry": "Reload",
+      "signInTitle": "Sign in to read this chat",
+      "signInBody": "A help chat can only be read by the customer who sent it.",
+      "staffBody": "You are signed in with a staff account. Customer tickets are opened from the admin ticket inbox."
+    }
+  },
+  "SupportTicketForm": {
+    "question": "Your question",
+    "questionHint": "Say briefly what you need, in 5 to 1,000 characters.",
+    "tooShort": "Write your question, at least 5 characters.",
+    "urgency": {
+      "legend": "How urgent is it?",
+      "normal": "Normal",
+      "normalHint": "A general question, for example about your next order.",
+      "urgent": "Urgent: about a job happening now",
+      "urgentHint": "Admin answers urgent questions first."
+    },
+    "order": {
+      "label": "Related order (optional)",
+      "none": "Not about an order"
+    },
+    "submit": "Send to admin",
+    "pending": "Sending…",
+    "errors": {
+      "notAllowed": "Sign in with a customer account to send a question.",
+      "questionInvalid": "Write your question in 5 to 1,000 characters.",
+      "messageInvalid": "A message has 1 to 2,000 characters.",
+      "notFound": "That order or chat was not found in your account.",
+      "closed": "This chat is closed, so it cannot be answered any more.",
+      "unavailable": "Your message was not sent because of a problem on our side. Please try again shortly."
+    }
+  },
+  "SupportChat": {
+    "titleCustomer": "Chat with the HomeKlin team",
+    "titleAdmin": "Chat with the customer",
+    "messagesLabel": "Messages",
+    "you": "You",
+    "team": "HomeKlin team",
+    "customerFallback": "Customer",
+    "opened": "Sent {time}",
+    "order": "Related order: {reference}",
+    "status": {
+      "open": "Waiting for a reply",
+      "answered": "Answered",
+      "closed": "Closed"
+    },
+    "urgent": "Urgent",
+    "live": {
+      "connected": "Connected",
+      "connectedHint": "New messages appear automatically.",
+      "connecting": "Connecting…",
+      "offline": "Disconnected. Reload the page to see new messages.",
+      "reload": "Reload"
+    },
+    "composer": {
+      "labelCustomer": "Write a message",
+      "labelAdmin": "Write a reply",
+      "sendCustomer": "Send",
+      "sendAdmin": "Send reply",
+      "pending": "Sending…",
+      "empty": "Write your message first."
+    },
+    "closedCustomer": "This chat is closed. If you have another question, send a new one from the Help page.",
+    "closedAdmin": "This ticket is closed. The customer cannot reply any more.",
+    "errors": {
+      "notAllowed": "Sign in with a customer account to send a question.",
+      "questionInvalid": "Write your question in 5 to 1,000 characters.",
+      "messageInvalid": "A message has 1 to 2,000 characters.",
+      "notFound": "That order or chat was not found in your account.",
+      "closed": "This chat is closed, so it cannot be answered any more.",
+      "unavailable": "Your message was not sent because of a problem on our side. Please try again shortly."
+    }
   },
   "AccountPage": {
     "title": "Account",
@@ -621,8 +735,35 @@
   },
   "AdminTicketsPage": {
     "title": "Tickets",
+    "description": "Customer questions from the Help page: waiting ones at the top, urgent ones first, then the oldest.",
     "emptyTitle": "No tickets yet",
-    "emptyBody": "Customer questions passed on from the Help page appear here, most urgent first."
+    "emptyBody": "Customer questions passed on from the Help page appear here, most urgent first.",
+    "listLabel": "Ticket list",
+    "summary": "{waiting, plural, =0 {Nothing waiting for a reply} other {# waiting for a reply}}",
+    "messageCount": "{count, plural, one {# message} other {# messages}}",
+    "customerFallback": "Customer",
+    "opened": "Opened {time}",
+    "live": {
+      "connected": "New tickets appear automatically",
+      "connecting": "Connecting…",
+      "offline": "Disconnected. Reload the page to see new tickets.",
+      "reload": "Reload"
+    },
+    "pickTitle": "Choose a ticket",
+    "pickBody": "Choose a ticket in the list to read the chat and reply.",
+    "notFoundTitle": "Ticket not found",
+    "notFoundBody": "This ticket does not exist or was deleted. Choose another ticket in the list.",
+    "back": "Back to the ticket list",
+    "errorTitle": "The tickets could not be loaded",
+    "errorBody": "Please reload the page.",
+    "close": {
+      "button": "Close ticket",
+      "question": "Close this ticket? The customer cannot reply any more.",
+      "confirm": "Yes, close ticket",
+      "cancel": "Cancel",
+      "pending": "Closing…",
+      "error": "The ticket could not be closed. Please try again shortly."
+    }
   },
   "AdminRecordingsPage": {
     "title": "Recordings",

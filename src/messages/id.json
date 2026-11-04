@@ -255,8 +255,122 @@
   },
   "SupportPage": {
     "title": "Bantuan",
-    "emptyTitle": "Pertanyaan umum muncul di sini",
-    "emptyBody": "Anda dapat mencari jawaban dengan kata kunci. Jika jawabannya tidak ada, Anda dapat menghubungi admin lewat chat dari halaman ini."
+    "description": "Cari jawaban atas pertanyaan umum. Jika belum terjawab, tanyakan langsung ke Tim HomeKlin.",
+    "search": {
+      "formLabel": "Cari di Bantuan",
+      "label": "Cari pertanyaan",
+      "placeholder": "Contoh: bayar, rekaman, jadwal",
+      "submit": "Cari",
+      "clear": "Tampilkan semua pertanyaan"
+    },
+    "faq": {
+      "allTitle": "Pertanyaan umum",
+      "resultsTitle": "{count, plural, other {# jawaban}} untuk “{query}”",
+      "emptyTitle": "Belum ada jawaban untuk pencarian ini",
+      "emptyBody": "Coba kata lain yang lebih umum, atau tanyakan langsung ke admin di bawah.",
+      "noEntriesTitle": "Belum ada pertanyaan umum",
+      "noEntriesBody": "Pertanyaan umum dan jawabannya muncul di sini. Sementara itu, Anda bisa bertanya langsung ke admin di bawah.",
+      "errorTitle": "Pertanyaan umum belum bisa dimuat",
+      "errorBody": "Coba muat ulang halaman. Anda tetap bisa menghubungi admin di bawah.",
+      "retry": "Muat ulang"
+    },
+    "contact": {
+      "title": "Masih butuh bantuan? Hubungi admin",
+      "body": "Tim HomeKlin membaca setiap pertanyaan dan membalas lewat chat di halaman ini.",
+      "loading": "Memuat…",
+      "signedOutBody": "Masuk dengan akun pelanggan Anda untuk mengirim pertanyaan. Balasan admin muncul di halaman ini.",
+      "signIn": "Masuk untuk bertanya",
+      "staffTitle": "Chat bantuan untuk akun pelanggan",
+      "staffBody": "Anda masuk dengan akun staf. Pertanyaan pelanggan dijawab dari halaman kerja Anda.",
+      "staffLink": "Ke halaman kerja Anda",
+      "adminLink": "Buka kotak tiket"
+    },
+    "tickets": {
+      "title": "Pertanyaan Anda ke admin",
+      "emptyTitle": "Belum ada pertanyaan ke admin",
+      "emptyBody": "Pertanyaan yang Anda kirim muncul di sini, bersama balasan dari Tim HomeKlin.",
+      "updated": "Diperbarui {time}",
+      "errorTitle": "Daftar pertanyaan Anda belum bisa dimuat",
+      "errorBody": "Coba muat ulang halaman."
+    },
+    "ticket": {
+      "back": "Kembali ke Bantuan",
+      "notFoundTitle": "Percakapan tidak ditemukan",
+      "notFoundBody": "Alamat ini tidak cocok dengan pertanyaan di akun Anda. Pertanyaan Anda ada di halaman Bantuan.",
+      "errorTitle": "Percakapan belum bisa dimuat",
+      "errorBody": "Coba muat ulang halaman.",
+      "retry": "Muat ulang",
+      "signInTitle": "Masuk untuk membaca percakapan ini",
+      "signInBody": "Percakapan bantuan hanya bisa dibaca oleh pelanggan yang mengirimnya.",
+      "staffBody": "Anda masuk dengan akun staf. Tiket pelanggan dibuka dari kotak tiket admin."
+    }
+  },
+  "SupportTicketForm": {
+    "question": "Pertanyaan Anda",
+    "questionHint": "Jelaskan singkat apa yang Anda butuhkan, 5 sampai 1.000 karakter.",
+    "tooShort": "Tulis pertanyaan Anda, paling sedikit 5 karakter.",
+    "urgency": {
+      "legend": "Seberapa mendesak?",
+      "normal": "Biasa",
+      "normalHint": "Pertanyaan umum, misalnya tentang pesanan berikutnya.",
+      "urgent": "Mendesak: tentang pekerjaan yang sedang berlangsung",
+      "urgentHint": "Admin menjawab pertanyaan mendesak lebih dulu."
+    },
+    "order": {
+      "label": "Pesanan terkait (opsional)",
+      "none": "Tidak terkait pesanan"
+    },
+    "submit": "Kirim ke admin",
+    "pending": "Mengirim…",
+    "errors": {
+      "notAllowed": "Masuk dengan akun pelanggan untuk mengirim pertanyaan.",
+      "questionInvalid": "Tulis pertanyaan Anda dalam 5 sampai 1.000 karakter.",
+      "messageInvalid": "Pesan berisi 1 sampai 2.000 karakter.",
+      "notFound": "Pesanan atau percakapan itu tidak ditemukan di akun Anda.",
+      "closed": "Percakapan ini sudah ditutup, jadi tidak bisa dibalas lagi.",
+      "unavailable": "Pesan belum terkirim karena ada gangguan. Coba lagi sebentar lagi."
+    }
+  },
+  "SupportChat": {
+    "titleCustomer": "Percakapan dengan Tim HomeKlin",
+    "titleAdmin": "Percakapan dengan pelanggan",
+    "messagesLabel": "Pesan",
+    "you": "Anda",
+    "team": "Tim HomeKlin",
+    "customerFallback": "Pelanggan",
+    "opened": "Dikirim {time}",
+    "order": "Pesanan terkait: {reference}",
+    "status": {
+      "open": "Menunggu jawaban",
+      "answered": "Sudah dijawab",
+      "closed": "Ditutup"
+    },
+    "urgent": "Mendesak",
+    "live": {
+      "connected": "Tersambung",
+      "connectedHint": "Pesan baru muncul otomatis.",
+      "connecting": "Menyambungkan…",
+      "offline": "Terputus. Muat ulang halaman untuk melihat pesan baru.",
+      "reload": "Muat ulang"
+    },
+    "composer": {
+      "labelCustomer": "Tulis pesan",
+      "labelAdmin": "Tulis balasan",
+      "sendCustomer": "Kirim",
+      "sendAdmin": "Kirim balasan",
+      "pending": "Mengirim…",
+      "empty": "Tulis pesan Anda dulu."
+    },
+    "closedCustomer": "Percakapan ini sudah ditutup. Jika masih ada pertanyaan, kirim pertanyaan baru dari halaman Bantuan.",
+    "closedAdmin": "Tiket ini sudah ditutup. Pelanggan tidak bisa membalas lagi.",
+    "errors": {
+      "notAllowed": "Masuk dengan akun pelanggan untuk mengirim pertanyaan.",
+      "questionInvalid": "Tulis pertanyaan Anda dalam 5 sampai 1.000 karakter.",
+      "messageInvalid": "Pesan berisi 1 sampai 2.000 karakter.",
+      "notFound": "Pesanan atau percakapan itu tidak ditemukan di akun Anda.",
+      "closed": "Percakapan ini sudah ditutup, jadi tidak bisa dibalas lagi.",
+      "unavailable": "Pesan belum terkirim karena ada gangguan. Coba lagi sebentar lagi."
+    }
   },
   "AccountPage": {
     "title": "Akun",
@@ -621,8 +735,35 @@
   },
   "AdminTicketsPage": {
     "title": "Tiket",
+    "description": "Pertanyaan pelanggan dari halaman Bantuan: yang menunggu jawaban di atas, yang mendesak lebih dulu, lalu yang paling lama.",
     "emptyTitle": "Belum ada tiket",
-    "emptyBody": "Pertanyaan pelanggan yang diteruskan dari halaman Bantuan muncul di sini, diurutkan dari yang paling mendesak."
+    "emptyBody": "Pertanyaan pelanggan yang diteruskan dari halaman Bantuan muncul di sini, diurutkan dari yang paling mendesak.",
+    "listLabel": "Daftar tiket",
+    "summary": "{waiting, plural, =0 {Tidak ada yang menunggu jawaban} other {# menunggu jawaban}}",
+    "messageCount": "{count, plural, other {# pesan}}",
+    "customerFallback": "Pelanggan",
+    "opened": "Dibuka {time}",
+    "live": {
+      "connected": "Tiket baru muncul otomatis",
+      "connecting": "Menyambungkan…",
+      "offline": "Terputus. Muat ulang halaman untuk melihat tiket baru.",
+      "reload": "Muat ulang"
+    },
+    "pickTitle": "Pilih tiket",
+    "pickBody": "Pilih tiket di daftar untuk membaca percakapan dan membalas.",
+    "notFoundTitle": "Tiket tidak ditemukan",
+    "notFoundBody": "Tiket ini tidak ada atau sudah dihapus. Pilih tiket lain di daftar.",
+    "back": "Kembali ke daftar tiket",
+    "errorTitle": "Tiket belum bisa dimuat",
+    "errorBody": "Coba muat ulang halaman.",
+    "close": {
+      "button": "Tutup tiket",
+      "question": "Tutup tiket ini? Pelanggan tidak bisa membalas lagi.",
+      "confirm": "Ya, tutup tiket",
+      "cancel": "Batal",
+      "pending": "Menutup…",
+      "error": "Tiket belum bisa ditutup. Coba lagi sebentar lagi."
+    }
   },
   "AdminRecordingsPage": {
     "title": "Rekaman",

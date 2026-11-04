@@ -89,7 +89,7 @@ test("an admin lands on /admin, is refused an agency page, and signs out from th
   const refused = await (await page.request.get("/agency/schedule")).text();
   expect(refused).not.toContain("Ketersediaan agensi Anda per area");
   const allowed = await (await page.request.get("/admin/tickets")).text();
-  expect(allowed).toContain("Pertanyaan pelanggan yang diteruskan");
+  expect(allowed).toContain("Tiket baru muncul otomatis");
   await page.goto("/agency/schedule");
   await expect(page).toHaveURL("/admin");
   await expect(page.getByRole("heading", { level: 1, name: "Dasbor" })).toBeVisible();

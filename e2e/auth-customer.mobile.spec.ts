@@ -113,7 +113,7 @@ test.describe("signing in", () => {
     // A sub-page of the admin section: the customer ends up on their own home, and the page they asked
     // for never reaches the browser, not even in the HTML that comes before the redirect.
     const html = await (await page.request.get("/admin/tickets")).text();
-    expect(html).not.toContain("Pertanyaan pelanggan yang diteruskan");
+    expect(html).not.toContain("Tiket baru muncul otomatis");
     await page.goto("/admin/tickets");
     await expect(page).toHaveURL("/home");
     await expect(page.getByRole("heading", { level: 1, name: "Pesan kebersihan rumah" })).toBeVisible();
