@@ -430,8 +430,88 @@
   },
   "CleanerJobsPage": {
     "title": "Pekerjaan hari ini",
-    "emptyTitle": "Belum ada pekerjaan hari ini",
-    "emptyBody": "Pekerjaan yang ditugaskan agensi Anda muncul di sini, lengkap dengan alamat dan jam kerja. Saat tiba di lokasi, Anda check-in dari halaman ini."
+    "emptyTitle": "Belum ada pekerjaan",
+    "emptyBody": "Pekerjaan yang ditugaskan agensi Anda muncul di sini, lengkap dengan alamat dan jam kerja. Saat tiba di lokasi, Anda check-in dari halaman ini.",
+    "sections": {
+      "today": "Hari ini",
+      "upcoming": "Akan datang",
+      "finished": "Baru selesai"
+    },
+    "todayNone": "Tidak ada pekerjaan lagi hari ini. Pekerjaan berikutnya ada di bawah.",
+    "fields": {
+      "window": "Jam kedatangan",
+      "address": "Alamat",
+      "customer": "Pelanggan"
+    },
+    "windowValue": "{day}, {window} WIB",
+    "serviceFallback": "Layanan HomeKlin",
+    "customerFallback": "Pelanggan HomeKlin",
+    "call": "Telepon",
+    "errorTitle": "Pekerjaan belum bisa dimuat",
+    "errorBody": "Daftar pekerjaan tidak dapat dimuat saat ini. Periksa koneksi Anda, lalu coba lagi.",
+    "retry": "Muat ulang"
+  },
+  "CleanerJobActions": {
+    "status": {
+      "early": "Belum dibuka",
+      "open": "Siap check-in",
+      "late": "Waktu check-in lewat",
+      "checkedIn": "Sedang dikerjakan",
+      "completed": "Selesai"
+    },
+    "opensAt": "Check-in dibuka pukul {time} WIB, 15 menit sebelum jam kedatangan.",
+    "lateBody": "Jam kedatangan berakhir pukul {time} WIB, jadi check-in tidak bisa lagi. Hubungi agensi Anda.",
+    "checkIn": "Check-in",
+    "checkInNote": "Lokasi Anda dicatat sekali, saat check-in.",
+    "locating": "Mencari lokasi…",
+    "checkingIn": "Mencatat check-in…",
+    "checkedInAt": "Check-in pukul {time} WIB",
+    "checkOut": "Check-out",
+    "checkOutNote": "Check-out setelah pekerjaan selesai.",
+    "confirmTitle": "Selesaikan pekerjaan ini?",
+    "confirmBody": "Setelah check-out, pekerjaan tercatat selesai dan tidak bisa dibuka lagi.",
+    "confirm": "Ya, check-out",
+    "cancel": "Batal",
+    "checkingOut": "Menyelesaikan…",
+    "completedAt": "Selesai pukul {time} WIB",
+    "doneNote": "Pekerjaan tercatat selesai. Terima kasih.",
+    "recordingMissing": "Pekerjaan tercatat selesai. Rekamannya belum bisa dilampirkan, dan Anda tidak perlu melakukan apa pun.",
+    "location": {
+      "denied": "Akses lokasi ditolak. Izinkan lokasi untuk situs ini di pengaturan browser (ketuk ikon di samping alamat situs), lalu ketuk Check-in lagi.",
+      "unavailable": "Lokasi Anda belum ditemukan. Pastikan GPS atau lokasi ponsel aktif, lalu ketuk Check-in lagi."
+    },
+    "errors": {
+      "notAllowed": "Hanya petugas yang dapat check-in. Masuk lagi dengan akun petugas Anda.",
+      "notFound": "Pekerjaan ini tidak ditemukan atau tidak lagi ditugaskan kepada Anda. Muat ulang halaman.",
+      "tooEarly": "Check-in belum dibuka untuk pekerjaan ini. Coba lagi saat waktunya tiba.",
+      "tooLate": "Jam kedatangan sudah berakhir, jadi check-in tidak bisa lagi. Hubungi agensi Anda.",
+      "alreadyCheckedIn": "Anda sudah check-in untuk pekerjaan ini. Muat ulang halaman.",
+      "notCheckedIn": "Check-in dulu sebelum check-out.",
+      "completed": "Pekerjaan ini sudah selesai. Muat ulang halaman.",
+      "locationInvalid": "Lokasi Anda tidak terbaca dengan benar. Ketuk Check-in lagi.",
+      "cleanerNotFound": "Petugas tidak ditemukan. Muat ulang halaman.",
+      "started": "Pekerjaan ini sudah dimulai. Muat ulang halaman.",
+      "unavailable": "Belum bisa terhubung. Periksa koneksi Anda, lalu coba lagi."
+    }
+  },
+  "BackOfficeJobs": {
+    "table": {
+      "window": "Jadwal",
+      "service": "Layanan",
+      "agency": "Agensi",
+      "cleaner": "Petugas",
+      "status": "Status"
+    },
+    "windowValue": "{day}, {window} WIB",
+    "timeValue": "{window} WIB",
+    "status": {
+      "unassigned": "Belum ada petugas",
+      "assigned": "Ditugaskan",
+      "inProgress": "Check-in pukul {time}",
+      "completed": "Selesai pukul {time}"
+    },
+    "noCleaner": "Belum ditugaskan",
+    "serviceFallback": "Layanan tidak aktif"
   },
   "CleanerAccountPage": {
     "title": "Akun"
@@ -453,8 +533,13 @@
   },
   "AgencyOrdersPage": {
     "title": "Pesanan",
+    "description": "Pesanan yang sudah dibayar dan diarahkan ke agensi Anda, terbaru di atas, dengan status check-in petugasnya.",
     "emptyTitle": "Belum ada pesanan",
-    "emptyBody": "Pesanan yang sudah dibayar muncul di sini. Dari halaman ini Anda menugaskan petugas untuk setiap pesanan."
+    "emptyBody": "Pesanan yang sudah dibayar muncul di sini. Dari halaman ini Anda menugaskan petugas untuk setiap pesanan.",
+    "caption": "Pesanan agensi Anda",
+    "summary": "{count, plural, other {# pesanan}}",
+    "errorTitle": "Pesanan belum bisa dimuat.",
+    "errorBody": "Muat ulang halaman untuk mencoba lagi."
   },
   "AgencyRecordingsPage": {
     "title": "Rekaman",
@@ -463,8 +548,13 @@
   },
   "AdminDashboardPage": {
     "title": "Dasbor",
-    "emptyTitle": "Ringkasan platform muncul di sini",
-    "emptyBody": "Pekerjaan yang sedang berlangsung, tiket bantuan yang menunggu jawaban, dan rekaman terbaru tampil di halaman ini."
+    "todayTitle": "Pekerjaan hari ini",
+    "todayDescription": "Semua pekerjaan yang dijadwalkan hari ini, dengan agensi, petugas, dan status check-in. Waktu dalam WIB.",
+    "todayEmptyTitle": "Tidak ada pekerjaan hari ini",
+    "todayEmptyBody": "Pekerjaan yang sudah dibayar dan dijadwalkan hari ini muncul di sini, lengkap dengan status check-in petugasnya.",
+    "todaySummary": "{count, plural, other {# pekerjaan}}",
+    "errorTitle": "Pekerjaan hari ini belum bisa dimuat.",
+    "errorBody": "Muat ulang halaman untuk mencoba lagi."
   },
   "AdminMonitorPage": {
     "title": "Monitor Langsung",

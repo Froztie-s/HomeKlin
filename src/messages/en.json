@@ -430,8 +430,88 @@
   },
   "CleanerJobsPage": {
     "title": "Today’s jobs",
-    "emptyTitle": "No jobs for today yet",
-    "emptyBody": "Jobs your agency assigns to you appear here, with the address and working hours. When you arrive, you check in from this page."
+    "emptyTitle": "No jobs yet",
+    "emptyBody": "Jobs your agency assigns to you appear here, with the address and working hours. When you arrive, you check in from this page.",
+    "sections": {
+      "today": "Today",
+      "upcoming": "Upcoming",
+      "finished": "Just finished"
+    },
+    "todayNone": "No more jobs today. Your next jobs are below.",
+    "fields": {
+      "window": "Arrival time",
+      "address": "Address",
+      "customer": "Customer"
+    },
+    "windowValue": "{day}, {window} WIB",
+    "serviceFallback": "HomeKlin service",
+    "customerFallback": "HomeKlin customer",
+    "call": "Call",
+    "errorTitle": "Your jobs could not be loaded",
+    "errorBody": "The job list cannot be loaded right now. Check your connection, then try again.",
+    "retry": "Reload"
+  },
+  "CleanerJobActions": {
+    "status": {
+      "early": "Not open yet",
+      "open": "Ready to check in",
+      "late": "Check-in time has passed",
+      "checkedIn": "In progress",
+      "completed": "Finished"
+    },
+    "opensAt": "Check-in opens at {time} WIB, 15 minutes before the arrival time.",
+    "lateBody": "The arrival time ended at {time} WIB, so you can no longer check in. Contact your agency.",
+    "checkIn": "Check-in",
+    "checkInNote": "Your location is recorded once, when you check in.",
+    "locating": "Finding your location…",
+    "checkingIn": "Recording check-in…",
+    "checkedInAt": "Checked in at {time} WIB",
+    "checkOut": "Check-out",
+    "checkOutNote": "Check out when the job is done.",
+    "confirmTitle": "Finish this job?",
+    "confirmBody": "After check-out, the job is recorded as finished and cannot be reopened.",
+    "confirm": "Yes, check out",
+    "cancel": "Cancel",
+    "checkingOut": "Finishing…",
+    "completedAt": "Finished at {time} WIB",
+    "doneNote": "The job is recorded as finished. Thank you.",
+    "recordingMissing": "The job is recorded as finished. Its recording could not be attached yet, and you do not need to do anything.",
+    "location": {
+      "denied": "Location access was refused. Allow location for this site in your browser settings (tap the icon next to the site address), then tap Check-in again.",
+      "unavailable": "Your location could not be found yet. Make sure GPS or phone location is on, then tap Check-in again."
+    },
+    "errors": {
+      "notAllowed": "Only cleaners can check in. Sign in again with your cleaner account.",
+      "notFound": "This job was not found or is no longer assigned to you. Reload the page.",
+      "tooEarly": "Check-in has not opened for this job yet. Try again when it is time.",
+      "tooLate": "The arrival time has ended, so you can no longer check in. Contact your agency.",
+      "alreadyCheckedIn": "You have already checked in for this job. Reload the page.",
+      "notCheckedIn": "Check in before you check out.",
+      "completed": "This job is already finished. Reload the page.",
+      "locationInvalid": "Your location could not be read correctly. Tap Check-in again.",
+      "cleanerNotFound": "The cleaner was not found. Reload the page.",
+      "started": "This job has already started. Reload the page.",
+      "unavailable": "Could not connect. Check your connection, then try again."
+    }
+  },
+  "BackOfficeJobs": {
+    "table": {
+      "window": "Time",
+      "service": "Service",
+      "agency": "Agency",
+      "cleaner": "Cleaner",
+      "status": "Status"
+    },
+    "windowValue": "{day}, {window} WIB",
+    "timeValue": "{window} WIB",
+    "status": {
+      "unassigned": "No cleaner yet",
+      "assigned": "Assigned",
+      "inProgress": "Checked in at {time}",
+      "completed": "Finished at {time}"
+    },
+    "noCleaner": "Not assigned",
+    "serviceFallback": "Service switched off"
   },
   "CleanerAccountPage": {
     "title": "Account"
@@ -453,8 +533,13 @@
   },
   "AgencyOrdersPage": {
     "title": "Orders",
+    "description": "Paid orders routed to your agency, newest first, with the cleaner’s check-in status.",
     "emptyTitle": "No orders yet",
-    "emptyBody": "Paid orders appear here. From this page you assign a cleaner to each order."
+    "emptyBody": "Paid orders appear here. From this page you assign a cleaner to each order.",
+    "caption": "Your agency’s orders",
+    "summary": "{count, plural, one {# order} other {# orders}}",
+    "errorTitle": "The orders could not be loaded.",
+    "errorBody": "Reload the page to try again."
   },
   "AgencyRecordingsPage": {
     "title": "Recordings",
@@ -463,8 +548,13 @@
   },
   "AdminDashboardPage": {
     "title": "Dashboard",
-    "emptyTitle": "The platform overview appears here",
-    "emptyBody": "Jobs in progress, help tickets waiting for an answer and the latest recordings appear on this page."
+    "todayTitle": "Today’s jobs",
+    "todayDescription": "Every job scheduled for today, with the agency, the cleaner and the check-in status. Times in WIB.",
+    "todayEmptyTitle": "No jobs today",
+    "todayEmptyBody": "Paid jobs scheduled for today appear here, with their cleaner’s check-in status.",
+    "todaySummary": "{count, plural, one {# job} other {# jobs}}",
+    "errorTitle": "Today’s jobs could not be loaded.",
+    "errorBody": "Reload the page to try again."
   },
   "AdminMonitorPage": {
     "title": "Live monitor",

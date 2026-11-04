@@ -76,13 +76,13 @@ test("an agency user lands on /agency, sees who is signed in, and is refused the
 
   await page.goto("/admin");
   await expect(page).toHaveURL("/agency");
-  await expect(page.getByText("Ringkasan platform muncul di sini")).toHaveCount(0);
+  await expect(page.getByRole("heading", { level: 2, name: "Pekerjaan hari ini" })).toHaveCount(0);
 });
 
 test("an admin lands on /admin, is refused an agency page, and signs out from the sidebar", async ({ page }) => {
   await logIn(page, administrator);
   await expect(page).toHaveURL("/admin");
-  await expect(page.getByText("Ringkasan platform muncul di sini")).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Pekerjaan hari ini" })).toBeVisible();
 
   // A sub-page of the agency section. The page the admin asked for never reaches the browser, not
   // even in the HTML that comes before the redirect; their own pages do (the check is not vacuous).

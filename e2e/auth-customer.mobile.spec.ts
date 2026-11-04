@@ -120,7 +120,7 @@ test.describe("signing in", () => {
 
     await page.goto("/cleaner");
     await expect(page).toHaveURL("/home");
-    await expect(page.getByText("Belum ada pekerjaan hari ini")).toHaveCount(0);
+    await expect(page.getByText("Belum ada pekerjaan", { exact: true })).toHaveCount(0);
 
     // Signed in already: the sign-in pages send the customer on, to `next` when they may open it.
     await page.goto("/login");
@@ -134,7 +134,7 @@ test.describe("signing in", () => {
     await fillLogin(page, cleaner);
     await expect(page).toHaveURL("/cleaner");
     await expect(page.getByRole("heading", { level: 1, name: "Pekerjaan hari ini" })).toBeVisible();
-    await expect(page.getByText("Belum ada pekerjaan hari ini")).toBeVisible();
+    await expect(page.getByText("Belum ada pekerjaan", { exact: true })).toBeVisible();
 
     await page.goto("/orders");
     await expect(page).toHaveURL("/cleaner");
