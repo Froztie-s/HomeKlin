@@ -29,6 +29,7 @@ import {
   demoJobPhone,
   cleanerPhotos,
   demoJobs,
+  faqEntries,
   seedAreas,
   seedServices,
   slotPattern,
@@ -558,6 +559,31 @@ export async function seedUpcomingJob({ client, customerId, job, now = new Date(
   return { startsAt: startsAt.toISOString() };
 }
 
+/**
+ * Brings HomeKlin's FAQ entries up to date (T19); entries admin added are left alone.
+ *
+ * @param {{ client: import("@supabase/supabase-js").SupabaseClient }} options
+ */
+export async function seedFaq({ client }) {
+  await must(
+    "FAQ",
+    client.from("faq_entries").upsert(
+      faqEntries.map((entry, index) => ({
+        id: entry.id,
+        question_id: entry.questionId,
+        question_en: entry.questionEn,
+        answer_id: entry.answerId,
+        answer_en: entry.answerEn,
+        keywords: entry.keywords,
+        sort_order: index,
+        is_published: true,
+      })),
+      { onConflict: "id" },
+    ),
+  );
+  return { entries: faqEntries.length };
+}
+
 /** The clips in the local, git-ignored clips folder, ready for uploadClips. */
 function localClips() {
   if (!existsSync(clipsDirectory)) return [];
@@ -621,6 +647,8 @@ async function main() {
       photoUrl: cleanerPhotos[result.email.split("@")[0]] ?? null,
     }));
   await seedCleaners({ client, cleaners });
+  const faq = await seedFaq({ client });
+  console.log(`FAQ: ${faq.entries} entries up to date.`);
   console.log(`Cleaners: ${cleaners.length} linked to their agencies.`);
 
   const jobs = demoJobs.map(({ agency, cleaner, ...job }) => ({ ...job, agencyId: agencyIdOf(agency), cleanerId: cleanerIdOf(cleaner) }));
