@@ -720,18 +720,73 @@
   },
   "AdminDashboardPage": {
     "title": "Dashboard",
+    "description": "Today’s jobs, cleaners and customer tickets in one view. Times in WIB.",
+    "summaryTitle": "Summary",
+    "tiles": {
+      "today": {
+        "label": "Today’s jobs",
+        "hint": "See the list below"
+      },
+      "inProgress": {
+        "label": "In progress",
+        "hint": "Open the live monitor"
+      },
+      "waiting": {
+        "label": "Waiting for a cleaner",
+        "hint": "See today’s jobs"
+      },
+      "tickets": {
+        "label": "Open tickets",
+        "hint": "{urgent, plural, =0 {None urgent} other {# urgent}}"
+      }
+    },
+    "tileUnavailable": "Could not be loaded",
     "todayTitle": "Today’s jobs",
     "todayDescription": "Every job scheduled for today, with the agency, the cleaner and the check-in status. Times in WIB.",
     "todayEmptyTitle": "No jobs today",
     "todayEmptyBody": "Paid jobs scheduled for today appear here, with their cleaner’s check-in status.",
     "todaySummary": "{count, plural, one {# job} other {# jobs}}",
     "errorTitle": "Today’s jobs could not be loaded.",
-    "errorBody": "Reload the page to try again."
+    "errorBody": "Reload the page to try again.",
+    "ticketsTitle": "Latest open tickets",
+    "ticketsDescription": "Urgent ones first, then the newest. Open a ticket to reply to the customer.",
+    "ticketsAll": "See all tickets",
+    "ticketsEmptyTitle": "No open tickets",
+    "ticketsEmptyBody": "New questions from customers appear here and on the Tickets page.",
+    "ticketsErrorTitle": "Tickets could not be loaded.",
+    "urgent": "Urgent",
+    "customerFallback": "Customer",
+    "messageCount": "{count, plural, one {# message} other {# messages}}",
+    "lastToday": "Today, {time} WIB",
+    "lastDay": "{day}, {time} WIB"
   },
   "AdminMonitorPage": {
     "title": "Live monitor",
+    "description": "Live streams of every job in progress. Only HomeKlin admins can open this page.",
     "emptyTitle": "No jobs in progress",
-    "emptyBody": "Live streams of all jobs in progress appear here in one view."
+    "emptyBody": "Live streams of all jobs in progress appear here in one view.",
+    "gridLabel": "Live streams",
+    "summary": "{count, plural, one {# live stream} other {# live streams}} as of {time} WIB",
+    "refresh": "Refresh list",
+    "errorTitle": "Live streams could not be loaded.",
+    "errorBody": "Reload the page to try again.",
+    "status": {
+      "active": "Active",
+      "weak": "Weak signal",
+      "disconnected": "Disconnected",
+      "ended": "Ended"
+    },
+    "startedAt": "Started at {time} WIB",
+    "agency": "Agency",
+    "videoLabel": "Live stream of {name}",
+    "cleanerFallback": "Cleaner not recorded",
+    "serviceFallback": "Service switched off",
+    "loading": "Loading the stream…",
+    "unsupported": "Your browser cannot play this video.",
+    "failed": "The stream cannot be played yet.",
+    "ended": "This stream has ended.",
+    "retry": "Try again",
+    "retrying": "Reloading the stream…"
   },
   "AdminTicketsPage": {
     "title": "Tickets",
@@ -767,8 +822,47 @@
   },
   "AdminRecordingsPage": {
     "title": "Recordings",
-    "emptyTitle": "No recordings yet",
-    "emptyBody": "Recordings of all jobs still within the 7-day storage period appear here."
+    "description": "Jobs finished in the last 30 days. Recordings are kept for 7 days after the job ends, then deleted automatically. Times in WIB.",
+    "emptyTitle": "No finished jobs yet",
+    "emptyBody": "Jobs finished in the last 30 days appear here, with their recording while it is kept.",
+    "summary": "{count, plural, one {# finished job} other {# finished jobs}}",
+    "tableCaption": "Finished jobs",
+    "table": {
+      "finished": "Finished",
+      "service": "Service",
+      "agency": "Agency",
+      "cleaner": "Cleaner",
+      "recording": "Recording"
+    },
+    "finishedAt": "{day}, {time} WIB",
+    "state": {
+      "available": "Available until {day}, {time} WIB",
+      "expired": "Deleted",
+      "none": "No recording"
+    },
+    "play": "Play",
+    "playing": "Playing",
+    "noCleaner": "Not assigned",
+    "serviceFallback": "Service switched off",
+    "listErrorTitle": "The job list could not be loaded.",
+    "errorBody": "Reload the page to try again.",
+    "playerTitle": "Job recording",
+    "playerLabel": "Recording of {service} by {cleaner}",
+    "close": "Close recording",
+    "availableUntil": "Available until {day}, {time} WIB",
+    "privacy": "Only this job’s customer, its agency and HomeKlin admins can play this recording.",
+    "loading": "Loading the recording…",
+    "expiredTitle": "The recording has been deleted",
+    "expiredBody": "Recordings are deleted automatically 7 days after the job ends and cannot be played again.",
+    "noneTitle": "Recording not found",
+    "noneBody": "Choose a recording that is still available from the list below.",
+    "unavailableTitle": "The recording could not be loaded.",
+    "retryPage": "Reload page",
+    "unsupported": "Your browser cannot play this video.",
+    "unplayable": "The video cannot be played right now.",
+    "failed": "The video could not be loaded. Check your connection, then try again.",
+    "reload": "Reload video",
+    "reloading": "Reloading the video…"
   },
   "AdminServicesPage": {
     "title": "Services & prices",

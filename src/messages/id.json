@@ -720,18 +720,73 @@
   },
   "AdminDashboardPage": {
     "title": "Dasbor",
+    "description": "Pekerjaan, petugas, dan tiket pelanggan hari ini dalam satu tampilan. Waktu dalam WIB.",
+    "summaryTitle": "Ringkasan",
+    "tiles": {
+      "today": {
+        "label": "Pekerjaan hari ini",
+        "hint": "Lihat daftar di bawah"
+      },
+      "inProgress": {
+        "label": "Sedang berlangsung",
+        "hint": "Buka monitor langsung"
+      },
+      "waiting": {
+        "label": "Menunggu petugas",
+        "hint": "Lihat pekerjaan hari ini"
+      },
+      "tickets": {
+        "label": "Tiket terbuka",
+        "hint": "{urgent, plural, =0 {Tidak ada yang mendesak} other {# mendesak}}"
+      }
+    },
+    "tileUnavailable": "Belum dapat dimuat",
     "todayTitle": "Pekerjaan hari ini",
     "todayDescription": "Semua pekerjaan yang dijadwalkan hari ini, dengan agensi, petugas, dan status check-in. Waktu dalam WIB.",
     "todayEmptyTitle": "Tidak ada pekerjaan hari ini",
     "todayEmptyBody": "Pekerjaan yang sudah dibayar dan dijadwalkan hari ini muncul di sini, lengkap dengan status check-in petugasnya.",
     "todaySummary": "{count, plural, other {# pekerjaan}}",
     "errorTitle": "Pekerjaan hari ini belum bisa dimuat.",
-    "errorBody": "Muat ulang halaman untuk mencoba lagi."
+    "errorBody": "Muat ulang halaman untuk mencoba lagi.",
+    "ticketsTitle": "Tiket terbuka terbaru",
+    "ticketsDescription": "Yang mendesak lebih dulu, lalu yang terbaru. Buka tiket untuk membalas pelanggan.",
+    "ticketsAll": "Lihat semua tiket",
+    "ticketsEmptyTitle": "Tidak ada tiket terbuka",
+    "ticketsEmptyBody": "Pertanyaan baru dari pelanggan muncul di sini dan di halaman Tiket.",
+    "ticketsErrorTitle": "Tiket belum bisa dimuat.",
+    "urgent": "Mendesak",
+    "customerFallback": "Pelanggan",
+    "messageCount": "{count, plural, other {# pesan}}",
+    "lastToday": "Hari ini, {time} WIB",
+    "lastDay": "{day}, {time} WIB"
   },
   "AdminMonitorPage": {
     "title": "Monitor Langsung",
+    "description": "Siaran langsung semua pekerjaan yang sedang berlangsung. Hanya admin HomeKlin yang dapat membuka halaman ini.",
     "emptyTitle": "Tidak ada pekerjaan yang sedang berlangsung",
-    "emptyBody": "Siaran langsung semua pekerjaan yang sedang berlangsung muncul di sini dalam satu tampilan."
+    "emptyBody": "Siaran langsung semua pekerjaan yang sedang berlangsung muncul di sini dalam satu tampilan.",
+    "gridLabel": "Siaran langsung",
+    "summary": "{count, plural, other {# siaran langsung}} per pukul {time} WIB",
+    "refresh": "Perbarui daftar",
+    "errorTitle": "Siaran langsung belum bisa dimuat.",
+    "errorBody": "Muat ulang halaman untuk mencoba lagi.",
+    "status": {
+      "active": "Aktif",
+      "weak": "Sinyal lemah",
+      "disconnected": "Terputus",
+      "ended": "Selesai"
+    },
+    "startedAt": "Mulai pukul {time} WIB",
+    "agency": "Agensi",
+    "videoLabel": "Siaran langsung {name}",
+    "cleanerFallback": "Petugas belum tercatat",
+    "serviceFallback": "Layanan tidak aktif",
+    "loading": "Memuat siaran…",
+    "unsupported": "Browser Anda tidak dapat memutar video ini.",
+    "failed": "Siaran belum dapat diputar.",
+    "ended": "Siaran ini sudah berakhir.",
+    "retry": "Coba lagi",
+    "retrying": "Memuat ulang siaran…"
   },
   "AdminTicketsPage": {
     "title": "Tiket",
@@ -767,8 +822,47 @@
   },
   "AdminRecordingsPage": {
     "title": "Rekaman",
-    "emptyTitle": "Belum ada rekaman",
-    "emptyBody": "Rekaman semua pekerjaan yang masih dalam masa simpan 7 hari muncul di sini."
+    "description": "Pekerjaan yang selesai dalam 30 hari terakhir. Rekaman disimpan 7 hari setelah pekerjaan selesai, lalu dihapus otomatis. Waktu dalam WIB.",
+    "emptyTitle": "Belum ada pekerjaan selesai",
+    "emptyBody": "Pekerjaan yang selesai dalam 30 hari terakhir muncul di sini, dengan rekamannya selama masih disimpan.",
+    "summary": "{count, plural, other {# pekerjaan selesai}}",
+    "tableCaption": "Pekerjaan selesai",
+    "table": {
+      "finished": "Selesai",
+      "service": "Layanan",
+      "agency": "Agensi",
+      "cleaner": "Petugas",
+      "recording": "Rekaman"
+    },
+    "finishedAt": "{day}, {time} WIB",
+    "state": {
+      "available": "Tersedia sampai {day}, {time} WIB",
+      "expired": "Sudah dihapus",
+      "none": "Tidak ada rekaman"
+    },
+    "play": "Putar",
+    "playing": "Sedang diputar",
+    "noCleaner": "Belum ditugaskan",
+    "serviceFallback": "Layanan tidak aktif",
+    "listErrorTitle": "Daftar pekerjaan belum bisa dimuat.",
+    "errorBody": "Muat ulang halaman untuk mencoba lagi.",
+    "playerTitle": "Rekaman pekerjaan",
+    "playerLabel": "Rekaman {service} oleh {cleaner}",
+    "close": "Tutup rekaman",
+    "availableUntil": "Tersedia sampai {day}, {time} WIB",
+    "privacy": "Hanya pelanggan pekerjaan ini, agensinya, dan admin HomeKlin yang dapat memutar rekaman ini.",
+    "loading": "Memuat rekaman…",
+    "expiredTitle": "Rekaman sudah dihapus",
+    "expiredBody": "Rekaman dihapus otomatis 7 hari setelah pekerjaan selesai dan tidak dapat diputar lagi.",
+    "noneTitle": "Rekaman tidak ditemukan",
+    "noneBody": "Pilih rekaman yang masih tersedia dari daftar di bawah.",
+    "unavailableTitle": "Rekaman belum dapat dimuat.",
+    "retryPage": "Muat ulang halaman",
+    "unsupported": "Browser Anda tidak dapat memutar video ini.",
+    "unplayable": "Video tidak dapat diputar saat ini.",
+    "failed": "Video belum dapat dimuat. Periksa koneksi Anda, lalu coba lagi.",
+    "reload": "Muat ulang video",
+    "reloading": "Memuat ulang video…"
   },
   "AdminServicesPage": {
     "title": "Layanan & Harga",
