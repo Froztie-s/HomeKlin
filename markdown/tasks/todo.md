@@ -136,11 +136,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 6: Live viewer (demo source)
 
-- [ ] **T22 Stream seam, demo source, cleaner stream page** (M)
+- [x] **T22 Stream seam, demo source, cleaner stream page** (M) — done 2026-11-05: `StreamSource` with the demo clip source (`src/lib/stream/source.ts`), `stream_sessions`; the checked-in job card has Mulai siaran, a live badge (green, per design.md), Aktif / Sinyal lemah / Terputus with simulation buttons, Sambung lagi and Hentikan siaran; check-out ends it; e2e `live-stream.mobile.spec.ts`; screenshots `docs/screenshots/t22/`. Known gap: the cleaner page remembers the stream state per tab (no server read for the cleaner yet), so a new tab shows Mulai siaran, which resumes the same session
   - Accept: `StreamSource` interface with a demo clip source; `stream_sessions` table; cleaner "start stream" page with status indicator (active, weak signal, disconnected simulated); stream tied to an active job.
   - Verify: Vitest for the interface; Playwright start/stop.
   - Deps: T18. Skills: `api-and-interface-design`.
-- [ ] **T23 Customer live viewer with access rules** (M)
+- [x] **T23 Customer live viewer with access rules** (M) — done 2026-11-05: the job's customer watches on the order details and `/orders/live?order=<id>` (link made on the server only after `stream_for_viewer` allows it; status polled every 10 s; calm weak and disconnected overlays); a guessed or foreign id shows "Siaran tidak tersedia" with nothing in the HTML and the API answers 404; matrix in `tests/integration/streams.test.ts`
   - Accept: customer can watch only the cleaner on their own active, consented booking; other cleaners, finished jobs or no consent are refused by the server; no way to list streams.
   - Verify: Vitest authorization matrix; Playwright viewer plus guessed-URL attempt.
   - Deps: T22. Skills: `security-and-hardening`, `doubt-driven-development`, `frontend-ui-engineering`.

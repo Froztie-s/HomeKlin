@@ -198,8 +198,8 @@ export function StreamControl({ orderId }: { orderId: string }) {
 /** "LIVE" with a red dot: the cleaner's own sign that the stream is on. The dot is still under reduced motion. */
 function OnAirBadge({ label }: { label: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-danger-surface px-2.5 py-1 text-xs font-bold tracking-wide text-danger">
-      <span aria-hidden="true" className="size-2 animate-breathe rounded-full bg-danger motion-reduce:animate-none" />
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-success-surface px-2.5 py-1 text-xs font-bold tracking-wide text-success">
+      <span aria-hidden="true" className="size-2 animate-breathe rounded-full bg-success motion-reduce:animate-none" />
       {label}
     </span>
   );
