@@ -1,9 +1,10 @@
-import { CalendarCheck, ChevronRight, ShieldCheck, Video, VideoOff, type LucideIcon } from "lucide-react";
+import { CalendarCheck, ChevronRight, Radio, ShieldCheck, Video, VideoOff, type LucideIcon } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { CustomerOrder } from "@/lib/booking/orders";
 import { formatRupiah } from "@/lib/format";
 import { jakartaDayOf } from "./booking-query";
+import { liveInProgress } from "./live-status";
 import { getOrderWords, OrderStatusPill } from "./order-status";
 import { recordingState, type RecordingState } from "./recording-time";
 import { getSlotLabels } from "./slot-labels";
@@ -26,13 +27,15 @@ const recordingIcons: Record<Exclude<RecordingState, "none">, { Icon: LucideIcon
 // The customer's orders on /orders (T12). The whole row is one link to the order's details
 // (/orders?order=<id>). A paid order's window is the job itself, so it stands out on a labelled line;
 // on any other order it is only what was asked for, in muted text. A finished job says whether its
-// recording can still be replayed, and until when (T15); the player itself is on the details.
+// recording can still be replayed, and until when (T15); the player itself is on the details. A job in
+// progress says it can be watched live from its details (T23).
 export async function OrderList({ orders, serviceName, now }: OrderListProps) {
   const locale = await getLocale();
-  const [t, tConfirmation, tRecording, words, labels] = await Promise.all([
+  const [t, tConfirmation, tRecording, tLive, words, labels] = await Promise.all([
     getTranslations("OrdersPage"),
     getTranslations("OrderConfirmation"),
     getTranslations("Recording"),
+    getTranslations("LiveStream"),
     getOrderWords(locale),
     getSlotLabels(locale),
   ]);
@@ -75,6 +78,12 @@ export async function OrderList({ orders, serviceName, now }: OrderListProps) {
               ) : (
                 <span className="text-sm text-ink-muted">{words.arrival(order)}</span>
               )}
+              {liveInProgress(order) ? (
+                <span data-testid="live-line" className="flex items-start gap-2 text-sm font-medium text-ink">
+                  <Radio className="mt-0.5 size-4 shrink-0 text-brand-700" aria-hidden="true" />
+                  <span>{tLive("listLine")}</span>
+                </span>
+              ) : null}
               {recording !== "none" ? <RecordingLine state={recording} text={recordingText(order, recording)} /> : null}
               <span className="mt-auto flex items-baseline justify-between gap-6">
                 <span className="text-sm text-ink-muted">{tConfirmation("fields.total")}</span>

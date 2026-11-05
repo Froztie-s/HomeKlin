@@ -30,7 +30,7 @@ type OrderRecordingProps = {
 export async function OrderRecording({ recordingId, state, now }: OrderRecordingProps) {
   const t = await getTranslations("Recording");
   return (
-    <section aria-labelledby="recording-title" className="flex flex-col gap-3 border-t border-border p-5 md:p-6">
+    <section id="recording" aria-labelledby="recording-title" className="flex scroll-mt-4 flex-col gap-3 border-t border-border p-5 md:p-6">
       <h3 id="recording-title" className="font-display text-lg font-semibold text-ink">
         {t("title")}
       </h3>

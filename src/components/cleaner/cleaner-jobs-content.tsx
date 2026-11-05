@@ -91,7 +91,7 @@ export async function CleanerJobsContent() {
   );
 
   return (
-    <ClientMessages namespaces={["CleanerJobActions"]}>
+    <ClientMessages namespaces={["CleanerJobActions", "CleanerStream"]}>
       <FinishedNotesProvider>
         <div className="flex flex-col gap-8">
           <JobSection id="today" title={t("sections.today")}>

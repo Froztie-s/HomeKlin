@@ -7,6 +7,7 @@ import { checkInState, type CheckInState } from "@/lib/jobs/check-in";
 import { CheckInButton } from "./check-in-button";
 import { CheckOutForm } from "./check-out-form";
 import { FinishedNoteLine } from "./finished-notes";
+import { StreamControl } from "./stream-control";
 
 export type JobCardJob = {
   id: string;
@@ -46,6 +47,7 @@ const pills: Record<CheckInState, { Icon: LucideIcon; tone: string }> = {
 // to do now. The state follows the clock (checkInState, the rule the database enforces too), so a page
 // left open shows the Check-in button once check-in opens, 15 minutes before the window, and hides it
 // once the window has closed. The state line is a live region: what changes in it is announced.
+// A job in progress also has its live stream controls (T22, ./stream-control.tsx) above Check-out.
 export function JobCard({ job, times, renderedAt, children }: JobCardProps) {
   const t = useTranslations("CleanerJobActions");
   const now = useNow(renderedAt);
@@ -74,6 +76,7 @@ export function JobCard({ job, times, renderedAt, children }: JobCardProps) {
           <StateLine state={state} times={times} />
         </p>
         {state === "open" ? <CheckInButton orderId={job.id} onCheckedIn={() => setCheckedInHere(true)} /> : null}
+        {state === "checkedIn" ? <StreamControl orderId={job.id} /> : null}
         {state === "checkedIn" ? <CheckOutForm orderId={job.id} buttonRef={checkOutRef} /> : null}
         {state === "completed" ? <FinishedNoteLine orderId={job.id} /> : null}
       </div>
