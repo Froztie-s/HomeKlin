@@ -3,7 +3,9 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { ClientMessages } from "@/i18n/client-messages";
 import type { CustomerOrder } from "@/lib/booking/orders";
 import { formatRupiah } from "@/lib/format";
+import { liveInProgress } from "./live-status";
 import { OrderJob } from "./order-job";
+import { OrderLive } from "./order-live";
 import { OrderRecording } from "./order-recording";
 import { getOrderWords, OrderStatusPill } from "./order-status";
 import { PaymentForm } from "./payment-form";
@@ -33,7 +35,8 @@ type OrderConfirmationProps = {
 // Opened from the list (T12) the same facts carry their own title and a line for the order's status,
 // since the order was not just made and a failed or cancelled one holds no window any more.
 // A paid order shows its Petugas HomeKlin and the job's progress (./order-job.tsx), and a finished job
-// its recording, with until when it is kept (T15, ./order-recording.tsx).
+// its recording, with until when it is kept (T15, ./order-recording.tsx). While the job is in progress
+// the customer can watch it live here (T23, ./order-live.tsx); /orders/live?order=<id> shows the same.
 export async function OrderConfirmation({
   order,
   serviceName,
@@ -53,6 +56,7 @@ export async function OrderConfirmation({
   const goingAhead = awaitingPayment || order.status === "paid";
   const HeaderIcon = details ? ClipboardList : CircleCheck;
   const recording = recordingState(order, now.getTime());
+  const live = liveInProgress(order);
   const lead = details ? (order.completedAt ? t("detailsLeadCompleted") : t(`detailsLead.${order.status}`)) : t("lead");
   const facts = [
     { label: t("fields.service"), value: words.service(serviceName) },
@@ -93,6 +97,7 @@ export async function OrderConfirmation({
       </div>
 
       {order.status === "paid" ? <OrderJob order={order} /> : null}
+      {live ? <OrderLive orderId={order.id} variant="details" /> : null}
       {recording !== "none" ? <OrderRecording recordingId={order.recordingId} state={recording} now={now} /> : null}
 
       <dl className="flex flex-col border-t border-border px-5 md:px-6">
@@ -121,8 +126,8 @@ export async function OrderConfirmation({
         </div>
       ) : null}
 
-      {/* A finished job's recording section already says who can see it and for how long. */}
-      {(goingAhead || !details) && recording === "none" ? (
+      {/* A finished job's recording section and a job's live view already say who can see them. */}
+      {(goingAhead || !details) && recording === "none" && !live ? (
         <div className="flex flex-col gap-3 border-t border-border p-5 md:p-6">
           {goingAhead && !order.cleanerName ? (
             <div className="flex items-start gap-3 rounded-md bg-surface-sunken px-4 py-3">
