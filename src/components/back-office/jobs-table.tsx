@@ -1,4 +1,5 @@
 import { CircleCheck, CircleDashed, MapPinCheck, UserCheck, type LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { jakartaDayOf } from "@/components/customer/booking-query";
 import { getSlotLabels } from "@/components/customer/slot-labels";
@@ -12,6 +13,8 @@ export type JobsTableRow = Pick<BackOfficeJob, "id" | "startsAt" | "endsAt" | "c
   detail?: string;
   /** Admin only: the partner agency the job was routed to. */
   agencyName?: string;
+  /** Agency only (T28): the control that assigns a cleaner, in place of the cleaner's name. */
+  assign?: ReactNode;
 };
 
 type JobsTableProps = {
@@ -34,8 +37,9 @@ const statusStyles: Record<JobProgress, { Icon: LucideIcon; pill: string }> = {
 };
 
 // Jobs in the back office (T18): when, which service, (for admin) which agency, which cleaner, and
-// where the job stands: no cleaner yet, assigned, checked in at a time, finished at a time. Read-only:
-// assigning a cleaner is T28. A real table on a desk; below 1024 px the agency and the cleaner move under
+// where the job stands: no cleaner yet, assigned, checked in at a time, finished at a time. Admin's
+// table is read-only; the agency's rows may carry an assign control (T28) in place of the cleaner's
+// name, for jobs nobody has checked in to yet. A real table on a desk; below 1024 px the agency and the cleaner move under
 // the service and the status, and below 768 px each job is one cell, so nothing scrolls sideways. Hidden cells are display: none, so a screen reader meets each fact
 // once. Times are in Jakarta time (WIB), whatever the server's time zone.
 export async function JobsTable({ rows, caption, when }: JobsTableProps) {
@@ -63,7 +67,9 @@ export async function JobsTable({ rows, caption, when }: JobsTableProps) {
   }
 
   const cleaner = (row: JobsTableRow) =>
-    row.cleanerName ? <span className="text-ink">{row.cleanerName}</span> : <span className="text-ink-muted">{t("noCleaner")}</span>;
+    row.assign ? (
+      row.assign
+    ) : row.cleanerName ? <span className="text-ink">{row.cleanerName}</span> : <span className="text-ink-muted">{t("noCleaner")}</span>;
 
   // The base styles give every <p> `text-wrap: pretty`, which would undo an inherited nowrap, so the
   // lines that must not wrap are blocks of their own.

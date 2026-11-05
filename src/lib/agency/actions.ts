@@ -104,7 +104,7 @@ export async function deleteSlot(_previous: AgencyActionState, formData: FormDat
   return { ok: true };
 }
 
-export const cleanerPhotoBucket = "cleaner-photos";
+const cleanerPhotoBucket = "cleaner-photos";
 const photoTypes = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" } as const;
 const maxPhotoBytes = 2 * 1024 * 1024;
 

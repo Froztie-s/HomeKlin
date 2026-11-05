@@ -4,8 +4,9 @@ import { createJobWorld, jakartaClock, sessionOf, type JobWorld } from "./job-te
 import { signedInAs } from "./setup/auth-state";
 
 // T18 on a desk: the agency (on /agency/orders) and admin (on /admin, "Pekerjaan hari ini") see where
-// each job stands: no cleaner yet, a cleaner assigned, checked in at a time, finished at a time. Both
-// are read-only: assigning a cleaner is T28. The agency sees only the jobs routed to it; admin sees the
+// each job stands: no cleaner yet, a cleaner assigned, checked in at a time, finished at a time.
+// Admin's list is read-only, and the agency can assign a cleaner only until check-in (T28,
+// covered in full by e2e/agency-back-office.desktop.spec.ts). The agency sees only the jobs routed to it; admin sees the
 // agency's name too. The spec makes its own agency (serving Jakarta Timur, with one cleaner) and writes
 // its own paid jobs a few minutes from now (e2e/job-test-data.ts), so they are today's jobs in Jakarta.
 
@@ -60,19 +61,25 @@ async function expectReadOnly(page: Page, table: Locator) {
 test.describe("the agency", () => {
   test.use({ storageState: async ({}, provide) => provide(agencySession) });
 
-  test("sees each of its jobs with the cleaner and the check-in status, read-only", async ({ page }) => {
+  test("sees each of its jobs with the cleaner and the check-in status; only jobs not started can be assigned", async ({ page }) => {
     await page.goto("/agency/orders");
     const table = page.getByRole("table", { name: "Pesanan agensi Anda" });
     await expect(table).toBeVisible();
     await expect(table.getByRole("row")).toHaveCount(5); // the header and four jobs: only its own
 
     await expect(rowOf(table, address.unassigned)).toContainText("Belum ada petugas");
+    await expect(rowOf(table, address.assigned).getByRole("combobox")).toHaveValue(/.+/); // its cleaner is chosen
     await expect(rowOf(table, address.assigned)).toContainText("Uji Petugas Meja");
     await expect(rowOf(table, address.assigned)).toContainText("Ditugaskan");
     await expect(rowOf(table, address.started)).toContainText(`Check-in pukul ${times.checkedIn}`);
     await expect(rowOf(table, address.finished)).toContainText(`Selesai pukul ${times.completed}`);
     await expect(rowOf(table, address.finished)).toContainText("Pembersihan Rutin");
-    await expectReadOnly(page, table);
+    // T28: a cleaner can be assigned until check-in; a job that has started is read-only.
+    await expect(rowOf(table, address.unassigned).getByRole("button", { name: "Tugaskan" })).toBeVisible();
+    for (const started of [address.started, address.finished]) {
+      await expect(rowOf(table, started).getByRole("combobox")).toHaveCount(0);
+      await expect(rowOf(table, started).getByRole("button")).toHaveCount(0);
+    }
   });
 
   test("reads in English", async ({ page }) => {

@@ -67,7 +67,8 @@ test("an agency user lands on /agency, sees who is signed in, and is refused the
   await logIn(page, agency);
   await expect(page).toHaveURL("/agency");
   await expect(page.getByRole("heading", { level: 1, name: "Dasbor" })).toBeVisible();
-  await expect(page.getByText("Ringkasan agensi muncul di sini")).toBeVisible();
+  // The setup's agency user has no partner agency row of its own, so the dashboard says so (T28).
+  await expect(page.getByText("Akun ini belum terhubung ke agensi.")).toBeVisible();
 
   const sidebar = page.getByRole("complementary");
   await expect(sidebar.getByText("Masuk sebagai")).toBeVisible();
@@ -87,7 +88,9 @@ test("an admin lands on /admin, is refused an agency page, and signs out from th
   // A sub-page of the agency section. The page the admin asked for never reaches the browser, not
   // even in the HTML that comes before the redirect; their own pages do (the check is not vacuous).
   const refused = await (await page.request.get("/agency/schedule")).text();
-  expect(refused).not.toContain("Ketersediaan agensi Anda per area");
+  // Inside the schedule's role check: the add form (T27) and the "not linked" state.
+  expect(refused).not.toContain("Tambah jendela");
+  expect(refused).not.toContain("Akun ini belum terhubung ke agensi.");
   const allowed = await (await page.request.get("/admin/tickets")).text();
   expect(allowed).toContain("Tiket baru muncul otomatis");
   await page.goto("/agency/schedule");

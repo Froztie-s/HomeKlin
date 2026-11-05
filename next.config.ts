@@ -12,6 +12,12 @@ const withNextIntl = createNextIntlPlugin({
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    // An agency uploads a cleaner's photo of up to 2 MB through a Server Action (addCleaner); the
+    // default 1 MB body limit would refuse it. The room above 2 MB is for the form's other fields and
+    // the multipart overhead. Source: node_modules/next/dist/docs/01-app/02-guides/server-actions.md
+    serverActions: { bodySizeLimit: "3mb" },
+  },
   turbopack: {
     rules: {
       "*.css": {
