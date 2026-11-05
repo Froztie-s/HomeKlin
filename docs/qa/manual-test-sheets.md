@@ -57,7 +57,12 @@ Result against the 3-second target: ____. If the target is missed, write the gap
 allows documenting an honest gap.
 
 ## 4. Payment outcomes on the live site (Checkpoint 2)
-Successful was confirmed on 1 November 2026. Failed and cancelled are still to run.
+All three outcomes are confirmed on the live site. Successful: 1 November 2026 (the user). Failed and cancelled: 5 November 2026, run by
+the software house's lead with the user's permission, as the demo customer, through Midtrans's real Sandbox: the
+failed order with the deny card below (Midtrans answered "Payment declined by bank"), the cancelled one by choosing
+a BCA virtual account in Snap and then cancelling that pending payment with Midtrans's Sandbox cancel call (instead of
+waiting an hour). Each time Midtrans sent its real notification to the live site. Both test orders stay on the live
+project. The steps, to repeat by hand:
 1. **Failed:** order, "Bayar sekarang", choose credit card, test card `4911 1111 1111 1113`, any future
    expiry, CVV `123`, OTP `112233`. The bank declines it; the order must show as failed on `/orders`, and its
    window must be free again.
@@ -68,5 +73,5 @@ Successful was confirmed on 1 November 2026. Failed and cancelled are still to r
 | Outcome | Order id | Status shown | Window free again | Date | Result |
 |---|---|---|---|---|---|
 | Successful | | | | 2026-11-01 | Pass (user) |
-| Failed | | | | | |
-| Cancelled | | | | | |
+| Failed | 70c4e526 | failed (read as the customer) | yes: booked 0 of 2, nothing holding the window | 2026-11-05 | Pass (lead) |
+| Cancelled | 224e158c | cancelled (read as the customer) | yes: booked 0 of 2, nothing holding the window | 2026-11-05 | Pass (lead) |

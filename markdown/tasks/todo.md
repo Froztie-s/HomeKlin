@@ -78,7 +78,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Deps: T11.
 
 ### Checkpoint 2: Booking and payment
-- [ ] Booking -> payment -> status works end to end on the deployed URL; all three payment outcomes tested; review. (Postponed by the user on 2026-11-01: paid is confirmed live; the failed and cancelled runs on live are still to do.)
+- [ ] Booking -> payment -> status works end to end on the deployed URL; all three payment outcomes tested; review. (All three outcomes are now confirmed on the deployed URL: successful by the user on 2026-11-01; failed and cancelled on 2026-11-05, run by the lead with the user's permission through Midtrans's real Sandbox, see `docs/qa/manual-test-sheets.md`. What remains is your review.)
 
 ## Phase 3: Customer recording replay (top priority)
 

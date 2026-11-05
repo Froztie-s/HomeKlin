@@ -37,7 +37,8 @@ push (`.github/workflows/ci.yml`).
   provided. No real stream is built (decision of 2026-11-05); the live view plays pre-recorded clips (ADR 0002).
 - Real devices and browsers (Chrome Android, Safari iOS 16 and later, desktop Edge and Firefox) and the
   trial with three people (T35).
-- A real Midtrans Sandbox payment for the failed and cancelled outcomes on the live URL (Checkpoint 2);
-  the successful outcome was confirmed live on 1 November 2026.
-- Availability of 99% during UAT: the uptime monitor still has to be created (README, "Settings outside
-  the code").
+- A real Midtrans Sandbox payment on the live URL, run by hand: successful (1 November 2026), failed with the deny
+  card and cancelled through Midtrans's cancel call (5 November 2026). Each moved its order correctly and gave the
+  window back.
+- Availability of 99% during UAT: recorded by the Uptime workflow (every 10 minutes, `npm run uptime`, see
+  `docs/qa/uptime.md`); its figure exists once it has run for a while.
