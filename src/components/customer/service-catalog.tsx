@@ -2,6 +2,7 @@ import { CircleAlert, MapPinOff, SearchX } from "lucide-react";
 import { unstable_rethrow } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Suspense } from "react";
+import { ServiceRating } from "@/components/reviews/service-rating";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getPathname, Link } from "@/i18n/navigation";
 import { getCatalogServices, getServiceAreas } from "@/lib/catalog/cached";
@@ -130,7 +131,16 @@ export async function ServiceCatalog({ searchParams }: { searchParams: Promise<S
             <ul aria-labelledby="daftar-harga" className="mt-4 grid gap-4 md:grid-cols-2 md:gap-5">
               {services.map((service) => (
                 <li key={service.id}>
-                  <ServiceCard service={service} bookHref={bookHrefFor(service)} />
+                  <ServiceCard
+                    service={service}
+                    bookHref={bookHrefFor(service)}
+                    rating={
+                      // Each card's rating streams in on its own; a card without reviews shows none.
+                      <Suspense fallback={null}>
+                        <ServiceRating serviceId={service.id} serviceName={service.name[locale]} />
+                      </Suspense>
+                    }
+                  />
                 </li>
               ))}
             </ul>

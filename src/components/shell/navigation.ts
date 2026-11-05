@@ -17,7 +17,7 @@ export type Navigation<LabelKey extends string = string> = {
   items: readonly NavItem<LabelKey>[];
 };
 export type AppNavKey = "customer" | "cleaner";
-export type BackOfficeNavKey = "agency" | "admin";
+export type BackOfficeNavKey = "agency" | "admin" | "owner";
 export type NavKey = AppNavKey | BackOfficeNavKey;
 
 // Every shell's navigation in one place, for server code and tests. Client components import
@@ -30,4 +30,5 @@ export const navigationMessages = {
   cleaner: "AppNavigation",
   agency: "BackOfficeNavigation",
   admin: "BackOfficeNavigation",
+  owner: "BackOfficeNavigation",
 } as const satisfies Record<NavKey, keyof Messages>;
