@@ -16,7 +16,7 @@ Live: **https://home-klin.vercel.app** (Indonesian; English under `/en`). Progre
 | Owner | desktop | business numbers, partner agency oversight, admin accounts | `/owner` |
 
 ## Stack (free tiers)
-Next.js 16 (App Router, Cache Components) + TypeScript (strict) + Tailwind CSS 4 on Vercel; Supabase (Postgres with row-level security, Auth, Realtime, Storage); next-intl (Indonesian default, English); Midtrans **Sandbox** (simulated payment, no real money); LiveKit Cloud for the real live stream (the demo uses pre-recorded clips, see `docs/adr/0002`). Tests: Vitest (unit and integration against a separate test project) and Playwright (mobile and desktop).
+Next.js 16 (App Router, Cache Components) + TypeScript (strict) + Tailwind CSS 4 on Vercel; Supabase (Postgres with row-level security, Auth, Realtime, Storage); next-intl (Indonesian default, English); Midtrans **Sandbox** (simulated payment, no real money); no real live stream: the live view plays pre-recorded clips (decision of 2026-11-05, see `docs/adr/0002`; the server side for LiveKit tokens exists but is unused). Tests: Vitest (unit and integration against a separate test project) and Playwright (mobile and desktop).
 
 ## Run it locally
 1. Node 24 and npm. `npm ci`.

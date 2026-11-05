@@ -33,8 +33,8 @@ push (`.github/workflows/ci.yml`).
   protected page checks the role.
 
 ## Not covered by automated tests
-- Latency of the live stream (target 3 seconds) and recovery after a connection drop: needs the real
-  LiveKit source (T32) and two devices (T33). The demo source plays clips (ADR 0002).
+- Latency of the live stream (target 3 seconds), adaptive bitrate and recovery after a connection drop: not
+  provided. No real stream is built (decision of 2026-11-05); the live view plays pre-recorded clips (ADR 0002).
 - Real devices and browsers (Chrome Android, Safari iOS 16 and later, desktop Edge and Firefox) and the
   trial with three people (T35).
 - A real Midtrans Sandbox payment for the failed and cancelled outcomes on the live URL (Checkpoint 2);

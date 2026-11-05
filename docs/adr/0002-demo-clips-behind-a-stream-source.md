@@ -21,3 +21,11 @@ phone's network on the day.
 - The demo always works, and the access rules, the 7-day expiry and the deletion can be shown for real.
 - The 3-second latency target can only be measured once the LiveKit source runs (T32, T33).
 - The presenters say plainly that the clips stand in for the live camera.
+
+## Update, 5 November 2026: the real stream is not built
+The software house decided that the product stays a demonstration: the live view plays pre-recorded
+clips and no real stream is built. The server side prepared for LiveKit (stream sessions with a source per
+job, tokens in `src/lib/stream/livekit.ts` and `/api/streams/<id>/token`, the publish rule) stays in the code
+but is not used, and nothing in it was tested against a real LiveKit project. Consequences for the Quality
+Plan: the 3-second latency, adaptive bitrate and recovery targets are not met. They are listed as gaps in
+`docs/qa/quality-plan-traceability.md` and are to be told to the client group plainly.

@@ -32,7 +32,10 @@ pay for it." Do not help; note where they hesitate. Use a test email address the
 
 Result: ___ of 3 booked unaided (___%).
 
-## 3. Streaming latency and recovery (T33; target: at most 3 seconds end to end)
+## 3. Streaming latency and recovery (T33; not needed now)
+The real stream was dropped (decision of 2026-11-05), so there is nothing to measure. This sheet stays in case
+a real source is built later.
+
 Needs the real LiveKit source (T32), a cleaner's phone and a viewer's phone or laptop side by side.
 1. On the cleaner's phone, open a large running clock (for example a stopwatch app showing milliseconds)
    and point the camera at it.

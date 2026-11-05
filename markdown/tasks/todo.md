@@ -211,17 +211,17 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: server-issued, short-lived tokens scoped to one room per job; same access matrix as T23/T29/T25; no token for unauthorized users.
   - Verify: Vitest matrix.
   - Deps: T23, T29, T25, human LiveKit keys. Skills: `source-driven-development`, `security-and-hardening`.
-- [ ] **T32 LiveKit source: publish, view, resilience** (M) — blocked on the user: needs approval for the `livekit-client` package (a new dependency) and LiveKit Cloud keys (`LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `LIVEKIT_URL`); the server side (tokens, the publish rule, the stream sessions with a source per job) is done in T31
+- [x] **T32 LiveKit source: publish, view, resilience** (M) — CLOSED WITHOUT BUILDING, 2026-11-05 (user decision): no real stream is built (user decision, 2026-11-05: the demo plays pre-recorded clips; documented in docs/adr/0002). What exists stays: the stream source seam with the demo clip source, and the server side of T31 (LiveKit tokens, the publish rule), which is unused. Nothing here was tested against real LiveKit
   - Accept: cleaner's phone browser publishes; customer/agency/admin view; adaptive bitrate on; stream recovers after a connection drop; status indicator reflects real state; demo source still selectable.
   - Verify: two-device manual test with throttled network.
   - Deps: T31. Skills: `debugging-and-error-recovery`.
-- [ ] **T33 Measure latency and recovery** (XS) — blocked on T32 and two real devices; the procedure and result sheet are in `docs/qa/manual-test-sheets.md`
+- [x] **T33 Measure latency and recovery** (XS) — CLOSED WITHOUT BUILDING, 2026-11-05 (user decision): there is no real stream to measure, so the 3-second latency and recovery targets are a documented gap (`docs/qa/quality-plan-traceability.md`, ADR 0002)
   - Accept: end-to-end latency <= 3 s measured and recorded in `docs/`; recovery time recorded.
   - Verify: documented measurements.
   - Deps: T32.
 
 ### Checkpoint 9: Streaming
-- [ ] Real stream meets targets or the gap is documented honestly.
+- [x] Real stream meets targets or the gap is documented honestly. — the gap is documented: no real stream (user decision, 2026-11-05)
 
 ## Phase 11: Hardening, evidence, ship
 
@@ -237,7 +237,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: key customer pages load acceptably on a mobile connection; findings fixed.
   - Verify: `/agent-skills:webperf` audit report.
   - Deps: T35. Skills: `performance-optimization`.
-- [ ] **T37 Quality Plan e2e suite and evidence** (M) — mostly done 2026-11-05: `docs/qa/quality-plan-traceability.md` (every Quality Plan target against its tests), `docs/qa/defect-log.md` (0 open critical), `docs/qa/test-results-2026-11-05.md`. `.github/workflows/uptime.yml` checks the live health address every 10 minutes and `npm run uptime` reports the availability (`docs/qa/uptime.md`; a figure exists once it has run for a while); `docs/qa/manual-test-sheets.md` holds the sheets for what needs people and devices. Open: latency and recovery (T32, T33), the device trial (T35), an outside monitor such as UptimeRobot (optional now)
+- [x] **T37 Quality Plan e2e suite and evidence** (M) — done 2026-11-05: `docs/qa/quality-plan-traceability.md` (every Quality Plan target against its tests, with the gaps stated), `docs/qa/test-results-2026-11-05.md` (707 unit and integration tests, 371 browser tests), `docs/qa/defect-log.md` (0 open critical), and the availability record: `.github/workflows/uptime.yml` checks the live health address every 10 minutes and `npm run uptime` reports the percentage (`docs/qa/uptime.md`; its first scheduled runs are pending). The device trial is T35; `docs/qa/manual-test-sheets.md` holds the sheets
   - Accept: one Playwright spec per Quality Plan scenario passes; results saved in `docs/`; defect log shows 0 critical; uptime report started.
   - Verify: `npm run test:e2e` output archived.
   - Deps: T34-T36.
@@ -245,7 +245,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: README (setup, env vars, commands); ADRs for website-vs-Android, demo clips, and "encrypted in transit, not end-to-end"; handover list per Contract (source, docs, config, access).
   - Verify: a fresh clone can run from the README.
   - Deps: T37. Skills: `documentation-and-adrs`, `code-simplification`.
-- [ ] **T39 Pre-demo ship checklist** (S) — written 2026-11-05: `docs/demo-checklist.md` (checklist, 15-minute script, rollback). The ticks need the live project: migrate live, seed live, clips, CRON_SECRET, a phone run
+- [ ] **T39 Pre-demo ship checklist** (S) — prepared 2026-11-05: `docs/demo-checklist.md` (checklist, 15-minute script, rollback). Done: Supabase awake (live health answers 200), the live database migrated and seeded (2026-11-05, with the user's permission), demo script, rollback plan. Left, for the day: the demo video in `clips/` and a live seed again (the demo job starts 10 minutes after the seed), `CRON_SECRET` in Vercel, the site opened on a phone, then `/agent-skills:ship`
   - Accept: Supabase project awake; seed data fresh; clips present; URL works on a phone; demo script written; rollback plan noted.
   - Verify: `/agent-skills:ship` checklist complete.
   - Deps: T38. Skills: `shipping-and-launch`.
