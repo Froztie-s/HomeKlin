@@ -51,6 +51,12 @@
       "recordings": "Rekaman",
       "services": "Layanan & Harga",
       "faq": "FAQ"
+    },
+    "owner": {
+      "label": "Navigasi pemilik",
+      "numbers": "Angka bisnis",
+      "agencies": "Mitra agensi",
+      "admins": "Akun admin"
     }
   },
   "BackOfficeShell": {
@@ -894,9 +900,220 @@
     "emptyBody": "Pertanyaan umum yang tampil di halaman Bantuan pelanggan muncul di sini. Anda dapat menambah dan mengubahnya."
   },
   "OwnerDashboardPage": {
-    "title": "Dasbor pemilik",
-    "emptyTitle": "Angka bisnis segera hadir",
-    "emptyBody": "Pendapatan, pesanan, dan kinerja mitra akan tampil di sini."
+    "title": "Angka bisnis",
+    "description": "Pendapatan dan pesanan HomeKlin, dan pekerjaan tiap mitra agensi. Tanpa data pribadi pelanggan.",
+    "errorTitle": "Angka bisnis tidak dapat dimuat.",
+    "errorBody": "Muat ulang halaman ini sebentar lagi.",
+    "tiles": {
+      "label": "Ringkasan",
+      "revenue": "Pendapatan",
+      "revenueHint": "Dari semua pesanan yang sudah dibayar",
+      "paidOrders": "Pesanan dibayar",
+      "paidOrdersHint": "Pesanan yang pembayarannya sudah dikonfirmasi",
+      "completedJobs": "Pekerjaan selesai",
+      "completedJobsHint": "Dari {paid, plural, other {# pesanan dibayar}}"
+    },
+    "status": {
+      "title": "Pesanan menurut status",
+      "description": "Semua pesanan, termasuk yang belum atau tidak jadi dibayar.",
+      "total": "{count, plural, other {# pesanan}} seluruhnya",
+      "share": "{percent, number}%",
+      "paid": "Dibayar",
+      "pending_payment": "Menunggu pembayaran",
+      "failed": "Gagal",
+      "cancelled": "Dibatalkan"
+    },
+    "trend": {
+      "title": "30 hari terakhir",
+      "description": "Pesanan baru per hari menurut tanggal pemesanan (WIB). Pendapatan hanya dari pesanan yang dibayar.",
+      "summary": "{orders, plural, other {# pesanan}} dalam 30 hari terakhir, pendapatan {revenue}.",
+      "chartLabel": "Diagram batang pesanan per hari: {orders, plural, other {# pesanan}} dalam 30 hari terakhir. {busiest}",
+      "busiest": "Hari tersibuk {date}, {count, plural, other {# pesanan}}.",
+      "none": "Belum ada pesanan dalam 30 hari terakhir.",
+      "tooltip": "{date}: {orders, plural, other {# pesanan}}, {revenue}",
+      "showTable": "Tampilkan sebagai tabel",
+      "tableCaption": "Pesanan per hari",
+      "date": "Tanggal",
+      "orders": "Pesanan",
+      "revenue": "Pendapatan"
+    },
+    "partners": {
+      "title": "Kinerja mitra agensi",
+      "description": "Pekerjaan dan pendapatan dari pesanan yang sudah dibayar, per mitra.",
+      "name": "Mitra",
+      "status": "Status",
+      "jobs": "Pekerjaan",
+      "completed": "Selesai",
+      "revenue": "Pendapatan",
+      "emptyTitle": "Belum ada mitra agensi",
+      "emptyBody": "Tambahkan mitra di halaman Mitra agensi. Kinerjanya tampil di sini setelah ada pesanan."
+    },
+    "agencyStatus": {
+      "active": "Aktif",
+      "suspended": "Ditangguhkan"
+    }
+  },
+  "OwnerAgenciesPage": {
+    "title": "Mitra agensi",
+    "description": "Mitra agensi menyediakan petugas dan jadwal. Mitra yang ditangguhkan tidak menerima pesanan baru.",
+    "summary": "{total, plural, other {# mitra}}, {active, plural, other {# aktif}}",
+    "addLink": "Tambah mitra",
+    "errorTitle": "Daftar mitra tidak dapat dimuat.",
+    "errorBody": "Muat ulang halaman ini sebentar lagi.",
+    "table": {
+      "caption": "Daftar mitra agensi",
+      "name": "Mitra",
+      "status": "Status",
+      "areas": "Area",
+      "cleaners": "Petugas",
+      "jobs": "Pekerjaan",
+      "revenue": "Pendapatan",
+      "signIn": "Akses masuk",
+      "actions": "Tindakan",
+      "since": "Sejak {date}",
+      "noAreas": "Belum ada area"
+    },
+    "signIn": {
+      "yes": "Ada",
+      "no": "Belum ada"
+    },
+    "status": {
+      "active": "Aktif",
+      "suspended": "Ditangguhkan"
+    },
+    "suspend": {
+      "button": "Tangguhkan",
+      "label": "Tangguhkan {name}",
+      "question": "Tangguhkan {name}?",
+      "body": "Selama ditangguhkan, mitra ini tidak menerima pesanan baru dan jadwal kosongnya tidak ditawarkan kepada pelanggan. Pekerjaan yang sudah dipesan tetap berjalan.",
+      "confirm": "Ya, tangguhkan",
+      "pending": "Menangguhkan…",
+      "done": "{name} ditangguhkan."
+    },
+    "reactivate": {
+      "button": "Aktifkan lagi",
+      "label": "Aktifkan lagi {name}",
+      "question": "Aktifkan {name} lagi?",
+      "body": "Mitra ini kembali menerima pesanan baru dan jadwal kosongnya ditawarkan lagi kepada pelanggan.",
+      "confirm": "Ya, aktifkan",
+      "pending": "Mengaktifkan…",
+      "done": "{name} aktif lagi."
+    },
+    "cancel": "Batal",
+    "empty": {
+      "title": "Belum ada mitra agensi",
+      "body": "Tambahkan mitra pertama dengan formulir di bawah."
+    },
+    "form": {
+      "title": "Tambah mitra",
+      "description": "Mitra baru langsung aktif, tetapi baru menerima pesanan setelah jadwal kosongnya diisi.",
+      "name": "Nama mitra",
+      "nameHint": "Nama usaha mitra, 2 sampai 120 karakter.",
+      "areas": "Area yang dilayani",
+      "areasHint": "Boleh lebih dari satu, atau dipilih nanti.",
+      "submit": "Tambah mitra",
+      "pending": "Menambahkan…",
+      "done": "{name} ditambahkan."
+    },
+    "errors": {
+      "notAllowed": "Hanya pemilik yang dapat mengubah mitra.",
+      "nameInvalid": "Nama mitra perlu 2 sampai 120 karakter.",
+      "areaNotFound": "Salah satu area tidak dikenal. Muat ulang halaman, lalu pilih lagi.",
+      "agencyNotFound": "Mitra ini tidak ditemukan. Muat ulang halaman.",
+      "statusInvalid": "Status ini tidak dikenal. Muat ulang halaman.",
+      "unavailable": "Perubahan belum tersimpan. Coba lagi sebentar lagi."
+    }
+  },
+  "OwnerAdminsPage": {
+    "title": "Akun admin",
+    "description": "Admin menjalankan HomeKlin sehari-hari: layanan dan harga, pemantauan, tiket, dan FAQ. Hanya pemilik yang membuat dan menghapus akun admin.",
+    "summary": "{count, plural, other {# akun admin}}",
+    "addLink": "Buat akun admin",
+    "errorTitle": "Daftar admin tidak dapat dimuat.",
+    "errorBody": "Muat ulang halaman ini sebentar lagi.",
+    "table": {
+      "caption": "Daftar akun admin",
+      "name": "Nama",
+      "email": "Email",
+      "created": "Dibuat",
+      "actions": "Tindakan"
+    },
+    "empty": {
+      "title": "Belum ada akun admin",
+      "body": "Buat akun admin pertama dengan formulir di bawah."
+    },
+    "remove": {
+      "button": "Hapus admin",
+      "label": "Hapus admin {name}",
+      "question": "Hapus akses admin {name}?",
+      "body": "{name} tidak bisa lagi membuka konsol admin. Akunnya tetap ada sebagai akun biasa, tanpa akses admin.",
+      "confirm": "Ya, hapus",
+      "pending": "Menghapus…",
+      "cancel": "Batal",
+      "done": "{name} bukan admin lagi."
+    },
+    "form": {
+      "title": "Buat akun admin",
+      "description": "Akun baru langsung dapat membuka konsol admin.",
+      "fullName": "Nama lengkap",
+      "email": "Email",
+      "emailHint": "Admin masuk dengan email ini.",
+      "password": "Kata sandi awal",
+      "passwordHint": "Paling sedikit 8 karakter.",
+      "showPassword": "Tampilkan kata sandi",
+      "shareTitle": "Bagikan kata sandi secara pribadi",
+      "shareBody": "Sampaikan kata sandi ini langsung kepada admin, misalnya lewat telepon, bukan di grup chat atau email bersama. Admin juga dapat masuk dengan kode yang dikirim ke emailnya.",
+      "submit": "Buat akun admin",
+      "pending": "Membuat akun…",
+      "done": "Akun admin untuk {email} dibuat. Admin dapat masuk sekarang."
+    },
+    "errors": {
+      "notAllowed": "Hanya pemilik yang dapat mengelola akun admin.",
+      "nameInvalid": "Nama perlu 2 sampai 120 karakter.",
+      "emailInvalid": "Periksa alamat email ini.",
+      "emailTaken": "Email ini sudah dipakai akun lain.",
+      "passwordInvalid": "Kata sandi perlu paling sedikit 8 karakter.",
+      "adminNotFound": "Akun admin ini tidak ditemukan. Muat ulang halaman.",
+      "unavailable": "Perubahan belum tersimpan. Coba lagi sebentar lagi."
+    }
+  },
+  "OwnerNavigation": {
+    "role": "Pemilik"
+  },
+  "Reviews": {
+    "title": "Ulasan",
+    "lead": "Bagaimana pekerjaan ini? Penilaian Anda membantu HomeKlin menjaga mutu layanan.",
+    "serviceGroup": "Layanan HomeKlin",
+    "cleanerGroup": "Petugas HomeKlin, {name}",
+    "cleanerLabel": "Petugas HomeKlin",
+    "stars": "{count, number} dari 5 bintang",
+    "chosen": "{count, number} dari 5",
+    "notChosen": "Belum dipilih",
+    "comment": "Komentar (opsional)",
+    "commentHint": "Paling banyak 500 karakter. Ulasan tampil tanpa nama Anda.",
+    "submit": "Kirim ulasan",
+    "pending": "Mengirim…",
+    "missingService": "Pilih nilai untuk layanan HomeKlin terlebih dahulu.",
+    "errors": {
+      "notAllowed": "Hanya pelanggan yang memesan pekerjaan ini yang dapat memberi ulasan.",
+      "notFound": "Pekerjaan ini belum selesai atau tidak ditemukan.",
+      "exists": "Anda sudah memberi ulasan untuk pekerjaan ini.",
+      "ratingInvalid": "Pilih nilai 1 sampai 5 bintang.",
+      "commentInvalid": "Komentar paling banyak 500 karakter.",
+      "unavailable": "Ulasan belum terkirim. Coba lagi sebentar lagi."
+    },
+    "given": {
+      "thanks": "Terima kasih, ulasan Anda sudah tersimpan.",
+      "date": "Dikirim {date}"
+    },
+    "loadError": "Ulasan belum dapat dimuat. Muat ulang halaman ini sebentar lagi.",
+    "summary": {
+      "label": "Nilai {average} dari 5, {count, plural, other {# ulasan}}",
+      "count": "({count, plural, other {# ulasan}})",
+      "show": "Lihat ulasan",
+      "listLabel": "Ulasan terbaru {service}",
+      "cleaner": "Petugas {name}"
+    }
   },
   "LoginPage": {
     "metaTitle": "Masuk",

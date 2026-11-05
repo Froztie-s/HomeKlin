@@ -1,5 +1,6 @@
 import { ArrowRight, Clock } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import type { Service } from "@/lib/catalog/catalog";
 import { formatRupiah } from "@/lib/format";
@@ -14,6 +15,8 @@ type ServiceCardProps = {
    * offers a booking that cannot be made.
    */
   bookHref?: string;
+  /** The service's rating and latest reviews (T30, src/components/reviews/service-rating.tsx), if any. */
+  rating?: ReactNode;
 };
 
 // One HomeKlin service on /services: what it covers, how long it takes and its one full price (no
@@ -23,7 +26,7 @@ type ServiceCardProps = {
 // window of the area, which the customer can change there (T9). Free slots are the same for every
 // service (any service fits any arrival window), so the page shows them once for the area instead of
 // on each card.
-export function ServiceCard({ service, bookHref }: ServiceCardProps) {
+export function ServiceCard({ service, bookHref, rating }: ServiceCardProps) {
   const locale = useLocale();
   const t = useTranslations("ServiceCard");
   const name = service.name[locale];
@@ -39,6 +42,7 @@ export function ServiceCard({ service, bookHref }: ServiceCardProps) {
         <div className="flex min-w-0 flex-col @sm:px-5 @sm:pt-5">
           <h3 className="text-base font-semibold text-ink @sm:text-lg">{name}</h3>
           <p className="mt-1 text-sm text-ink-muted">{service.description[locale]}</p>
+          {rating}
         </div>
       </div>
       <div className="mx-4 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-border py-3 @sm:mx-5 @sm:mt-4 @sm:py-4">

@@ -3,6 +3,8 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { ClientMessages } from "@/i18n/client-messages";
 import type { CustomerOrder } from "@/lib/booking/orders";
 import { formatRupiah } from "@/lib/format";
+import { OrderReview } from "@/components/reviews/order-review";
+import { canReview } from "@/components/reviews/rating";
 import { OrderJob } from "./order-job";
 import { OrderRecording } from "./order-recording";
 import { getOrderWords, OrderStatusPill } from "./order-status";
@@ -33,7 +35,8 @@ type OrderConfirmationProps = {
 // Opened from the list (T12) the same facts carry their own title and a line for the order's status,
 // since the order was not just made and a failed or cancelled one holds no window any more.
 // A paid order shows its Petugas HomeKlin and the job's progress (./order-job.tsx), and a finished job
-// its recording, with until when it is kept (T15, ./order-recording.tsx).
+// its recording, with until when it is kept (T15, ./order-recording.tsx), and under it the review the
+// customer gives the job once (T30, src/components/reviews/order-review.tsx).
 export async function OrderConfirmation({
   order,
   serviceName,
@@ -94,6 +97,7 @@ export async function OrderConfirmation({
 
       {order.status === "paid" ? <OrderJob order={order} /> : null}
       {recording !== "none" ? <OrderRecording recordingId={order.recordingId} state={recording} now={now} /> : null}
+      {details && canReview(order) ? <OrderReview orderId={order.id} cleanerName={order.cleanerName} /> : null}
 
       <dl className="flex flex-col border-t border-border px-5 md:px-6">
         {facts.map((fact) => (

@@ -51,6 +51,12 @@
       "recordings": "Recordings",
       "services": "Services & prices",
       "faq": "FAQ"
+    },
+    "owner": {
+      "label": "Owner navigation",
+      "numbers": "Business numbers",
+      "agencies": "Partner agencies",
+      "admins": "Admin accounts"
     }
   },
   "BackOfficeShell": {
@@ -894,9 +900,220 @@
     "emptyBody": "The common questions shown on the customer Help page appear here. You can add and edit them."
   },
   "OwnerDashboardPage": {
-    "title": "Owner dashboard",
-    "emptyTitle": "Business numbers coming soon",
-    "emptyBody": "Revenue, orders and partner performance will appear here."
+    "title": "Business numbers",
+    "description": "HomeKlin's revenue and orders, and the work of each partner agency. No customer personal data.",
+    "errorTitle": "The business numbers could not be loaded.",
+    "errorBody": "Reload this page in a moment.",
+    "tiles": {
+      "label": "Summary",
+      "revenue": "Revenue",
+      "revenueHint": "From every paid order",
+      "paidOrders": "Paid orders",
+      "paidOrdersHint": "Orders whose payment is confirmed",
+      "completedJobs": "Completed jobs",
+      "completedJobsHint": "Of {paid, plural, one {# paid order} other {# paid orders}}"
+    },
+    "status": {
+      "title": "Orders by status",
+      "description": "Every order, including those not paid or not paid yet.",
+      "total": "{count, plural, one {# order} other {# orders}} in all",
+      "share": "{percent, number}%",
+      "paid": "Paid",
+      "pending_payment": "Awaiting payment",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "trend": {
+      "title": "Last 30 days",
+      "description": "New orders per day by booking date (WIB). Revenue counts paid orders only.",
+      "summary": "{orders, plural, one {# order} other {# orders}} in the last 30 days, revenue {revenue}.",
+      "chartLabel": "Bar chart of orders per day: {orders, plural, one {# order} other {# orders}} in the last 30 days. {busiest}",
+      "busiest": "Busiest day {date}, {count, plural, one {# order} other {# orders}}.",
+      "none": "No orders in the last 30 days yet.",
+      "tooltip": "{date}: {orders, plural, one {# order} other {# orders}}, {revenue}",
+      "showTable": "Show as a table",
+      "tableCaption": "Orders per day",
+      "date": "Date",
+      "orders": "Orders",
+      "revenue": "Revenue"
+    },
+    "partners": {
+      "title": "Partner agency performance",
+      "description": "Jobs and revenue from paid orders, per partner.",
+      "name": "Partner",
+      "status": "Status",
+      "jobs": "Jobs",
+      "completed": "Completed",
+      "revenue": "Revenue",
+      "emptyTitle": "No partner agencies yet",
+      "emptyBody": "Add a partner on the Partner agencies page. Its performance appears here once it has orders."
+    },
+    "agencyStatus": {
+      "active": "Active",
+      "suspended": "Suspended"
+    }
+  },
+  "OwnerAgenciesPage": {
+    "title": "Partner agencies",
+    "description": "Partner agencies supply the cleaners and the schedule. A suspended partner gets no new bookings.",
+    "summary": "{total, plural, one {# partner} other {# partners}}, {active, plural, other {# active}}",
+    "addLink": "Add a partner",
+    "errorTitle": "The partner list could not be loaded.",
+    "errorBody": "Reload this page in a moment.",
+    "table": {
+      "caption": "Partner agency list",
+      "name": "Partner",
+      "status": "Status",
+      "areas": "Areas",
+      "cleaners": "Cleaners",
+      "jobs": "Jobs",
+      "revenue": "Revenue",
+      "signIn": "Sign-in",
+      "actions": "Actions",
+      "since": "Since {date}",
+      "noAreas": "No areas yet"
+    },
+    "signIn": {
+      "yes": "Yes",
+      "no": "Not yet"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "suspend": {
+      "button": "Suspend",
+      "label": "Suspend {name}",
+      "question": "Suspend {name}?",
+      "body": "While suspended, this partner gets no new bookings and its free windows are not offered to customers. Jobs already booked go ahead.",
+      "confirm": "Yes, suspend",
+      "pending": "Suspending…",
+      "done": "{name} is suspended."
+    },
+    "reactivate": {
+      "button": "Reactivate",
+      "label": "Reactivate {name}",
+      "question": "Reactivate {name}?",
+      "body": "This partner gets new bookings again and its free windows are offered to customers again.",
+      "confirm": "Yes, reactivate",
+      "pending": "Reactivating…",
+      "done": "{name} is active again."
+    },
+    "cancel": "Cancel",
+    "empty": {
+      "title": "No partner agencies yet",
+      "body": "Add the first partner with the form below."
+    },
+    "form": {
+      "title": "Add a partner",
+      "description": "A new partner is active at once, but gets bookings only after its free windows are filled in.",
+      "name": "Partner name",
+      "nameHint": "The partner's business name, 2 to 120 characters.",
+      "areas": "Areas served",
+      "areasHint": "You can choose more than one, or choose later.",
+      "submit": "Add partner",
+      "pending": "Adding…",
+      "done": "{name} added."
+    },
+    "errors": {
+      "notAllowed": "Only the owner can change partners.",
+      "nameInvalid": "The partner name needs 2 to 120 characters.",
+      "areaNotFound": "One of the areas is unknown. Reload the page and choose again.",
+      "agencyNotFound": "This partner was not found. Reload the page.",
+      "statusInvalid": "This status is unknown. Reload the page.",
+      "unavailable": "The change was not saved. Try again in a moment."
+    }
+  },
+  "OwnerAdminsPage": {
+    "title": "Admin accounts",
+    "description": "Admins run HomeKlin day to day: services and prices, monitoring, tickets and the FAQ. Only the owner creates and removes admin accounts.",
+    "summary": "{count, plural, one {# admin account} other {# admin accounts}}",
+    "addLink": "Create an admin account",
+    "errorTitle": "The admin list could not be loaded.",
+    "errorBody": "Reload this page in a moment.",
+    "table": {
+      "caption": "Admin account list",
+      "name": "Name",
+      "email": "Email",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No admin accounts yet",
+      "body": "Create the first admin account with the form below."
+    },
+    "remove": {
+      "button": "Remove admin",
+      "label": "Remove admin {name}",
+      "question": "Remove admin access for {name}?",
+      "body": "{name} can no longer open the admin console. The account stays as an ordinary account, without admin access.",
+      "confirm": "Yes, remove",
+      "pending": "Removing…",
+      "cancel": "Cancel",
+      "done": "{name} is no longer an admin."
+    },
+    "form": {
+      "title": "Create an admin account",
+      "description": "The new account can open the admin console at once.",
+      "fullName": "Full name",
+      "email": "Email",
+      "emailHint": "The admin signs in with this email.",
+      "password": "Initial password",
+      "passwordHint": "At least 8 characters.",
+      "showPassword": "Show password",
+      "shareTitle": "Share the password privately",
+      "shareBody": "Give this password to the admin directly, for example by phone, not in a group chat or a shared mailbox. The admin can also sign in with a code sent to their email.",
+      "submit": "Create admin account",
+      "pending": "Creating account…",
+      "done": "The admin account for {email} is created. The admin can sign in now."
+    },
+    "errors": {
+      "notAllowed": "Only the owner can manage admin accounts.",
+      "nameInvalid": "The name needs 2 to 120 characters.",
+      "emailInvalid": "Check this email address.",
+      "emailTaken": "This email is already used by another account.",
+      "passwordInvalid": "The password needs at least 8 characters.",
+      "adminNotFound": "This admin account was not found. Reload the page.",
+      "unavailable": "The change was not saved. Try again in a moment."
+    }
+  },
+  "OwnerNavigation": {
+    "role": "Owner"
+  },
+  "Reviews": {
+    "title": "Review",
+    "lead": "How did this job go? Your rating helps HomeKlin keep the service good.",
+    "serviceGroup": "HomeKlin service",
+    "cleanerGroup": "HomeKlin cleaner, {name}",
+    "cleanerLabel": "HomeKlin cleaner",
+    "stars": "{count, number} out of 5 stars",
+    "chosen": "{count, number} out of 5",
+    "notChosen": "Not chosen yet",
+    "comment": "Comment (optional)",
+    "commentHint": "Up to 500 characters. Reviews are shown without your name.",
+    "submit": "Send review",
+    "pending": "Sending…",
+    "missingService": "Choose a rating for the HomeKlin service first.",
+    "errors": {
+      "notAllowed": "Only the customer who booked this job can review it.",
+      "notFound": "This job is not finished or was not found.",
+      "exists": "You have already reviewed this job.",
+      "ratingInvalid": "Choose 1 to 5 stars.",
+      "commentInvalid": "The comment can be up to 500 characters.",
+      "unavailable": "The review was not sent. Try again in a moment."
+    },
+    "given": {
+      "thanks": "Thank you, your review is saved.",
+      "date": "Sent {date}"
+    },
+    "loadError": "The review could not be loaded. Reload this page in a moment.",
+    "summary": {
+      "label": "Rated {average} out of 5, {count, plural, one {# review} other {# reviews}}",
+      "count": "({count, plural, one {# review} other {# reviews}})",
+      "show": "See reviews",
+      "listLabel": "Latest reviews of {service}",
+      "cleaner": "Cleaner {name}"
+    }
   },
   "LoginPage": {
     "metaTitle": "Log in",

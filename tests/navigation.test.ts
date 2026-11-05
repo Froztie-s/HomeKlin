@@ -93,7 +93,7 @@ describe("navigation", () => {
 
   it("keeps the back-office menus and their labels out of what the customer and cleaner pages download", () => {
     expect(Object.keys(appNavigation)).toEqual(["customer", "cleaner"]);
-    expect(Object.keys(backOfficeNavigation)).toEqual(["agency", "admin"]);
+    expect(Object.keys(backOfficeNavigation)).toEqual(["agency", "admin", "owner"]);
     expect(navigation).toEqual({ ...appNavigation, ...backOfficeNavigation });
     expect(JSON.stringify(appNavigation)).not.toMatch(/agensi|agency|mitra|partner/i);
     // The app shells send the AppNavigation messages to the browser (src/components/shell/mobile-shell.tsx).
@@ -146,6 +146,19 @@ describe("navigation", () => {
       ["Recordings", "/admin/recordings"],
       ["Services & prices", "/admin/services"],
       ["FAQ", "/admin/faq"],
+    ]);
+  });
+
+  it("gives the owner the business numbers, the partner agencies and the admin accounts", () => {
+    expect(items("owner", "id")).toEqual([
+      ["Angka bisnis", "/owner"],
+      ["Mitra agensi", "/owner/agencies"],
+      ["Akun admin", "/owner/admins"],
+    ]);
+    expect(items("owner", "en")).toEqual([
+      ["Business numbers", "/owner"],
+      ["Partner agencies", "/owner/agencies"],
+      ["Admin accounts", "/owner/admins"],
     ]);
   });
 
