@@ -5,7 +5,9 @@ import { adminClient } from "../../tests/integration/test-project";
 // HomeKlin's catalog, the services, areas and demo agencies, and free arrival windows for the coming
 // three weeks, so the catalog specs (T8) see free slots whenever CI runs. The seed adds only what is
 // missing: it keeps prices, booked places and each agency's sign-in account as they are.
-// Then it gives back places no order holds. A run that stopped halfway can leave them: deleting a test
+// Then it removes test accounts an interrupted run left behind (a cancelled CI run never reaches its
+// clean-up, and its guests and their unpaid orders would meet the next run's checks), and gives back
+// places no order holds. A run that stopped halfway can leave them: deleting a test
 // customer deletes their orders (on delete cascade) but not the place each took, and after a few such
 // runs the specs find no free window late enough. Only the seeded areas are repaired; the integration
 // tests keep exact counts in areas of their own, and may run at the same time.
@@ -18,6 +20,16 @@ setup("keeps the catalog and its free windows up to date", async () => {
   const result = await seedCatalog({ client: admin });
   console.log(`Catalog ready: ${result.agencies} agencies, ${result.windowsAdded} new arrival windows`);
   expect(result.agencies).toBeGreaterThan(0);
+
+  // Only accounts with a test address, made more than an hour ago: a run still going, here or in CI,
+  // is never older than that, and the demo accounts have other addresses. Their orders go with them.
+  const testAccount = /^(t9b-[0-9a-f]{8}|homeklin-.+-[0-9a-f]{8})@example\.com$/;
+  const { data: accounts } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
+  const stale = (accounts?.users ?? []).filter(
+    (account) => testAccount.test(account.email ?? "") && Date.now() - Date.parse(account.created_at) > 60 * 60_000,
+  );
+  for (const account of stale) await admin.auth.admin.deleteUser(account.id);
+  console.log(`Removed ${stale.length} stale test accounts`);
 
   const areaIds = seedAreas.map((area: { id: string }) => area.id);
   const now = new Date().toISOString();

@@ -78,10 +78,15 @@ test.describe("as a guest", () => {
 
     await fillOrder(page, target, email);
     await expect(page.getByText("Kami kirim kode ke email ini.", { exact: false })).toBeVisible();
+    const ordersHere = async () => {
+      const { data } = await adminClient().from("orders").select("id").eq("starts_at", target.startsAt).eq("address", address);
+      return (data ?? []).map((row) => row.id as string).sort();
+    };
+    // An interrupted earlier run may have left an order here; the code step must not add one.
+    const existing = await ordersHere();
     await askForCode(page, email);
     // The order is not made yet.
-    const { data: before } = await adminClient().from("orders").select("id").eq("starts_at", target.startsAt).eq("address", address);
-    expect(before ?? []).toEqual([]);
+    expect(await ordersHere()).toEqual(existing);
 
     await codeField(page).fill(await codeFor(email));
     await placeButton(page).click();
