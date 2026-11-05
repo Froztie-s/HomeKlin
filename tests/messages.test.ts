@@ -187,7 +187,7 @@ describe("messages", () => {
     }
   });
 
-  it("uses no em dash or en dash (markdown/design.md, Do and Don't)", () => {
+  it("uses no em dash or en dash (markdown/design.md, Do's and Don'ts)", () => {
     for (const [locale, messages] of Object.entries(locales)) {
       for (const [key, text] of Object.entries(messages)) {
         expect(text, `${locale}: ${key}`).not.toMatch(/[–—]/);

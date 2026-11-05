@@ -1,4 +1,5 @@
 ---
+version: alpha
 name: HomeKlin
 description: A calm, trustworthy home-cleaning system pairing deep forest green with one electric lime action colour on a warm cream canvas, with italic serif accent words set into tight grotesk headlines. Soft-bento cards, alternating dark-green bands, and a reassuring live-job status card at its centre.
 colors:
@@ -51,10 +52,9 @@ typography:
     lineHeight: 1.02
     letterSpacing: -0.045em
   display-accent:
-    fontFamily: "Instrument Serif"
+    fontFamily: "Instrument Serif"  # Always italic: the format has no font-style key, see Typography
     fontSize: 70px                # About 10% above the grotesk so the x-heights match
     fontWeight: 400
-    fontStyle: italic
     lineHeight: 1.0
     letterSpacing: -0.02em
   headline-lg:
@@ -64,10 +64,9 @@ typography:
     lineHeight: 1.05
     letterSpacing: -0.035em
   headline-accent:
-    fontFamily: "Instrument Serif"
+    fontFamily: "Instrument Serif"  # Always italic: the format has no font-style key, see Typography
     fontSize: 52px
     fontWeight: 400
-    fontStyle: italic
     lineHeight: 1.05
     letterSpacing: -0.015em
   headline-md:
@@ -104,7 +103,6 @@ typography:
     fontFamily: "Instrument Serif"  # Italic numerals "01" to "04" on landing service cards only
     fontSize: 28px
     fontWeight: 400
-    fontStyle: italic
     lineHeight: 1.0
     letterSpacing: 0em
   body-lg:
@@ -138,12 +136,11 @@ typography:
     lineHeight: 1.3
     letterSpacing: 0em
   eyebrow:
-    fontFamily: "Inter"           # At most one per three landing sections
+    fontFamily: "Inter"           # At most one per three landing sections. Always uppercase: the format has no text-case key, see Typography
     fontSize: 12px
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: 0.1em
-    textTransform: uppercase
 
 rounded:
   sm: 8px        # Inputs, small tags, icon wells, table cells' chips
@@ -167,12 +164,6 @@ spacing:
   bottom-nav: 64px       # Customer and cleaner bottom navigation, before the safe-area inset
   top-bar: 44px          # Landing utility bar (desktop only). 44px, not the reference's 36px, so its link is a full touch target
   sidebar: 256px         # Back-office sidebar
-
-shadows:
-  none: "none"           # Default: white cards on cream separate by contrast, not shadow
-  float: "0 16px 40px rgba(20, 39, 28, 0.10)"      # The status card floating over the hero photo
-  card-hover: "0 10px 28px rgba(20, 39, 28, 0.08)" # Service card on hover and focus-within
-  nav: "0 -1px 12px rgba(20, 39, 28, 0.06)"        # Upward edge of the bottom navigation
 
 components:
   top-bar:
@@ -202,90 +193,99 @@ components:
     rounded: "{rounded.full}"
     padding: "14px 28px"
     height: 52px
-  button-outline:
+  button-outline:                 # 1.5px edge in colors.outline: see Components, Buttons
     backgroundColor: "transparent"
     textColor: "{colors.on-surface}"
-    borderColor: "{colors.outline}"
-    borderWidth: 1.5px
     typography: "{typography.label-md}"
     rounded: "{rounded.full}"
     height: 44px
-  button-icon-circle:
+  button-icon-circle:             # 1.5px edge in colors.outline: see Components, Buttons
     backgroundColor: "transparent"
     textColor: "{colors.on-surface}"
-    borderColor: "{colors.outline}"
-    borderWidth: 1.5px
     rounded: "{rounded.full}"
     size: 44px
   badge-live:
     backgroundColor: "{colors.success-container}"
     textColor: "{colors.success}"
-    dotColor: "{colors.tertiary-bright}"
     typography: "{typography.label-sm}"
     rounded: "{rounded.full}"
     padding: "4px 12px"
+  badge-live-dot:                 # The breathing live dot. A graphic, always beside a word; never under text
+    backgroundColor: "{colors.tertiary-bright}"
   badge-live-on-dark:
     backgroundColor: "{colors.inverse-surface}"
     textColor: "{colors.secondary}"
-    dotColor: "{colors.secondary}"
     typography: "{typography.label-sm}"
     rounded: "{rounded.full}"
     padding: "4px 12px"
+  badge-live-on-dark-dot:
+    backgroundColor: "{colors.secondary}"
   badge-sample:
     backgroundColor: "{colors.secondary-container}"
     textColor: "{colors.on-secondary-container}"
     typography: "{typography.eyebrow}"
     rounded: "{rounded.full}"
     padding: "3px 10px"
-  segmented-toggle:
+  segmented-toggle:               # 1px edge in colors.outline-control: see Components, Forms
     backgroundColor: "{colors.surface-container-lowest}"
-    borderColor: "{colors.outline-control}"
-    activeBackgroundColor: "{colors.primary}"
-    activeTextColor: "{colors.on-primary}"
     textColor: "{colors.on-surface}"
     typography: "{typography.label-md}"
     rounded: "{rounded.full}"
     padding: 4px
     height: 44px
+  segmented-toggle-active:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
   service-card:
     backgroundColor: "{colors.surface-container-lowest}"
     textColor: "{colors.on-surface}"
-    mutedTextColor: "{colors.on-surface-variant}"
     rounded: "{rounded.lg}"
     padding: 10px
+  service-card-muted:
+    backgroundColor: "{colors.surface-container-lowest}"
+    textColor: "{colors.on-surface-variant}"
   service-card-selected:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.on-primary}"
-    accentColor: "{colors.secondary}"
     rounded: "{rounded.lg}"
     padding: 10px
+  service-card-selected-accent:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.secondary}"
   fact-chip-dark:
     backgroundColor: "{colors.inverse-surface}"
     textColor: "{colors.secondary}"
-    mutedTextColor: "{colors.inverse-on-surface-variant}"
     typography: "{typography.fact}"
     rounded: "{rounded.md}"
     padding: "20px 24px"
+  fact-chip-dark-muted:
+    backgroundColor: "{colors.inverse-surface}"
+    textColor: "{colors.inverse-on-surface-variant}"
   fact-chip-light:
     backgroundColor: "{colors.surface-container-lowest}"
     textColor: "{colors.on-surface}"
-    mutedTextColor: "{colors.on-surface-variant}"
     typography: "{typography.fact}"
     rounded: "{rounded.md}"
     padding: "20px 24px"
-  status-card:
+  fact-chip-light-muted:
+    backgroundColor: "{colors.surface-container-lowest}"
+    textColor: "{colors.on-surface-variant}"
+  status-card:                    # Floats over the hero photo with the float shadow: see Elevation & Depth
     backgroundColor: "{colors.surface-container-lowest}"
     textColor: "{colors.on-surface}"
-    mutedTextColor: "{colors.on-surface-variant}"
     rounded: "{rounded.md}"
     padding: 16px
-    shadow: "{shadows.float}"
+  status-card-muted:
+    backgroundColor: "{colors.surface-container-lowest}"
+    textColor: "{colors.on-surface-variant}"
   status-card-hero:
     backgroundColor: "{colors.primary-container}"
     textColor: "{colors.on-primary-container}"
-    accentColor: "{colors.secondary}"
     rounded: "{rounded.lg}"
     padding: 20px
+  status-card-hero-accent:
+    backgroundColor: "{colors.primary-container}"
+    textColor: "{colors.secondary}"
   icon-well:
     backgroundColor: "{colors.secondary-container}"
     textColor: "{colors.primary}"
@@ -296,13 +296,14 @@ components:
     textColor: "{colors.on-secondary}"
     rounded: "{rounded.sm}"
     size: 40px
-  step-card:
+  step-card:                      # Edge: 8% cream, rgba(243, 242, 234, 0.08): see Elevation & Depth
     backgroundColor: "{colors.surface-container-high}"
     textColor: "{colors.inverse-on-surface}"
-    mutedTextColor: "{colors.inverse-on-surface-variant}"
-    borderColor: "rgba(243, 242, 234, 0.08)"
     rounded: "{rounded.lg}"
     padding: 24px
+  step-card-muted:
+    backgroundColor: "{colors.surface-container-high}"
+    textColor: "{colors.inverse-on-surface-variant}"
   safety-panel:
     backgroundColor: "{colors.secondary}"           # Full lime, not the wash: lime-wash on cream is 1.08:1, so the panel vanished
     textColor: "{colors.on-secondary}"
@@ -311,9 +312,10 @@ components:
   review-card:
     backgroundColor: "{colors.surface-container-lowest}"
     textColor: "{colors.on-surface}"
-    starColor: "{colors.rating}"
     rounded: "{rounded.md}"
     padding: 24px
+  review-card-star:               # The star icon only (T30); the score beside it is on-surface
+    backgroundColor: "{colors.rating}"
   cta-shell:
     backgroundColor: "{colors.primary-container}"
     textColor: "{colors.on-primary-container}"
@@ -323,19 +325,20 @@ components:
     backgroundColor: "{colors.surface-container-lowest}"
     rounded: "{rounded.lg}"
     padding: 32px
-  input-field:
+  input-field:                    # 1px edge in colors.outline-control: see Components, Forms
     backgroundColor: "{colors.surface-container-low}"
     textColor: "{colors.on-surface}"
-    placeholderColor: "{colors.on-surface-variant}"
-    borderColor: "{colors.outline-control}"
     typography: "{typography.body-sm}"
     rounded: "{rounded.sm}"
     height: 44px
     padding: "0 14px"
-  input-field-error:
+  input-field-placeholder:
+    backgroundColor: "{colors.surface-container-low}"
+    textColor: "{colors.on-surface-variant}"
+    typography: "{typography.body-sm}"
+  input-field-error:              # Edge in colors.error: see Components, Forms
     backgroundColor: "{colors.error-container}"
     textColor: "{colors.on-surface}"
-    borderColor: "{colors.error}"
     rounded: "{rounded.sm}"
     height: 44px
   button-submit:
@@ -360,30 +363,36 @@ components:
     textColor: "{colors.inverse-on-surface}"
     rounded: "{rounded.full}"
     size: 24px
-  bottom-nav:
+  bottom-nav:                     # Upward edge uses the nav shadow: see Elevation & Depth
     backgroundColor: "{colors.surface-container-lowest}"
     textColor: "{colors.on-surface-variant}"
-    activeBackgroundColor: "{colors.secondary-container}"
-    activeTextColor: "{colors.on-secondary-container}"
     typography: "{typography.label-sm}"
-    shadow: "{shadows.nav}"
     height: 64px
+  bottom-nav-item-active:
+    backgroundColor: "{colors.secondary-container}"
+    textColor: "{colors.on-secondary-container}"
   sidebar:
     backgroundColor: "{colors.inverse-surface}"
     textColor: "{colors.inverse-on-surface-variant}"
-    activeBackgroundColor: "{colors.surface-container-high}"
-    activeTextColor: "{colors.secondary}"
     typography: "{typography.label-md}"
     rounded: "{rounded.sm}"
     width: 256px
-  data-table:
+  sidebar-item-active:
+    backgroundColor: "{colors.surface-container-high}"
+    textColor: "{colors.secondary}"
+  data-table:                     # Row dividers in colors.outline-variant: see Components, Tables
     backgroundColor: "{colors.surface-container-lowest}"
-    headerBackgroundColor: "{colors.surface-dim}"
     textColor: "{colors.on-surface}"
-    mutedTextColor: "{colors.on-surface-variant}"
-    borderColor: "{colors.outline-variant}"
     typography: "{typography.body-sm}"
     rounded: "{rounded.lg}"
+  data-table-header:
+    backgroundColor: "{colors.surface-dim}"
+    textColor: "{colors.on-surface}"
+    typography: "{typography.label-sm}"
+  data-table-muted:
+    backgroundColor: "{colors.surface-container-lowest}"
+    textColor: "{colors.on-surface-variant}"
+    typography: "{typography.body-sm}"
   status-pill-warning:
     backgroundColor: "{colors.warning-container}"
     textColor: "{colors.warning}"
@@ -402,15 +411,20 @@ components:
   footer:
     backgroundColor: "{colors.inverse-surface}"
     textColor: "{colors.inverse-on-surface}"
-    linkColor: "{colors.inverse-on-surface-variant}"
-    headingColor: "{colors.secondary}"
+  footer-link:
+    backgroundColor: "{colors.inverse-surface}"
+    textColor: "{colors.inverse-on-surface-variant}"
+  footer-heading:
+    backgroundColor: "{colors.inverse-surface}"
+    textColor: "{colors.secondary}"
+    typography: "{typography.eyebrow}"
 ---
 
 # HomeKlin Design System (redesign, October 2026)
 
-Written 2026-10-19 as the specification for redesigning the whole site. It follows the Stitch `DESIGN.md` format of the user's reference (`markdown/references/brightnest-design.md`) and replaces the T3b system. The T3b doc was deleted on 2026-10-19 (user request); read it with `git show 96335bf:markdown/design-t3b.md`. The Token mapping table below lists every T3b token and what replaces it. Brand brief: `markdown/PRODUCT.md`. Business rules: `markdown/SPEC.md`. Until the migration below is done, `src/app/globals.css` still holds the T3b tokens.
+Written 2026-10-19 as the specification for redesigning the whole site. It follows the DESIGN.md format (version `alpha`; the user's reference is `markdown/references/brightnest-design.md`): tokens in the front matter, then the format's eight sections in order (Overview, Colors, Typography, Layout & Spacing, Elevation & Depth, Shapes, Components, Do's and Don'ts), then project sections the format keeps as they are (Motion, Accessibility and the migration material). Check the file with `npx @google/design.md lint markdown/design.md`. It replaces the T3b system. The T3b doc was deleted on 2026-10-19 (user request); read it with `git show 96335bf:markdown/design-t3b.md`. The Token mapping table below lists every T3b token and what replaces it. Brand brief: `markdown/PRODUCT.md`. Business rules: `markdown/SPEC.md`. Until the migration below is done, `src/app/globals.css` still holds the T3b tokens.
 
-## Brand & Style
+## Overview
 
 HomeKlin is a cleaning service built to feel **calm, trustworthy and clear**, which is `PRODUCT.md`'s personality, now with more warmth and more character than T3b. It avoids the sterile blue-and-white of the category and the busy super-app. It uses **deep forest green** for trust, **one electric lime** for the single action that matters on a screen, and a **warm cream** canvas that feels like a lived-in home, not a clinic.
 
@@ -424,19 +438,6 @@ The UI is **soft-bento**: rounded white cards on cream, alternated with full-ble
 - **Facts, not hype.** Full prices ("Rp 85.000", the one price admin sets; no "mulai dari" since T8), real free slots, what happens next, who can watch. No invented numbers, ratings, testimonials, press logos, vouchers or "most popular" labels. Anything illustrative is labelled "Contoh".
 - **Light theme only** (user decision, 2026-10-18). Full-bleed dark-green bands are sections inside a light page, not a dark mode. There is no dark token set.
 - **Key attributes:** trustworthy, fresh, premium-but-approachable, organised, human.
-
-### What changes against T3b
-
-| Area | T3b (built) | Redesign |
-|---|---|---|
-| Canvas | cool green-tinted off-white | warm cream `#F3F2EA`; cards are pure white |
-| Brand | evergreen `#1c7456` mid-green buttons | deep forest `#1B3D2B` buttons, dark green bands and cards |
-| Action colour | brand green for every action | lime `#D8EF6B` for the one main action per viewport; forest green for the rest |
-| Type | Bricolage Grotesque + Figtree, one family per role | Inter Tight (display) + Instrument Serif italic (accent word) + Inter (text) |
-| Shape | pill / 20 px / 12 px | pill / 28 / 20 / 14 / 8 px (five steps, listed under Shapes) |
-| Landing | white sections, timeline, safety card on a mint panel | cream and dark-green rhythm, hero with floating status card, trust row, bento safety, dark "Cara kerja" band |
-| Customer home | white job card | the current job is a forest-green status card with a lime "Tonton langsung" |
-| Back office | light sidebar | dark-green sidebar, white data tables, no decoration |
 
 ## Colors
 
@@ -463,6 +464,7 @@ The system pairs a **tight neo-grotesk** with an **italic display serif** and a 
 - **Instrument Serif Italic (accent):** one to three words per headline, plus the italic index numerals ("01" to "04") on landing service cards. About 10% larger than the grotesk beside it so the x-heights match, in the same colour as the headline (lime only on a dark band). Instrument Serif ships in regular and italic at one weight (400), so never set it bold.
 - **Inter (body and UI):** 400 for paragraphs at 15 to 17 px with 1.55 to 1.6 leading; 600 for buttons, nav, card titles and FAQ questions; 500 for small labels.
 - Not used any more: Bricolage Grotesque and Figtree (T3b). The T3b rule "no Inter, Fraunces or Instrument Serif" came from the taste skill's default bans; the user's new reference overrides it (see Decisions to review).
+- **Style and case are not tokens.** The format's typography keys have no font style or text case, so `display-accent`, `headline-accent` and `card-index` are always set in italic, and `eyebrow` in uppercase, as described above.
 
 **Scale at desktop (1280 px and up), then how it steps down:**
 
@@ -503,7 +505,7 @@ A **12-column fixed-width grid** inside a 1280 px container at a 1440 px canvas,
 
 **Customer app (mobile-first, `/home` and the rest of `src/app/[locale]/(customer)`)**
 - **App bar** (T4, all customer and cleaner pages): 56 px, wordmark left (linking to the app home), language toggle right; on phones it is not sticky. From 768 px the five sections join it as the top bar; between 768 and 1023 px their icons are hidden so the toggle fits (measured slack at 768 px: 22 px).
-- **Bottom navigation** (below 768 px): Beranda, Layanan, Pesanan, Bantuan, Akun. 64 px plus the safe-area inset, white, `shadow-nav`, always-visible labels, the current item in a lime-wash pill with a dark-green label and `aria-current="page"`. From 768 px a top bar with the same five sections replaces it.
+- **Bottom navigation** (below 768 px): Beranda, Layanan, Pesanan, Bantuan, Akun. 64 px plus the safe-area inset, white, the `nav` shadow, always-visible labels, the current item in a lime-wash pill with a dark-green label and `aria-current="page"`. From 768 px a top bar with the same five sections replaces it.
 - **`/home`** starts with the **hero status card** (`status-card-hero`): a forest-green card with a live badge, the state in plain words ("Petugas sudah check-in pukul 09.04"), the assigned "Petugas HomeKlin" with name and round photo, service and time, the privacy line, and the lime "Tonton langsung". Under it: the area picker, then service rows. With no active job the card becomes an empty state in `secondary-container` with one action.
 - **`/services`:** (as built in T8, on the T3b tokens until its migration) area picker, type filter as wrapping toggle buttons and keyword search, all in the address; service cards as on the landing (no index numerals) with the full price; the area's free arrival windows in one panel above the cards (any service fits any window), not on each card. The **selected** service inverts to forest green.
 - **Booking, payment, support chat:** a white `form-panel` on cream, 44 px inputs, one primary action per screen (button-accent only if it is the single action in the viewport, otherwise `button-primary`).
@@ -524,10 +526,16 @@ A **12-column fixed-width grid** inside a 1280 px container at a 1440 px canvas,
 Depth comes mostly from **colour contrast and layering, not shadow.**
 - **Level 0:** cream canvas.
 - **Level 1:** flat white cards on cream, no shadow; at most a 1 px `outline-variant` hairline where a card sits on white or lime wash.
-- **Level 2, floating fragment:** the **status card** over the hero photo uses `shadows.float`. It is the only large shadow in the system. `card-hover` lifts a service card on hover and `:focus-within`; `nav` is the bottom bar's upward edge.
-- **Tonal elevation on dark bands:** step cards rise from `inverse-surface` by a lighter `surface-container-high` fill and an 8%-cream border, not a shadow.
+- **Level 2, floating fragment:** the **status card** over the hero photo uses the `float` shadow. It is the only large shadow in the system. The `card-hover` shadow lifts a service card on hover and `:focus-within`; the `nav` shadow is the bottom bar's upward edge. The values are under Shadows below.
+- **Tonal elevation on dark bands:** step cards rise from `inverse-surface` by a lighter `surface-container-high` fill and an 8%-cream border (`rgba(243, 242, 234, 0.08)`), not a shadow.
 - **Decorative depth:** the lime blob off the hero photo, the darker circle in the CTA shell and the ghost wordmark. No blur, glass, glow or gradient.
 - **Layering scale** (use as `z-(--z-nav)`): sticky 20, nav 30, overlay 40, drawer 50, toast 60, tooltip 70. No arbitrary z-index values.
+
+**Shadows.** The format has no shadow token group, so the values live here (the Tailwind names are in Token mapping):
+- `float`: `0 16px 40px rgba(20, 39, 28, 0.10)`. The `status-card` floating over the hero photo, and the skip link.
+- `card-hover`: `0 10px 28px rgba(20, 39, 28, 0.08)`. The `service-card` on hover and `:focus-within`.
+- `nav`: `0 -1px 12px rgba(20, 39, 28, 0.06)`. The upward edge of the `bottom-nav`.
+- Nothing else has a shadow; the default is none.
 
 ## Shapes
 
@@ -545,6 +553,8 @@ Generously rounded and friendly, with fully pill-shaped interactive elements.
 
 All live in `src/components/`. Every interactive element has hover, `:focus-visible` (2 px ring in `primary`, `secondary` on dark bands, 2 px offset), active (`scale(0.98)` press on buttons), disabled and, where relevant, loading and error states, with a target of at least 44 px (`min-h-touch`). Icons: `lucide-react`, stroke width 2.
 
+**How the front matter expresses states, parts and edges.** The format has no state, border or shadow properties, so each part or state is its own component: `-active` (selected segment, bottom-nav item, sidebar item), `-muted` (secondary text), `-accent` (lime on a dark card), `-dot` (the live dot), `-star` (the review star), `-header` (table header row), `-link` and `-heading` (footer), `-placeholder` (input). Edges are not tokens; they are: 1.5 px `outline` on the outline button and the icon circle; 1 px `outline-control` on inputs and the segmented toggle (`error` on an input in error); an 8% cream edge on step cards; `outline-variant` row dividers in tables. Shadows are under Elevation & Depth.
+
 ### Buttons
 - **Primary ("Pesan sekarang", "Bayar"):** forest-green pill, white semibold label, and a 24 px lime circle holding a dark arrow, right-aligned inside the button. 44 px high. Hover `primary-container`.
 - **Accent:** lime pill with dark-green label, 52 px. **The main conversion button, at most once per viewport** (hero "Pesan sekarang", CTA shell, status card "Tonton langsung", the single action of a screen). One label per intent everywhere.
@@ -555,7 +565,7 @@ All live in `src/components/`. Every interactive element has hover, `:focus-visi
 
 ### Navigation
 - **Utility bar, header, bottom navigation, top navigation, sidebar:** as in Layout. Logo: a forest-green rounded square with a house glyph plus "HomeKlin" in `title-lg` (20 px semibold), in `inverse-on-surface` on dark.
-- **Skip link:** first focusable element on every page, lime fill with dark text, `shadows.float`.
+- **Skip link:** first focusable element on every page, lime fill with dark text, the `float` shadow.
 - **Language switch** (`shell/language-switch.tsx`, T4): a two-segment toggle ID | EN (see Segmented toggle) that remembers the choice for a year. The current language is plain text marked `aria-current="true"`, not a link (choosing it again would only reload the page); the other language is a real link to the same page in that language, so it works without JavaScript. Each option carries `lang` and `hrefLang`, and its accessible name starts with the visible code ("EN English", "ID Bahasa Indonesia", WCAG 2.5.3); the group is labelled "Bahasa" / "Language". The code dims while the other language loads. Variants: on-dark (landing utility bar), compact (one link, landing header below 640 px). Placement: landing utility bar from 1024 px and header below it; customer and cleaner app bar; back-office sidebar bottom, and inside the opened Menu below 1024 px (360 px leaves only 22 px beside the wordmark, role badge and Menu button). It keeps the path, not the query string.
 
 ### Badges and chips
@@ -585,6 +595,32 @@ White `lg` container, `surface-dim` header row in `label-sm`, 14 px cells, `outl
 
 ### Footer
 `inverse-surface`; lime uppercase column headings (`eyebrow`), muted links, the sample-data line, the ghost wordmark.
+
+## Do's and Don'ts
+
+**Do**
+- Speak as HomeKlin on every customer page; Indonesian with formal "Anda", short sentences, verb plus object on buttons.
+- Use tokens only. A component must not contain a hex value, a pixel radius or a raw shadow.
+- Put the current job state first on `/home`, in plain words.
+- Use lime for one action per viewport and forest green for every other primary action.
+- Mark any illustrative content "Contoh" / "Sample". Every visible string lives in `src/messages/id.json` and `src/messages/en.json` (next-intl, one namespace per component or page, ICU for plurals); add each key to both files (a unit test and the TypeScript types fail the build otherwise). Internal links use `Link` from `@/i18n/navigation` so English stays English.
+- English copy: plain and calm, "you", the typographic apostrophe (’), no em or en dashes; glossary in `src/messages/en.json` (e.g. "Petugas HomeKlin" = "HomeKlin cleaner", "Pesan sekarang" = "Book now").
+- Show full prices with `formatRupiah(amount, locale)`, prices marked as samples until admin sets them. English pages format numbers as `en-ID` ("Rp 85.000", "4,9", "08.00"), the Indonesian conventions, never "IDR 85,000".
+- On service cards the price moves to its own right-aligned row when it does not fit beside the duration (English at 1280 px).
+- Use the real component with sample data when the landing needs to show the product (the status card).
+- Keep the back office dense and plain: same palette and type, no accent serif, no photography.
+
+**Don't**
+- Show, name or hint at a partner agency on a customer page.
+- Invent proof: no review counts, ratings, "12k+ customers", named testimonials, "most popular" chips, press logos, vouchers, countdowns, newsletters or awards.
+- Use em dashes or en dashes in visible text; use a hyphen, a comma or two sentences.
+- Use a red or dark treatment for live video, a REC dot, or burned-in timestamps.
+- Put lime or mint text on a light surface, or put text on `tertiary-bright`.
+- Use gradients, glass, glows or gradient text; draw fake screenshots out of divs.
+- Nest cards, or add a card where a list row would do.
+- Put the italic serif on buttons, labels, nav, table text or body text.
+- Add a second lime button to a viewport, or two labels for the same intent.
+- Use section numbers or an eyebrow above every heading.
 
 ## Motion
 
@@ -648,31 +684,18 @@ Rules:
 - Language: `lang="id"` by default, `lang="en"` when switched; layouts hold strings 30% longer than the Indonesian default.
 - Performance: the hero photo is the only `priority` image; Inter Tight, Inter and Instrument Serif load through `next/font` with `display: swap` and the Latin subset only; Instrument Serif loads the italic style only, since the upright style is never used. LCP at most 2.5 s on key customer pages (T36).
 
-## Do and Don't
+## What changes against T3b
 
-**Do**
-- Speak as HomeKlin on every customer page; Indonesian with formal "Anda", short sentences, verb plus object on buttons.
-- Use tokens only. A component must not contain a hex value, a pixel radius or a raw shadow.
-- Put the current job state first on `/home`, in plain words.
-- Use lime for one action per viewport and forest green for every other primary action.
-- Mark any illustrative content "Contoh" / "Sample". Every visible string lives in `src/messages/id.json` and `src/messages/en.json` (next-intl, one namespace per component or page, ICU for plurals); add each key to both files (a unit test and the TypeScript types fail the build otherwise). Internal links use `Link` from `@/i18n/navigation` so English stays English.
-- English copy: plain and calm, "you", the typographic apostrophe (’), no em or en dashes; glossary in `src/messages/en.json` (e.g. "Petugas HomeKlin" = "HomeKlin cleaner", "Pesan sekarang" = "Book now").
-- Show full prices with `formatRupiah(amount, locale)`, prices marked as samples until admin sets them. English pages format numbers as `en-ID` ("Rp 85.000", "4,9", "08.00"), the Indonesian conventions, never "IDR 85,000".
-- On service cards the price moves to its own right-aligned row when it does not fit beside the duration (English at 1280 px).
-- Use the real component with sample data when the landing needs to show the product (the status card).
-- Keep the back office dense and plain: same palette and type, no accent serif, no photography.
-
-**Don't**
-- Show, name or hint at a partner agency on a customer page.
-- Invent proof: no review counts, ratings, "12k+ customers", named testimonials, "most popular" chips, press logos, vouchers, countdowns, newsletters or awards.
-- Use em dashes or en dashes in visible text; use a hyphen, a comma or two sentences.
-- Use a red or dark treatment for live video, a REC dot, or burned-in timestamps.
-- Put lime or mint text on a light surface, or put text on `tertiary-bright`.
-- Use gradients, glass, glows or gradient text; draw fake screenshots out of divs.
-- Nest cards, or add a card where a list row would do.
-- Put the italic serif on buttons, labels, nav, table text or body text.
-- Add a second lime button to a viewport, or two labels for the same intent.
-- Use section numbers or an eyebrow above every heading.
+| Area | T3b (built) | Redesign |
+|---|---|---|
+| Canvas | cool green-tinted off-white | warm cream `#F3F2EA`; cards are pure white |
+| Brand | evergreen `#1c7456` mid-green buttons | deep forest `#1B3D2B` buttons, dark green bands and cards |
+| Action colour | brand green for every action | lime `#D8EF6B` for the one main action per viewport; forest green for the rest |
+| Type | Bricolage Grotesque + Figtree, one family per role | Inter Tight (display) + Instrument Serif italic (accent word) + Inter (text) |
+| Shape | pill / 20 px / 12 px | pill / 28 / 20 / 14 / 8 px (five steps, listed under Shapes) |
+| Landing | white sections, timeline, safety card on a mint panel | cream and dark-green rhythm, hero with floating status card, trust row, bento safety, dark "Cara kerja" band |
+| Customer home | white job card | the current job is a forest-green status card with a lime "Tonton langsung" |
+| Back office | light sidebar | dark-green sidebar, white data tables, no decoration |
 
 ## Token mapping
 
@@ -705,7 +728,7 @@ Target: `src/app/globals.css` (Tailwind v4 `@theme static`, defaults cleared as 
 | `typography.*` sizes | add `text-display` 64, `text-display-accent` 70; keep `text-xs` to `text-5xl`; remove `text-6xl` (was reserved, unused) | scale | extended |
 | `rounded.sm/md/lg/xl/full` | `rounded-sm` 8, `rounded-md` 14, `rounded-lg` 20, `rounded-xl` 28, `rounded-full` | `md` 12, `xl` 20, `full` | **meanings shift**: T3b `xl` (20) becomes `lg`; T3b `md` (12) becomes `md` (14) |
 | `spacing.*` named values | `gutter` 16, `gutter-wide` 32, `gutter-landing` 80, `touch`, `bottom-nav`, `top-bar` (36 landing utility bar; the T3b 56 px app bar becomes `app-bar`), `sidebar`, `container-page` 80 rem (1280) | as T3b | `container-page` widens from 76 rem |
-| `shadows.*` | `shadow-float`, `shadow-card-hover`, `shadow-nav`; `shadow-card` and `shadow-raised` removed | `card`, `raised`, `nav` | changed |
+| Shadows (`float`, `card-hover`, `nav`; Elevation & Depth prose, no front-matter token) | `shadow-float`, `shadow-card-hover`, `shadow-nav`; `shadow-card` and `shadow-raised` removed | `card`, `raised`, `nav` | changed |
 
 Two renames are traps: **`surface` now means cream-versus-white the other way round**, and **`rounded-xl` shrinks a size**. Do the renames with one reviewed codemod before any visual change, and run the full e2e suite after it.
 
