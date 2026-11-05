@@ -9,7 +9,7 @@ the software house's lead. All fixes have tests against the separate Supabase te
 |---|---|---|---|
 | Critical | 0 | 0 | 0 |
 | High | 1 | 1 | 0 |
-| Medium | 3 | 2 | 1 (M3, needs a CAPTCHA account) |
+| Medium | 3 | 2 | 1 accepted (M3) |
 | Low | 2 | 2 | 0 |
 | Info | 5 | 1 (I5) | 4 |
 
@@ -21,7 +21,7 @@ the software house's lead. All fixes have tests against the separate Supabase te
 | H1 | Someone could register a customer's email with a password before that customer ever ordered, then sign in with it later and read the orders, the live view and the recordings. | **Fixed.** After an emailed code is verified (ordering or `/login`), a customer account's password is replaced by a random one and every other session ends (`src/lib/auth/code-session.ts`). Test: `tests/integration/account-claim.test.ts` (the intruder's password and session stop working; staff passwords stay). |
 | M1 | No `frame-ancestors`, `X-Frame-Options` or `nosniff`: clickjacking of staff buttons was possible. | **Fixed** in `next.config.ts` (`frame-ancestors 'none'`, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`). Test: `tests/security-headers.test.ts`. A full `script-src` CSP with nonces is logged as a follow-up. |
 | M2 | An order nobody paid for kept its place in the window for good, and one account could book every window. | **Fixed** (`supabase/migrations/20261105090000_security_fixes.sql`): `release_unpaid_orders()` cancels orders unpaid after 2 hours and gives the places back (run by `book_slot` and the daily cron); at most 3 unpaid orders per customer (`too_many_unpaid`). Tests in `tests/integration/booking.test.ts`. |
-| M3 | Anyone can use up the live project's hourly email allowance by asking for order codes for made-up addresses, which blocks ordering and sign-in for everyone. | **Logged.** Needs a CAPTCHA (Cloudflare Turnstile or hCaptcha, free) set up in Supabase Auth with the user's account, or a per-IP limiter. Until then: raise `rate_limit_email_sent` for UAT and watch the Supabase Auth logs. |
+| M3 | Anyone can use up the live project's hourly email allowance by asking for order codes for made-up addresses, which blocks ordering and sign-in for everyone. | **Accepted risk**, under the user's decision at Checkpoint 1 (2026-10-24): rate limits stay at their defaults, because the site is a demo with fewer than 5 users at a time. A per-address limit in the app was not added, since the client group's testers may share one network address and would block each other. If abuse is seen: a free CAPTCHA (Cloudflare Turnstile or hCaptcha) connected in Supabase Auth is the real fix, and needs the user's account. |
 | L1 | `stream_for_viewer()` let a stranger in when the job's agency had no sign-in account (a null comparison). | **Fixed**: the check fails closed (`coalesce(..., false)`). Test in `tests/integration/streams.test.ts`. |
 | L2 | A cleaner photo's address held the partner agency's id, visible to customers. | **Fixed**: new photos are stored under a random name only (`src/lib/agency/actions.ts`). |
 | I1 | The Midtrans signature formula does not cover `transaction_status`. | Logged. It is Midtrans' own formula, and a forgery needs the server key. |

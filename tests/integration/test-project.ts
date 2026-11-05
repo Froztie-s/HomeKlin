@@ -63,7 +63,13 @@ export async function createTestUser(label: string, metadata: Record<string, unk
   if (error || !data.user) throw new Error(`Could not create test user ${label}: ${error?.message}`);
 
   const client = visitorClient();
-  const signIn = await client.auth.signInWithPassword({ email, password });
+  // Many test files sign in a batch of users at the same moment, and Supabase answers a burst from one
+  // address with a rate-limit error: wait a little and try again, a few times.
+  let signIn = await client.auth.signInWithPassword({ email, password });
+  for (let attempt = 1; attempt <= 5 && signIn.error && /rate limit/i.test(signIn.error.message); attempt += 1) {
+    await new Promise((resolve) => setTimeout(resolve, attempt * 3000));
+    signIn = await client.auth.signInWithPassword({ email, password });
+  }
   if (signIn.error) throw new Error(`Could not sign in test user ${label}: ${signIn.error.message}`);
   return { id: data.user.id, email, password, client };
 }

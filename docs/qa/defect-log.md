@@ -14,10 +14,10 @@ defects: 0.**
 | 2026-11-05 | Critical | Account takeover: a password registered beforehand for a customer's email stayed valid after the customer ordered by code. | T34 security audit (H1) | Fixed: `src/lib/auth/code-session.ts`, `tests/integration/account-claim.test.ts` |
 | 2026-11-05 | Major | Unpaid orders kept their window place for good; one account could fill every window. | T34 (M2) | Fixed: `release_unpaid_orders`, at most 3 unpaid orders |
 | 2026-11-05 | Major | No frame-ancestors / X-Frame-Options (clickjacking of staff buttons). | T34 (M1) | Fixed: `next.config.ts` |
-| 2026-11-05 | Major | Anyone can exhaust the hourly email allowance with code requests, blocking ordering and sign-in. | T34 (M3) | **Open**: needs a CAPTCHA account (Turnstile or hCaptcha) from the user |
+| 2026-11-05 | Major | Anyone can exhaust the hourly email allowance with code requests, blocking ordering and sign-in. | T34 (M3) | **Accepted risk** (user decision at Checkpoint 1: default rate limits, a demo with fewer than 5 users; a per-address limit would also block testers sharing one network). A CAPTCHA is the fix if abuse is seen |
 | 2026-11-05 | Minor | `stream_for_viewer` failed open for an agency without a sign-in. | T34 (L1) | Fixed, test added |
 | 2026-11-05 | Minor | A cleaner photo's address held the agency id. | T34 (L2) | Fixed |
-| 2026-11-05 | Minor | The cleaner page remembers the stream state per tab only (a new tab shows "Mulai siaran", which resumes the same stream). | T22 agent report | Open, cosmetic |
+| 2026-11-05 | Minor | The cleaner page remembers the stream state per tab only (a new tab shows "Mulai siaran", which resumes the same stream). | T22 agent report | Backend done (`my_stream_status`); the screen reads it after the design revamp. Cosmetic |
 | 2026-11-01 | Minor | Paying an older order from its details returns to the "order made" heading. | T12 report | Open, cosmetic |
 
 Test-infrastructure faults fixed on the way (not product defects): an expired throw-away test mailbox,

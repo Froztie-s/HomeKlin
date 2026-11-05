@@ -215,7 +215,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: cleaner's phone browser publishes; customer/agency/admin view; adaptive bitrate on; stream recovers after a connection drop; status indicator reflects real state; demo source still selectable.
   - Verify: two-device manual test with throttled network.
   - Deps: T31. Skills: `debugging-and-error-recovery`.
-- [ ] **T33 Measure latency and recovery** (XS) — blocked on T32 and two real devices
+- [ ] **T33 Measure latency and recovery** (XS) — blocked on T32 and two real devices; the procedure and result sheet are in `docs/qa/manual-test-sheets.md`
   - Accept: end-to-end latency <= 3 s measured and recorded in `docs/`; recovery time recorded.
   - Verify: documented measurements.
   - Deps: T32.
@@ -225,11 +225,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 11: Hardening, evidence, ship
 
-- [x] **T34 Security and RLS audit** (M) — done 2026-11-05: read-only audit (0 critical, 1 high, 3 medium, 2 low, 5 info), report and fixes in `docs/qa/security-audit-2026-11-05.md`; fixed H1 (account takeover by pre-registering an email), M1 (frame and sniffing headers), M2 (unpaid orders hold places: released after 2 hours, at most 3 per customer), L1, L2 and the six missing refusal tests. **M3 stays open**: anyone can use up the hourly email allowance; needs a CAPTCHA account from the user
+- [x] **T34 Security and RLS audit** (M) — done 2026-11-05: read-only audit (0 critical, 1 high, 3 medium, 2 low, 5 info), report and fixes in `docs/qa/security-audit-2026-11-05.md`; fixed H1 (account takeover by pre-registering an email), M1 (frame and sniffing headers), M2 (unpaid orders hold places: released after 2 hours, at most 3 per customer), L1, L2 and the six missing refusal tests. **M3 is an accepted risk** under the user's Checkpoint 1 decision (rate limits stay at their defaults: a demo with fewer than 5 users; a per-address limit would also block UAT testers who share one network); a CAPTCHA is the fix if abuse is seen
   - Accept: every table has RLS; cross-role and cross-tenant tests pass; no secrets in repo; findings fixed or logged.
   - Verify: test suite plus `security-auditor` agent review.
   - Deps: all features. Skills: `security-and-hardening`.
-- [ ] **T35 Compatibility, accessibility, usability trial** (M) — needs real devices and three people; accessibility checks are best run after the design revamp
+- [ ] **T35 Compatibility, accessibility, usability trial** (M) — needs real devices and three people; accessibility checks are best run after the design revamp; the device matrix and usability sheets are in `docs/qa/manual-test-sheets.md`
   - Accept: main flows pass on Chrome Android, Safari iOS 16+, desktop Chrome/Edge/Firefox; 3 people book a service unaided; accessibility fixes done.
   - Verify: device matrix recorded in `docs/`.
   - Deps: all UI. Skills: `browser-testing-with-devtools`, `frontend-ui-engineering`.
@@ -237,7 +237,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: key customer pages load acceptably on a mobile connection; findings fixed.
   - Verify: `/agent-skills:webperf` audit report.
   - Deps: T35. Skills: `performance-optimization`.
-- [ ] **T37 Quality Plan e2e suite and evidence** (M) — mostly done 2026-11-05: `docs/qa/quality-plan-traceability.md` (every Quality Plan target against its tests), `docs/qa/defect-log.md` (0 open critical), `docs/qa/test-results-2026-11-05.md`. Open: the uptime monitor (UptimeRobot, the user), latency and recovery (T32, T33), the device trial (T35)
+- [ ] **T37 Quality Plan e2e suite and evidence** (M) — mostly done 2026-11-05: `docs/qa/quality-plan-traceability.md` (every Quality Plan target against its tests), `docs/qa/defect-log.md` (0 open critical), `docs/qa/test-results-2026-11-05.md`. `.github/workflows/uptime.yml` checks the live health address every 10 minutes and `npm run uptime` reports the availability (`docs/qa/uptime.md`; a figure exists once it has run for a while); `docs/qa/manual-test-sheets.md` holds the sheets for what needs people and devices. Open: latency and recovery (T32, T33), the device trial (T35), an outside monitor such as UptimeRobot (optional now)
   - Accept: one Playwright spec per Quality Plan scenario passes; results saved in `docs/`; defect log shows 0 critical; uptime report started.
   - Verify: `npm run test:e2e` output archived.
   - Deps: T34-T36.

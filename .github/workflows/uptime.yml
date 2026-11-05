@@ -1,0 +1,37 @@
+# Checks the live site's health address every 10 minutes: the record behind the Quality Plan's
+# availability target (at least 99% during UAT, markdown/SPEC.md, "Success Criteria"). A run counts as
+# down only when three tries 10 seconds apart all fail, so one slow answer is not an outage. Each run's
+# result is the evidence: `npm run uptime` turns the history into a percentage (docs/qa/uptime.md).
+# The address answers 200 with {"status":"ok"} only when the app and its Supabase project are up
+# (src/app/api/health/route.ts), and the visit also keeps the free Supabase project from pausing.
+# Sources: https://docs.github.com/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
+name: Uptime
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Check the health address
+        run: |
+          for attempt in 1 2 3; do
+            if curl --fail --silent --show-error --max-time 20 https://home-klin.vercel.app/api/health | grep -q '"status":"ok"'; then
+              echo "The site is up (try $attempt)."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "The live site did not answer healthy in 3 tries."
+          exit 1

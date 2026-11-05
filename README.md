@@ -34,6 +34,7 @@ Demo accounts (all `@example.com`, password `SEED_DEMO_PASSWORD` from `.env`): `
 | `npm run screenshots -- <task>` | saves screenshots to `docs/screenshots/<task>/` |
 | `npm run supabase -- <command>` | project helper: `migrate`, `keys`, `smtp`, `ethereal`, `test-rate-limits`, ... (see the top of `scripts/supabase.mjs`) |
 | `npm run db:seed -- <live\|test>` | seeds the demo data |
+| `npm run uptime` | availability from the history of the Uptime workflow (`docs/qa/uptime.md`) |
 
 Tests never touch the live project and never send real email. CI (`.github/workflows/ci.yml`) runs the same checks on every push, with the test project's keys as repository secrets; Vercel deploys `main`.
 
@@ -44,7 +45,7 @@ Tests never touch the live project and never send real email. CI (`.github/workf
 | Midtrans Sandbox dashboard | Settings > Payment > Notification URL: `https://home-klin.vercel.app/api/payments/midtrans` |
 | Vercel Cron (`vercel.json`) | daily `/api/cron/recordings`: deletes recordings older than 7 days |
 | GitHub secrets | `TEST_SUPABASE_URL`, `TEST_SUPABASE_PUBLISHABLE_KEY`, `TEST_SUPABASE_SECRET_KEY`, `MIDTRANS_SERVER_KEY` |
-| UptimeRobot | a monitor on `https://home-klin.vercel.app/api/health` (also keeps the free Supabase project awake) |
+| UptimeRobot | a monitor on `https://home-klin.vercel.app/api/health` (also keeps the free Supabase project awake). Meanwhile the Uptime workflow in GitHub Actions checks the same address every 10 minutes (`docs/qa/uptime.md`) |
 
 ## How it is built
 - `src/app/[locale]/`: every page, per role group; `src/app/api/`: route handlers (health, Midtrans notification, recording links, live streams, LiveKit tokens, the daily cleanup).
