@@ -291,7 +291,8 @@ describe("unpaid orders (T34, M2)", () => {
     expect((await customers[2].client.rpc("release_unpaid_orders")).error?.code).toBe("42501");
     const released = await admin.rpc("release_unpaid_orders");
     expect(released.error).toBeNull();
-    expect(released.data).toBeGreaterThanOrEqual(1);
+    // Not the count: any book_slot call from another test file releases stale orders too, so this call
+    // may find nothing left to do. The outcome is what counts.
     const { data: order } = await admin.from("orders").select("status, slot_id").eq("id", orderId).single();
     expect(order?.status).toBe("cancelled");
     const { data: slot } = await admin.from("availability_slots").select("booked").eq("id", order?.slot_id).single();

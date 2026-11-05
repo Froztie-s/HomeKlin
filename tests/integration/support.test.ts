@@ -158,15 +158,21 @@ describe("tickets", { timeout: 30_000 }, () => {
       await user.client.realtime.setAuth(session.session?.access_token ?? null);
     }
     const channels = [await subscribe(world.users.customer.client, "owner"), await subscribe(world.users.otherCustomer.client, "other")];
-    // Realtime starts delivering a moment after it confirms the subscription.
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Realtime can start delivering a little after it confirms a subscription, and an event posted in
+    // that gap is lost, so the admin answers again (up to 4 times, 10 seconds apart) until the customer
+    // has one. Every answer carries its own number; the other customer must receive none of them.
+    const answers: string[] = [];
+    for (let attempt = 1; attempt <= 4 && !received.owner.some((body) => answers.includes(body)); attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const body = `Jawaban waktu nyata ${attempt}.`;
+      answers.push(body);
+      await world.users.admin.client.rpc("post_ticket_message", { p_ticket: ticketId, p_body: body });
+      const deadline = Date.now() + 8000;
+      while (!received.owner.includes(body) && Date.now() < deadline) await new Promise((r) => setTimeout(r, 250));
+    }
 
-    await world.users.admin.client.rpc("post_ticket_message", { p_ticket: ticketId, p_body: "Jawaban waktu nyata." });
-    const deadline = Date.now() + 15_000;
-    while (!received.owner.includes("Jawaban waktu nyata.") && Date.now() < deadline) await new Promise((r) => setTimeout(r, 250));
-
-    expect(received.owner).toContain("Jawaban waktu nyata.");
-    expect(received.other).not.toContain("Jawaban waktu nyata.");
+    expect(received.owner.some((body) => answers.includes(body))).toBe(true);
+    expect(received.other.filter((body) => answers.includes(body))).toEqual([]);
     for (const channel of channels) await channel.unsubscribe();
-  });
+  }, 60_000);
 });
