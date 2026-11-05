@@ -146,7 +146,7 @@ describe("services and areas", () => {
   }, 20_000);
 });
 
-describe("agency data stays private", () => {
+describe("agency data stays private", { timeout: 30_000 }, () => {
   it("gives a visitor and a customer no access to agencies, their areas or their slots", async () => {
     for (const client of [visitorClient(), signedIn(customer).client]) {
       for (const table of ["agencies", "agency_areas", "availability_slots"]) {

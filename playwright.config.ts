@@ -69,7 +69,8 @@ export default defineConfig({
     // Always build and start a fresh server: a server already running on this port (`npm run dev`, or
     // another checkout's) could be talking to the live project.
     reuseExistingServer: false,
-    timeout: 180_000,
+    // The command builds the whole app first, which takes about 3 minutes now that it has grown.
+    timeout: 600_000,
     // The app under test talks to the separate Supabase test project, never the live one
     // (markdown/SPEC.md, "Testing Strategy"). NEXT_PUBLIC_ values are baked in at build time, which is
     // why they are set for this command (it builds, then starts). Playwright merges this over process.env.

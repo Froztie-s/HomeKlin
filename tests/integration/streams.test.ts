@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { clipFolder, recordingsBucket } from "@/lib/recordings/attach";
-import { listLiveStreams, watchStream } from "@/lib/stream/streams";
+import { listLiveStreams, myStreamStatus, watchStream } from "@/lib/stream/streams";
 import { adminClient, visitorClient } from "./test-project";
 import { createWorld, hours, type World } from "./world";
 
@@ -184,5 +184,29 @@ describe("T34 review: refusals with no test before", { timeout: 30_000 }, () => 
     } finally {
       await adminClient().storage.from("cleaner-photos").remove([path]);
     }
+  });
+});
+
+describe("the cleaner's own stream state", { timeout: 30_000 }, () => {
+  it("shows the job's cleaner the true state, in any tab", async () => {
+    const orderId = await liveJob();
+    const cleaner = world.users.cleanerA.client;
+    expect(await myStreamStatus(cleaner, orderId)).toBe("active");
+    await cleaner.rpc("set_stream_status", { p_order: orderId, p_status: "weak" });
+    expect(await myStreamStatus(cleaner, orderId)).toBe("weak");
+    await cleaner.rpc("set_stream_status", { p_order: orderId, p_status: "ended" });
+    expect(await myStreamStatus(cleaner, orderId)).toBe("ended");
+  });
+
+  it("answers null for a job without a stream and for another cleaner's job, and refuses other roles", async () => {
+    const quiet = await world.job({ startsAt: now(), checkedIn: true });
+    expect(await myStreamStatus(world.users.cleanerA.client, quiet)).toBeNull();
+    const orderId = await liveJob();
+    expect(await myStreamStatus(world.users.cleanerA2.client, orderId)).toBeNull();
+    expect(await myStreamStatus(world.users.cleanerB.client, orderId)).toBeNull();
+    for (const viewer of ["customer", "agencyA", "admin"] as const) {
+      expect((await world.users[viewer].client.rpc("my_stream_status", { p_order: orderId })).error?.code).toBe("42501");
+    }
+    expect((await visitorClient().rpc("my_stream_status", { p_order: orderId })).error?.code).toBe("42501");
   });
 });

@@ -105,11 +105,16 @@ test.beforeAll(async ({ browser, baseURL }) => {
 test.afterAll(async () => {
   test.setTimeout(120_000);
   const admin = adminClient();
-  // The photo first (the agency's folder), then the jobs, windows, agencies (their cleaners go with
-  // them) and users, then the cleaner this spec added through the page.
+  // The photo first (found from the cleaner's own row: photos have random names, with no agency in
+  // the path, T34 L2), then the jobs, windows, agencies (their cleaners go with them) and users, then
+  // the cleaner this spec added through the page.
   if (agency) {
-    const files = await admin.storage.from(photoBucket).list(agency.id, { limit: 100 });
-    const paths = (files.data ?? []).map((file) => `${agency.id}/${file.name}`);
+    const { data: rows } = await admin.from("cleaners").select("photo_url").eq("agency_id", agency.id);
+    const marker = `/storage/v1/object/public/${photoBucket}/`;
+    const paths = (rows ?? [])
+      .map((row) => row.photo_url as string | null)
+      .filter((url): url is string => !!url && url.includes(marker))
+      .map((url) => url.slice(url.indexOf(marker) + marker.length));
     if (paths.length > 0) await admin.storage.from(photoBucket).remove(paths);
   }
   await world?.cleanup();
@@ -226,7 +231,9 @@ test.describe("the agency", () => {
 
     const { data } = await adminClient().from("cleaners").select("user_id, photo_url").eq("agency_id", agency.id).eq("full_name", newCleaner.name).single<{ user_id: string; photo_url: string }>();
     newCleaner.id = data?.user_id ?? "";
-    expect(data?.photo_url).toContain(`/storage/v1/object/public/${photoBucket}/${agency.id}/`);
+    // A random file name in the bucket, with no agency id in the address (T34, L2).
+    expect(data?.photo_url).toMatch(new RegExp(`/storage/v1/object/public/${photoBucket}/[0-9a-f-]{36}\.png$`));
+    expect(data?.photo_url).not.toContain(agency.id);
 
     // The same email again is refused, in words.
     await form.getByLabel("Nama lengkap").fill("Uji Petugas Kembar");

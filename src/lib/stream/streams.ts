@@ -92,3 +92,14 @@ export async function listLiveStreams(client: SupabaseClient): Promise<LiveStrea
     agencyName: row.agency_name,
   }));
 }
+
+/**
+ * The state of the signed-in cleaner's own stream for a job: active, weak, disconnected or ended, or null
+ * when the job has no stream (or is not theirs). Lets the cleaner's page show the true state in any tab
+ * or device (supabase/migrations/20261105100000_stream_state.sql).
+ */
+export async function myStreamStatus(cleaner: SupabaseClient, orderId: string): Promise<StreamStatus | null> {
+  const { data, error } = await cleaner.rpc("my_stream_status", { p_order: orderId });
+  if (error) throw new StreamError(null, error.message);
+  return (data as StreamStatus | null) ?? null;
+}

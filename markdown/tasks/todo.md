@@ -168,15 +168,15 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 8: Agency back office
 
-- [ ] **T27 Agency manages its availability** (M)
+- [x] **T27 Agency manages its availability** (M) — done 2026-11-05: `/agency/schedule` (one week at a time) adds, resizes and removes only the agency's own windows (`add_slot`, `set_slot_capacity`, `delete_slot`, each on the caller's own agency); a window added shows free on `/services` at once; no agency writes services or prices; RLS in `tests/integration/agency-back-office.test.ts`; e2e `agency-back-office.desktop.spec.ts`
   - Accept: agency CRUD on its own availability slots per service area only (page "Jadwal"); changes appear in the customer's aggregated free slots; agencies cannot create services or change prices.
   - Verify: Playwright; RLS tests that agency A cannot edit agency B's slots and that no agency can write services or prices.
   - Deps: T7. Skills: `frontend-ui-engineering`, `security-and-hardening`.
-- [ ] **T28 Agency manages cleaners and assigns routed jobs** (M)
+- [x] **T28 Agency manages cleaners and assigns routed jobs** (M) — done 2026-11-05: `/agency/cleaners` adds a cleaner (name, email, photo; the sign-in is made on the server after finding the caller's own agency; photos are stored under random names), `/agency/orders` assigns an own cleaner to an own job until it starts; the customer then sees the name and photo as Petugas HomeKlin, never the agency; `tests/integration/jobs.test.ts`, e2e `agency-back-office.desktop.spec.ts`
   - Accept: agency adds its cleaners (name, photo); sees only the paid jobs routed to it; assigns one of its own cleaners; the cleaner then sees the job, and the customer sees the cleaner's name and photo as "Petugas HomeKlin" (never the agency).
   - Verify: Playwright agency -> cleaner -> customer flow; RLS test that an agency cannot see or assign another agency's jobs.
   - Deps: T27, T17.
-- [ ] **T29 Agency video access (own cleaners only)** (M)
+- [x] **T29 Agency video access (own cleaners only)** (M) — done 2026-11-05: `/agency/recordings` shows the agency's own live streams and replays its own recordings; another agency's stream or recording is refused (404); matrix in `tests/integration/streams.test.ts` and `recording-access.test.ts`
   - Accept: agency watches live stream and recordings of its own cleaners; other agencies' are refused.
   - Verify: Vitest authorization matrix; Playwright.
   - Deps: T23, T14, T28. Skills: `security-and-hardening`, `doubt-driven-development`.
@@ -186,11 +186,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 8b: Owner dashboard (user request 2026-11-03)
 
-- [ ] **T29b Owner role and business numbers** (M)
+- [x] **T29b Owner role and business numbers** (M) — done 2026-11-05: `owner` role (own migration), `/owner` (revenue, paid orders, completed jobs, orders by status, 30-day trend with a table alternative, per-partner table) from `owner_numbers()`, which carries no customer data; sign-up cannot create an owner; demo owner `pemilik@example.com`; `tests/integration/owner.test.ts`, e2e `owner.desktop.spec.ts`
   - Accept: `owner` is added to the role enum by its own migration (`ALTER TYPE ... ADD VALUE` cannot share a transaction with statements that use the new value); `/owner` is a protected section in `src/lib/auth/roles.ts` with `RoleGate` on every owner page, so `tests/protected-pages.test.ts` stays green; the seed adds one fictional owner, marked in `app_metadata` like the other privileged users; the desktop dashboard shows revenue from paid orders, orders by status, a 30-day trend, and jobs and revenue per partner agency, read through a function that only the owner role can call and that returns no customer personal data; both languages.
   - Verify: integration tests that a customer, cleaner, agency and admin cannot call the function or open `/owner`, and that sign-up cannot create an owner; Playwright desktop: owner signs in and the numbers match the seeded paid orders.
   - Deps: T12, T6. Skills: `security-and-hardening`, `frontend-ui-engineering`, `test-driven-development`.
-- [ ] **T29c Owner: partner agencies and admin accounts** (M)
+- [x] **T29c Owner: partner agencies and admin accounts** (M) — done 2026-11-05: `/owner/agencies` lists, adds, suspends and reactivates partners (a suspended partner gets no booking and its windows vanish; its jobs stay); `/owner/admins` creates and removes admins through server actions that check the owner role before the secret key is used; `tests/integration/owner.test.ts`, `tests/back-office-actions.test.ts`
   - Accept: the owner lists partner agencies with their performance, adds one, and suspends or reactivates one (a status column on `agencies`); `book_slot` and `free_slots` skip suspended agencies, and an area served only by suspended agencies shows the existing empty state; the owner lists, creates and removes admin accounts through a server action with `authorize(["owner"])`, the Supabase secret key used on the server only, the role marked in `app_metadata` and never read from sign-up metadata (the seed's rules); removing an admin takes the role away.
   - Verify: integration tests that a suspended agency receives no booking and its windows vanish, that the routing race tests still pass, and that only the owner can create or remove admins (each other role is refused); Playwright desktop; the no-agency-wording test stays green (owner pages are not customer pages).
   - Deps: T29b, T9. Skills: `security-and-hardening`, `doubt-driven-development` (privilege escalation, changing the routing), `frontend-ui-engineering`.
@@ -200,7 +200,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 9: Reviews
 
-- [ ] **T30 Rating and review after completed job** (S)
+- [x] **T30 Rating and review after completed job** (S) — done 2026-11-05: the customer rates a completed job once (service and Petugas HomeKlin, stars 1-5, comment up to 500 characters); `/services` cards show the average and the latest reviews with the cleaner's first name, never the customer or an agency; `tests/integration/reviews.test.ts`, e2e `reviews.mobile.spec.ts`
   - Accept: customer rates a completed job once, for the HomeKlin service and the cleaner ("Petugas HomeKlin"); shown on the service; never names a partner agency on customer pages; only the booking's customer can review.
   - Verify: Playwright; RLS test.
   - Deps: T12.
@@ -211,11 +211,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: server-issued, short-lived tokens scoped to one room per job; same access matrix as T23/T29/T25; no token for unauthorized users.
   - Verify: Vitest matrix.
   - Deps: T23, T29, T25, human LiveKit keys. Skills: `source-driven-development`, `security-and-hardening`.
-- [ ] **T32 LiveKit source: publish, view, resilience** (M)
+- [ ] **T32 LiveKit source: publish, view, resilience** (M) — blocked on the user: needs approval for the `livekit-client` package (a new dependency) and LiveKit Cloud keys (`LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `LIVEKIT_URL`); the server side (tokens, the publish rule, the stream sessions with a source per job) is done in T31
   - Accept: cleaner's phone browser publishes; customer/agency/admin view; adaptive bitrate on; stream recovers after a connection drop; status indicator reflects real state; demo source still selectable.
   - Verify: two-device manual test with throttled network.
   - Deps: T31. Skills: `debugging-and-error-recovery`.
-- [ ] **T33 Measure latency and recovery** (XS)
+- [ ] **T33 Measure latency and recovery** (XS) — blocked on T32 and two real devices
   - Accept: end-to-end latency <= 3 s measured and recorded in `docs/`; recovery time recorded.
   - Verify: documented measurements.
   - Deps: T32.
@@ -225,27 +225,27 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 11: Hardening, evidence, ship
 
-- [ ] **T34 Security and RLS audit** (M)
+- [x] **T34 Security and RLS audit** (M) — done 2026-11-05: read-only audit (0 critical, 1 high, 3 medium, 2 low, 5 info), report and fixes in `docs/qa/security-audit-2026-11-05.md`; fixed H1 (account takeover by pre-registering an email), M1 (frame and sniffing headers), M2 (unpaid orders hold places: released after 2 hours, at most 3 per customer), L1, L2 and the six missing refusal tests. **M3 stays open**: anyone can use up the hourly email allowance; needs a CAPTCHA account from the user
   - Accept: every table has RLS; cross-role and cross-tenant tests pass; no secrets in repo; findings fixed or logged.
   - Verify: test suite plus `security-auditor` agent review.
   - Deps: all features. Skills: `security-and-hardening`.
-- [ ] **T35 Compatibility, accessibility, usability trial** (M)
+- [ ] **T35 Compatibility, accessibility, usability trial** (M) — needs real devices and three people; accessibility checks are best run after the design revamp
   - Accept: main flows pass on Chrome Android, Safari iOS 16+, desktop Chrome/Edge/Firefox; 3 people book a service unaided; accessibility fixes done.
   - Verify: device matrix recorded in `docs/`.
   - Deps: all UI. Skills: `browser-testing-with-devtools`, `frontend-ui-engineering`.
-- [ ] **T36 Mobile performance pass** (S)
+- [ ] **T36 Mobile performance pass** (S) — deferred on purpose: run `/agent-skills:webperf` after the design revamp (2026-11-05, user), since the revamp changes every page
   - Accept: key customer pages load acceptably on a mobile connection; findings fixed.
   - Verify: `/agent-skills:webperf` audit report.
   - Deps: T35. Skills: `performance-optimization`.
-- [ ] **T37 Quality Plan e2e suite and evidence** (M)
+- [ ] **T37 Quality Plan e2e suite and evidence** (M) — mostly done 2026-11-05: `docs/qa/quality-plan-traceability.md` (every Quality Plan target against its tests), `docs/qa/defect-log.md` (0 open critical), `docs/qa/test-results-2026-11-05.md`. Open: the uptime monitor (UptimeRobot, the user), latency and recovery (T32, T33), the device trial (T35)
   - Accept: one Playwright spec per Quality Plan scenario passes; results saved in `docs/`; defect log shows 0 critical; uptime report started.
   - Verify: `npm run test:e2e` output archived.
   - Deps: T34-T36.
-- [ ] **T38 Documentation and handover** (M)
+- [ ] **T38 Documentation and handover** (M) — done 2026-11-05 except the check that a fresh clone runs from the README: README rewritten (setup, settings, commands, hand-over), ADRs 0001-0006 in `docs/adr/`, `docs/frontend-map.md`; `docs/demo-checklist.md` is T39's
   - Accept: README (setup, env vars, commands); ADRs for website-vs-Android, demo clips, and "encrypted in transit, not end-to-end"; handover list per Contract (source, docs, config, access).
   - Verify: a fresh clone can run from the README.
   - Deps: T37. Skills: `documentation-and-adrs`, `code-simplification`.
-- [ ] **T39 Pre-demo ship checklist** (S)
+- [ ] **T39 Pre-demo ship checklist** (S) — written 2026-11-05: `docs/demo-checklist.md` (checklist, 15-minute script, rollback). The ticks need the live project: migrate live, seed live, clips, CRON_SECRET, a phone run
   - Accept: Supabase project awake; seed data fresh; clips present; URL works on a phone; demo script written; rollback plan noted.
   - Verify: `/agent-skills:ship` checklist complete.
   - Deps: T38. Skills: `shipping-and-launch`.
