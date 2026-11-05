@@ -241,7 +241,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: one Playwright spec per Quality Plan scenario passes; results saved in `docs/`; defect log shows 0 critical; uptime report started.
   - Verify: `npm run test:e2e` output archived.
   - Deps: T34-T36.
-- [ ] **T38 Documentation and handover** (M) — done 2026-11-05 except the check that a fresh clone runs from the README: README rewritten (setup, settings, commands, hand-over), ADRs 0001-0006 in `docs/adr/`, `docs/frontend-map.md`; `docs/demo-checklist.md` is T39's
+- [x] **T38 Documentation and handover** (M) — done 2026-11-05; a fresh clone installs, typechecks, lints and passes 531 tests with no secrets set (checked): README rewritten (setup, settings, commands, hand-over), ADRs 0001-0006 in `docs/adr/`, `docs/frontend-map.md`; `docs/demo-checklist.md` is T39's
   - Accept: README (setup, env vars, commands); ADRs for website-vs-Android, demo clips, and "encrypted in transit, not end-to-end"; handover list per Contract (source, docs, config, access).
   - Verify: a fresh clone can run from the README.
   - Deps: T37. Skills: `documentation-and-adrs`, `code-simplification`.
