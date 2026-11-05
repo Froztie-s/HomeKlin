@@ -18,6 +18,10 @@ const serviceRow = { name_id: "Pembersihan Rutin", name_en: "Regular Cleaning" }
 const from = () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: serviceRow, error: null }) }) }) });
 
 vi.mock("@/lib/auth/dal", () => ({ authorize: async (roles: string[]) => (user && roles.includes(user.role) ? user : null) }));
+// The account claim after a code check (T34, H1) has its own test: tests/integration/account-claim.test.ts.
+const { claimCustomerAccount } = vi.hoisted(() => ({ claimCustomerAccount: vi.fn() }));
+vi.mock("@/lib/auth/code-session", () => ({ claimCustomerAccount }));
+vi.mock("@/lib/supabase/service", () => ({ createSupabaseServiceClient: () => ({}) }));
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({ rpc, from, auth: { getUser, signInWithOtp, verifyOtp } }),
 }));

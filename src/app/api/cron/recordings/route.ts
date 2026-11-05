@@ -26,9 +26,13 @@ export async function GET(request: Request) {
   if (!isAuthorized(request.headers.get("authorization"), secret)) return reply(401, { error: "unauthorized" });
 
   try {
-    const result = await deleteExpiredRecordings(createSupabaseServiceClient());
-    console.info("[recordings] cleanup deleted %d expired recordings", result.deleted);
-    return reply(200, result);
+    const server = createSupabaseServiceClient();
+    const result = await deleteExpiredRecordings(server);
+    // Orders nobody paid for within 2 hours give their places back (T34, M2); book_slot does it too.
+    const released = await server.rpc("release_unpaid_orders");
+    if (released.error) throw new Error(released.error.message);
+    console.info("[recordings] cleanup deleted %d expired recordings, released %d unpaid orders", result.deleted, released.data);
+    return reply(200, { ...result, releasedOrders: Number(released.data ?? 0) });
   } catch (cause) {
     console.error("[recordings] cleanup failed:", cause);
     return reply(503, { error: "unavailable" });

@@ -12,7 +12,7 @@ import { createWorld, hours, type World } from "./world";
 // future would delete their files too.
 
 let world: World;
-const clipName = "t16-clip.mp4";
+const clipName = "test-clip.mp4"; // shared by every test file, never deleted
 const clipBytes = new Uint8Array([0, 0, 0, 24, 102, 116, 121, 112]);
 const files: string[] = [];
 
@@ -22,7 +22,7 @@ beforeAll(async () => {
 }, 180_000);
 
 afterAll(async () => {
-  await adminClient().storage.from(recordingsBucket).remove([`${clipFolder}/${clipName}`, ...files]);
+  await adminClient().storage.from(recordingsBucket).remove(files);
   await world.cleanup();
 }, 120_000);
 

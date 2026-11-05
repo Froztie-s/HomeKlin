@@ -2,9 +2,11 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "@/i18n/navigation";
+import { claimCustomerAccount } from "@/lib/auth/code-session";
 import { authorize } from "@/lib/auth/dal";
 import { orderConfirmationEmail, sendAppEmail } from "@/lib/email/send";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import {
   parseBooking,
   parseCode,
@@ -30,7 +32,7 @@ import {
 // confirmation is emailed; an email that cannot be sent never fails the order.
 
 /** Why the order could not be made, as a message key ("Booking.formErrors.<key>"). */
-export type BookingFailureKey = "notCustomer" | "slotUnavailable" | "serviceUnavailable" | "rateLimited" | "unavailable";
+export type BookingFailureKey = "notCustomer" | "slotUnavailable" | "serviceUnavailable" | "tooManyUnpaid" | "rateLimited" | "unavailable";
 
 export type BookingFormState = {
   fieldErrors?: Partial<Record<BookingField, BookingErrorKey>>;
@@ -47,6 +49,7 @@ export type BookingFormState = {
 const refusals: Record<string, BookingFormState> = {
   slot_unavailable: { formError: "slotUnavailable" },
   service_unavailable: { formError: "serviceUnavailable" },
+  too_many_unpaid: { formError: "tooManyUnpaid" },
   not_customer: { formError: "notCustomer" },
   consent_required: { fieldErrors: { consent: "consentRequired" } },
   address_invalid: { fieldErrors: { address: "addressTooShort" } },
@@ -158,11 +161,12 @@ export async function placeOrder(_previous: BookingFormState, formData: FormData
   if (!code) return { fieldErrors: { code: "codeInvalid" }, codeSent: true, values };
 
   const supabase = await createSupabaseServerClient({ writeCookies: true });
-  const { error } = await supabase.auth.verifyOtp({ email: parsed.data.email, token: code, type: "email" });
-  if (error) {
-    if (error.status === 429) return { formError: "rateLimited", codeSent: true, values };
+  const { data: verified, error } = await supabase.auth.verifyOtp({ email: parsed.data.email, token: code, type: "email" });
+  if (error || !verified.user) {
+    if (error?.status === 429) return { formError: "rateLimited", codeSent: true, values };
     return { fieldErrors: { code: "codeInvalid" }, codeSent: true, values };
   }
+  await claimCustomerAccount(supabase, createSupabaseServiceClient(), verified.user.id, parsed.data.email);
   return book(supabase, parsed.data, parsed.data.email, values, { signedIn: true });
 }
 

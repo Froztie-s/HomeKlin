@@ -10,6 +10,10 @@ const signOut = vi.fn();
 const redirectMock = vi.fn();
 let profile: { role: string } | null = null;
 
+// The account claim after a code check (T34, H1) has its own test: tests/integration/account-claim.test.ts.
+const { claimCustomerAccount } = vi.hoisted(() => ({ claimCustomerAccount: vi.fn() }));
+vi.mock("@/lib/auth/code-session", () => ({ claimCustomerAccount }));
+vi.mock("@/lib/supabase/service", () => ({ createSupabaseServiceClient: () => ({}) }));
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({
     auth: { signInWithOtp, verifyOtp, signOut },

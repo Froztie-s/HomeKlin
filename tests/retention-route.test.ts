@@ -9,7 +9,7 @@ vi.mock("@/lib/recordings/retention", async (original) => ({
   ...(await original<typeof import("@/lib/recordings/retention")>()),
   deleteExpiredRecordings,
 }));
-vi.mock("@/lib/supabase/service", () => ({ createSupabaseServiceClient: () => ({}) }));
+vi.mock("@/lib/supabase/service", () => ({ createSupabaseServiceClient: () => ({ rpc: async () => ({ data: 2, error: null }) }) }));
 
 const { GET } = await import("@/app/api/cron/recordings/route");
 
@@ -30,7 +30,7 @@ describe("GET /api/cron/recordings", () => {
   afterEach(() => vi.unstubAllEnvs());
 
   it("runs the cleanup for Vercel's cron request", async () => {
-    expect(await call("Bearer a-long-random-test-secret")).toEqual({ status: 200, body: { deleted: 3 } });
+    expect(await call("Bearer a-long-random-test-secret")).toEqual({ status: 200, body: { deleted: 3, releasedOrders: 2 } });
   });
 
   it.each([[undefined], ["Bearer wrong"], ["a-long-random-test-secret"]])("refuses %s", async (authorization) => {

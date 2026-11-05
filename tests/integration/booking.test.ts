@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { listMyOrders } from "@/lib/booking/orders";
 import { adminClient, createTestUser, deleteTestUsers, visitorClient, type TestUser } from "./test-project";
 
@@ -88,6 +88,16 @@ afterAll(async () => {
   await admin.from("service_areas").delete().like("id", `${prefix}-%`);
 }, 60_000);
 
+// Each test books for the same few customers; a customer may hold at most 3 unpaid orders (T34, M2), so
+// the orders earlier tests left waiting are marked cancelled first. Their places stay taken, which is
+// what the capacity checks below count on.
+async function setUnpaidAside() {
+  const ids = [...customers, ...others].map((user) => user.id);
+  if (ids.length > 0) await adminClient().from("orders").update({ status: "cancelled" }).in("customer_id", ids).eq("status", "pending_payment");
+}
+
+beforeEach(setUnpaidAside);
+
 describe("book_slot routing", () => {
   it("books a free window: the order waits for payment, at the service's price, and names no agency", async () => {
     const times = nextWindow();
@@ -158,6 +168,7 @@ describe("book_slot routing", () => {
 describe("book_slot race safety", () => {
   it("lets exactly one of two customers take the last place, every time", async () => {
     for (let round = 0; round < 5; round += 1) {
+      await setUnpaidAside();
       const times = nextWindow();
       await addSlots([{ agency: agencyA, capacity: 1, times }]);
 
@@ -253,5 +264,37 @@ describe("orders stay private", () => {
     expect(orders).toEqual([
       expect.objectContaining({ id: mine.data?.[0]?.order_id, serviceId, areaId: area, address, contactPhone: phone, priceIdr: 123000, status: "pending_payment" }),
     ]);
+  });
+});
+
+describe("unpaid orders (T34, M2)", () => {
+  it("allows a customer at most 3 unpaid orders", async () => {
+    const starts: string[] = [];
+    for (let i = 0; i < 4; i += 1) {
+      const times = nextWindow();
+      await addSlots([{ agency: agencyA, capacity: 1, times }]);
+      starts.push(times.starts_at);
+    }
+    for (const start of starts.slice(0, 3)) expect((await book(customers[0], start)).error).toBeNull();
+    expect((await book(customers[0], starts[3] ?? "")).error?.message).toBe("too_many_unpaid");
+    expect((await book(customers[1], starts[3] ?? "")).error).toBeNull();
+  });
+
+  it("cancels orders left unpaid for 2 hours and gives their places back, for the server only", async () => {
+    const times = nextWindow();
+    await addSlots([{ agency: agencyA, capacity: 1, times }]);
+    const { data } = await book(customers[2], times.starts_at);
+    const orderId = data?.[0]?.order_id;
+    const admin = adminClient();
+    await admin.from("orders").update({ created_at: new Date(Date.now() - 3 * 3_600_000).toISOString() }).eq("id", orderId);
+
+    expect((await customers[2].client.rpc("release_unpaid_orders")).error?.code).toBe("42501");
+    const released = await admin.rpc("release_unpaid_orders");
+    expect(released.error).toBeNull();
+    expect(released.data).toBeGreaterThanOrEqual(1);
+    const { data: order } = await admin.from("orders").select("status, slot_id").eq("id", orderId).single();
+    expect(order?.status).toBe("cancelled");
+    const { data: slot } = await admin.from("availability_slots").select("booked").eq("id", order?.slot_id).single();
+    expect(slot?.booked).toBe(0);
   });
 });

@@ -148,6 +148,16 @@ describe("recordingLink: who may replay", { timeout: 30_000 }, () => {
     });
   });
 
+  it("refuses the HomeKlin owner role, which runs the business but never watches customers (T34 review)", async () => {
+    const ownerUser = await createTestUser("t14-owner-role");
+    try {
+      await adminClient().from("profiles").update({ role: "owner" }).eq("id", ownerUser.id);
+      await expect(recordingLink(ownerUser.client, adminClient(), recordings.available)).rejects.toMatchObject({ reason: "recording_not_found" });
+    } finally {
+      await deleteTestUsers([ownerUser]);
+    }
+  });
+
   it("refuses a visitor who is not signed in", async () => {
     const { error } = await visitorClient().rpc("recording_for_viewer", { p_recording: recordings.available });
     expect(error?.code).toBe("42501");

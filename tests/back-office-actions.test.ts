@@ -70,7 +70,7 @@ describe("addCleaner", () => {
     expect(await addCleaner(null, form({ fullName: "Sari Wulandari", email: "Sari@Contoh.id", photo }))).toEqual({ ok: true });
     expect(createUser).toHaveBeenCalledWith(expect.objectContaining({ email: "sari@contoh.id", app_metadata: { homeklin_role: "cleaner", agency_id: agencyId } }));
     expect(profileUpdate).toHaveBeenCalledWith({ role: "cleaner", full_name: "Sari Wulandari" });
-    expect(cleanerInsert).toHaveBeenCalledWith(expect.objectContaining({ user_id: userId, agency_id: agencyId, photo_url: expect.stringContaining(`${agencyId}/${userId}`) }));
+    expect(cleanerInsert).toHaveBeenCalledWith(expect.objectContaining({ user_id: userId, agency_id: agencyId, photo_url: expect.not.stringContaining(agencyId) }));
   });
 
   it("refuses anyone but an agency before touching the server's client", async () => {

@@ -443,6 +443,7 @@
       "notCustomer": "Hanya akun pelanggan yang dapat memesan. Masuk dengan akun pelanggan Anda, lalu coba lagi.",
       "slotUnavailable": "Pelanggan lain memesan tempat terakhir pada jadwal ini sesaat sebelum Anda. Pilih jadwal lain di bawah. Alamat dan persetujuan Anda tetap tersimpan.",
       "serviceUnavailable": "Layanan ini sudah tidak ditawarkan. Pilih layanan lain dari daftar layanan.",
+      "tooManyUnpaid": "Anda masih punya 3 pesanan yang belum dibayar. Bayar atau tunggu salah satunya batal (2 jam setelah dibuat) sebelum memesan lagi.",
       "unavailable": "Pesanan belum dapat dibuat karena ada gangguan. Coba lagi sebentar lagi.",
       "rateLimited": "Terlalu banyak percobaan. Tunggu beberapa menit, lalu coba lagi."
     }

@@ -149,3 +149,11 @@ describe("partner agencies", { timeout: 30_000 }, () => {
     expect((await ownerUser().client.rpc("owner_set_agency_status", { p_agency: "00000000-0000-4000-8000-000000000000", p_status: "active" })).error?.message).toBe("agency_not_found");
   });
 });
+
+describe("adding partners (T34 review)", { timeout: 30_000 }, () => {
+  it("is refused to every other role", async () => {
+    for (const user of [world.users.customer, world.users.cleanerA, world.users.agencyA, world.users.admin]) {
+      expect((await user.client.rpc("owner_add_agency", { p_name: "Mitra Gelap", p_areas: [] })).error?.code).toBe("42501");
+    }
+  });
+});

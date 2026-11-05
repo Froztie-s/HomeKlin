@@ -14,7 +14,8 @@ const prefix = `t13-${randomUUID().slice(0, 8)}`;
 const area = `${prefix}-area`;
 const serviceId = `${prefix}-svc`;
 const price = 88000;
-const clipName = `${prefix}.mp4`;
+// The clip every test file shares; never deleted, because other files may be copying it right now.
+const clipName = "test-clip.mp4";
 const clipBytes = new Uint8Array([0, 0, 0, 24, 102, 116, 121, 112]);
 const day = 86_400_000;
 let customer: TestUser | undefined;
@@ -69,7 +70,7 @@ beforeAll(async () => {
   });
   const upload = await admin.storage
     .from(recordingsBucket)
-    .upload(`${clipFolder}/${clipName}`, clipBytes, { contentType: "video/mp4" });
+    .upload(`${clipFolder}/${clipName}`, clipBytes, { contentType: "video/mp4", upsert: true });
   if (upload.error) throw new Error(`Could not upload the test clip: ${upload.error.message}`);
   customer = await createTestUser("t13-customer");
   stranger = await createTestUser("t13-stranger");
@@ -77,7 +78,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   const admin = adminClient();
-  await admin.storage.from(recordingsBucket).remove([`${clipFolder}/${clipName}`, ...filesMade]);
+  await admin.storage.from(recordingsBucket).remove(filesMade);
   await deleteTestUsers([customer, stranger]);
   await admin.from("availability_slots").delete().eq("area_id", area);
   await admin.from("agencies").delete().like("key", `${prefix}-%`);

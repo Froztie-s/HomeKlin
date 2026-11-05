@@ -122,3 +122,67 @@ describe("who may publish (T31)", { timeout: 30_000 }, () => {
     expect((await ask("cleanerA")).data).toBe(false);
   });
 });
+
+describe("T34 review: refusals with no test before", { timeout: 30_000 }, () => {
+  it("lets no other cleaner and no other role change a stream's status", async () => {
+    const orderId = await liveJob();
+    for (const viewer of ["cleanerA2", "cleanerB"] as const) {
+      expect((await world.users[viewer].client.rpc("set_stream_status", { p_order: orderId, p_status: "ended" })).error?.message).toBe("stream_not_found");
+    }
+    for (const viewer of ["customer", "agencyA", "admin"] as const) {
+      expect((await world.users[viewer].client.rpc("set_stream_status", { p_order: orderId, p_status: "ended" })).error?.code).toBe("42501");
+    }
+    expect((await watch("admin", orderId)).status).toBe("active");
+  });
+
+  it("refuses strangers when the job's agency has no sign-in account (fails closed)", async () => {
+    const orderId = await liveJob();
+    const admin = adminClient();
+    await admin.from("agencies").update({ user_id: null }).eq("id", world.agencies.A);
+    try {
+      for (const viewer of ["otherCustomer", "agencyB", "cleanerB"] as const) {
+        await expect(watch(viewer, orderId)).rejects.toMatchObject({ reason: "stream_not_found" });
+      }
+      await expect(watch("customer", orderId)).resolves.toMatchObject({ orderId });
+    } finally {
+      await admin.from("agencies").update({ user_id: world.users.agencyA.id }).eq("id", world.agencies.A);
+    }
+  });
+
+  it("lets no other role check out a job", async () => {
+    const orderId = await world.job({ startsAt: now(), checkedIn: true });
+    for (const viewer of ["customer", "agencyA", "admin"] as const) {
+      expect((await world.users[viewer].client.rpc("check_out", { p_order: orderId })).error?.code).toBe("42501");
+    }
+  });
+
+  it("gives the agency functions to agencies only", async () => {
+    for (const viewer of ["customer", "cleanerA", "admin"] as const) {
+      expect((await world.users[viewer].client.rpc("my_agency")).error?.code).toBe("42501");
+      expect((await world.users[viewer].client.rpc("agency_slots")).error?.code).toBe("42501");
+    }
+  });
+
+  it("keeps the cleaner photo bucket public for reading but closed for writing", async () => {
+    const { data: bucket } = await adminClient().storage.getBucket("cleaner-photos");
+    expect(bucket).toMatchObject({ public: true, allowed_mime_types: ["image/jpeg", "image/png", "image/webp"] });
+    const path = `t34-${Date.now()}.png`;
+    const png = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]);
+    for (const client of [visitorClient(), world.users.customer.client, world.users.agencyA.client]) {
+      const files = client.storage.from("cleaner-photos");
+      expect((await files.upload(path, png, { contentType: "image/png" })).error).not.toBeNull();
+    }
+    await adminClient().storage.from("cleaner-photos").upload(path, png, { contentType: "image/png" });
+    try {
+      for (const client of [visitorClient(), world.users.agencyA.client]) {
+        const files = client.storage.from("cleaner-photos");
+        await files.remove([path]);
+        expect((await files.list()).data ?? []).toEqual([]);
+      }
+      const still = await adminClient().storage.from("cleaner-photos").list("", { search: path });
+      expect(still.data?.map((file) => file.name)).toContain(path);
+    } finally {
+      await adminClient().storage.from("cleaner-photos").remove([path]);
+    }
+  });
+});

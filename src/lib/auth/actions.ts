@@ -5,6 +5,8 @@ import type { Locale } from "next-intl";
 import { redirect } from "@/i18n/navigation";
 import { isSessionCookieName } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createSupabaseServiceClient } from "@/lib/supabase/service";
+import { claimCustomerAccount } from "./code-session";
 import { parseCodeLogin, parseLocale, parseSignIn, parseSignUp, type AuthErrorKey } from "@/lib/validation/auth";
 import { parseCode } from "@/lib/validation/booking";
 import { authFailureKey, type AuthFailureKey } from "./errors";
@@ -94,6 +96,7 @@ export async function verifyLoginCode(_previous: AuthFormState, formData: FormDa
     if (error?.status === 429) return { formError: "rateLimited", codeSent: true, values };
     return { formError: "codeInvalid", codeSent: true, values };
   }
+  await claimCustomerAccount(supabase, createSupabaseServiceClient(), data.user.id, email);
   return enter(supabase, data.user.id, next, locale, values);
 }
 

@@ -143,7 +143,9 @@ export async function addCleaner(_previous: AgencyActionState, formData: FormDat
     let photoUrl: string | null = null;
     if (hasPhoto) {
       const extension = photoTypes[photo.type as keyof typeof photoTypes];
-      const path = `${agency.id}/${userId}-${randomUUID().slice(0, 8)}.${extension}`;
+      // No agency id in the path: the photo address reaches customers, who must not learn which cleaners
+      // share a partner (T34, L2). The cleaner's agency is in cleaners.agency_id.
+      const path = `${randomUUID()}.${extension}`;
       const upload = await server.storage.from(cleanerPhotoBucket).upload(path, photo, { contentType: photo.type });
       if (upload.error) throw new Error(upload.error.message);
       photoUrl = server.storage.from(cleanerPhotoBucket).getPublicUrl(path).data.publicUrl;

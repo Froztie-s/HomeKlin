@@ -103,23 +103,19 @@ test.describe("with an order of each status", () => {
     windows.failed = await lateWindow(area, "13.00");
     windows.cancelled = await lateWindow(area, "15.00");
 
-    // The order of booking matters: the list shows the newest first.
-    ids.past = await book(customer, await lateWindow(area, "08.00", 1), addressOf("Lampau"));
+    // The order of booking matters: the list shows the newest first. Each outcome is applied right after
+    // its booking, because a customer may hold at most 3 unpaid orders (T34 security review, M2).
+    const settle = async (id: string, [status, code]: readonly [string, string]) => {
+      expect((await notify(request, await notification(id, status, code))).status).toBe(200);
+      return id;
+    };
+    ids.past = await settle(await book(customer, await lateWindow(area, "08.00", 1), addressOf("Lampau")), midtransOutcome.paid);
     ids.off = await book(customer, await lateWindow(area, "10.00", 1), addressOf("Dimatikan"));
-    ids.cancelled = await book(customer, windowOf("cancelled"), addressOf("Batal"));
-    ids.failed = await book(customer, windowOf("failed"), addressOf("Gagal"));
-    ids.paid = await book(customer, windowOf("paid"), addressOf("Lunas"));
+    ids.cancelled = await settle(await book(customer, windowOf("cancelled"), addressOf("Batal")), midtransOutcome.cancelled);
+    ids.failed = await settle(await book(customer, windowOf("failed"), addressOf("Gagal")), midtransOutcome.failed);
+    ids.paid = await settle(await book(customer, windowOf("paid"), addressOf("Lunas")), midtransOutcome.paid);
     ids.waiting = await book(customer, windowOf("waiting"), addressOf("Menunggu"));
     ids.others = await book(other, await lateWindow(area, "13.00", 1), addressOf("Rahasia Orang Lain"));
-
-    for (const [id, [status, code]] of [
-      [ids.paid, midtransOutcome.paid],
-      [ids.failed, midtransOutcome.failed],
-      [ids.cancelled, midtransOutcome.cancelled],
-      [ids.past, midtransOutcome.paid],
-    ] as const) {
-      expect((await notify(request, await notification(id, status, code))).status).toBe(200);
-    }
 
     // An order whose window has passed, and one for a service switched off since booking. The window
     // of the first moves only in the order: its place in the seeded window is given back as usual.

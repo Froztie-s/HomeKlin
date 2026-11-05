@@ -443,6 +443,7 @@
       "notCustomer": "Only customer accounts can book. Sign in with your customer account, then try again.",
       "slotUnavailable": "Another customer booked the last place in this slot just before you. Choose another slot below. Your address and consent are kept.",
       "serviceUnavailable": "This service is no longer offered. Choose another service from the services list.",
+      "tooManyUnpaid": "You still have 3 unpaid orders. Pay one, or wait until one is cancelled (2 hours after it was made), before ordering again.",
       "unavailable": "The order could not be made because something went wrong. Try again in a moment.",
       "rateLimited": "Too many attempts. Wait a few minutes, then try again."
     }
