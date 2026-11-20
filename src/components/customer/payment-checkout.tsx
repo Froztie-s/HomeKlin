@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition, type FormEvent, type ReactNode } from "react";
 import { changePaymentMethod, payOrder, type PaymentFailureKey } from "@/lib/payment/actions";
 import { isMidtransAddress, type Bank, type PaymentChoice, type PaymentDetails } from "@/lib/payment/methods";
+import { BookingBar } from "./booking-bar";
 import { parseCard, type CardFields } from "./card-input";
 import { flowCard, flowOutlineButton, flowPrimaryButton } from "./flow-styles";
 import { authenticateCard, getCardToken, type CardError } from "./midtrans-card";
@@ -25,7 +26,12 @@ type Props = {
   footer: ReactNode;
   /** Beside the order card: the note about the email. */
   note: ReactNode;
+  /** The service's name, for the phone bar. */
+  serviceName: string;
 };
+
+/** The id of the card's own "Bayar sekarang": while it is on screen, the phone bar steps aside. */
+const submitId = "bayar-kirim";
 
 const emptyCard: CardFields = { number: "", expiry: "", cvv: "" };
 
@@ -36,8 +42,10 @@ const emptyCard: CardFields = { number: "", expiry: "", cvv: "" };
 // shown on this page (PaymentWaiting) until Midtrans' signed notification marks the order paid, which
 // the page notices by reading the order again. A card is swapped for a one-time token in the browser
 // (midtrans-card.ts): the number never reaches HomeKlin. A card may need the bank's 3-D Secure page,
-// shown in a frame over this one.
-export function PaymentCheckout({ orderId, details, clientKey, amountText, summary, footer, note }: Props) {
+// shown in a frame over this one. On phones the button sits under the order card, far below the
+// methods, so a bar with the service, the chosen method, the price and its own "Bayar sekarang" stays
+// above the bottom navigation, as on steps 1 and 2 (./booking-bar.tsx; 2026-11-20, UX audit item 9).
+export function PaymentCheckout({ orderId, details, clientKey, amountText, summary, footer, note, serviceName }: Props) {
   const t = useTranslations("PaymentChooser");
   const tp = useTranslations("Payment");
   const locale = useLocale();
@@ -120,6 +128,27 @@ export function PaymentCheckout({ orderId, details, clientKey, amountText, summa
     </div>
   );
 
+  const methodLabel =
+    method === "bank" ? `${t("methods.bank.title")} ${t(`banks.${bank}`)}` : t(`methods.${method}.title`);
+
+  const payButton = (compact: boolean) => (
+    <button
+      id={compact ? undefined : submitId}
+      type="submit"
+      disabled={busy}
+      className={`${flowPrimaryButton} ${compact ? "min-h-12 w-auto shrink-0 px-4 text-sm" : ""} ${
+        busy ? "cursor-progress disabled:bg-primary-container disabled:text-on-primary" : ""
+      }`}
+    >
+      {busy ? (
+        <LoaderCircle className="size-5 shrink-0 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+      ) : (
+        <Lock className="size-4.5 shrink-0" aria-hidden="true" />
+      )}
+      {busy ? t("pending") : tp("submit")}
+    </button>
+  );
+
   return (
     <form onSubmit={pay} noValidate className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-6">
       <div className="flex min-w-0 flex-col gap-3">
@@ -144,25 +173,22 @@ export function PaymentCheckout({ orderId, details, clientKey, amountText, summa
         <div className={flowCard}>
           {summary}
           {details ? null : (
-            <div className="mt-5">
-              <button
-                type="submit"
-                disabled={busy}
-                className={`${flowPrimaryButton} ${busy ? "cursor-progress disabled:bg-primary-container disabled:text-on-primary" : ""}`}
-              >
-                {busy ? (
-                  <LoaderCircle className="size-5 shrink-0 animate-spin motion-reduce:animate-none" aria-hidden="true" />
-                ) : (
-                  <Lock className="size-4.5 shrink-0" aria-hidden="true" />
-                )}
-                {busy ? t("pending") : tp("submit")}
-              </button>
-            </div>
+            <div className="mt-5">{payButton(false)}</div>
           )}
           {footer}
         </div>
         {note}
       </aside>
+
+      {/* Inside the form, so its button submits the same choice. Off once a method is charged. */}
+      <BookingBar
+        watchId={submitId}
+        title={serviceName}
+        detail={methodLabel}
+        price={amountText}
+        action={payButton(true)}
+        off={details !== null || frame !== null}
+      />
 
       {frame ? (
         <div role="dialog" aria-modal="true" aria-label={t("threeDs.title")} className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4">

@@ -15,8 +15,6 @@ type MobileShellProps = {
   roleLabel?: string;
   /** forest: inside a `theme-forest` wrapper, the cream bar, the forest wordmark and the lime-wash nav pill. */
   tone?: AppTone;
-  /** The customer shell has a floating language switch (fixed bottom-left): leaves room for it under the page. */
-  floatingControl?: boolean;
   children: ReactNode;
 };
 
@@ -24,7 +22,7 @@ type MobileShellProps = {
 // tablet width up. The menus and the sign-out button are client components, so this shell sends them
 // their messages (customer and cleaner labels only, never the back office's). The customer's "Akun" is
 // the account menu (account-menu.tsx), which also needs the account strings.
-export function MobileShell({ nav, roleLabel, tone = "default", floatingControl = false, children }: MobileShellProps) {
+export function MobileShell({ nav, roleLabel, tone = "default", children }: MobileShellProps) {
   return (
     <ClientMessages namespaces={["AppNavigation", "SignOut", "AccountSummary", "AccountChip"]}>
       <SkipLink />
@@ -32,7 +30,7 @@ export function MobileShell({ nav, roleLabel, tone = "default", floatingControl 
       <main
         id="konten"
         tabIndex={-1}
-        className={`flex flex-1 flex-col outline-none ${floatingControl ? "pb-clear-float md:pb-24" : "pb-clear-nav md:pb-12"}`}
+        className="flex flex-1 flex-col pb-clear-nav outline-none md:pb-12"
       >
         {children}
       </main>

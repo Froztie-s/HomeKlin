@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { checkOutOverdue } from "./overdue";
 
 // What each role reads about jobs (T17, T24, T26, T28), through the database functions of
 // supabase/migrations/20261104090000_jobs.sql, which check the role and return only what that role may
@@ -203,11 +204,18 @@ export async function getMyCleanerProfile(client: SupabaseClient): Promise<Clean
 }
 
 /** Where a job stands, for every role's status line. */
-export type JobProgress = "unassigned" | "assigned" | "inProgress" | "completed";
+export type JobProgress = "unassigned" | "assigned" | "inProgress" | "overdue" | "completed";
 
-export function jobProgress(job: { cleanerName: string | null; checkedInAt: string | null; completedAt: string | null }): JobProgress {
+/**
+ * Where a job stands. Given `now` and the window's end, a job checked in to but not checked out hours
+ * after its window is "overdue" ("Belum check-out", src/lib/jobs/overdue.ts, 2026-11-20), not under way.
+ */
+export function jobProgress(
+  job: { cleanerName: string | null; checkedInAt: string | null; completedAt: string | null; endsAt?: string },
+  now?: Date,
+): JobProgress {
   if (job.completedAt) return "completed";
-  if (job.checkedInAt) return "inProgress";
+  if (job.checkedInAt) return now && job.endsAt && checkOutOverdue({ ...job, endsAt: job.endsAt }, now) ? "overdue" : "inProgress";
   return job.cleanerName ? "assigned" : "unassigned";
 }
 

@@ -69,6 +69,16 @@ async function settle(page: Page, path: string) {
   await expect(page.getByText(/^(Memuat…|Loading…)$/)).toHaveCount(0);
 }
 
+// 2026-11-20 (UX audit): the home leads straight to the job to do next.
+test("the home shows the next job, which opens its page", async ({ page }) => {
+  await settle(page, "/cleaner");
+  const next = page.getByRole("region", { name: "Pekerjaan berikutnya" });
+  await expect(next).toContainText(windowOf(jobs.open));
+  await expect(next).toContainText(address.open);
+  await expect(next.getByRole("link")).toHaveAttribute("href", jobPath(jobs.open));
+  await expect(next).toContainText("Buka untuk check-in");
+});
+
 test("lists only the cleaner's own jobs, today first, with the window, address and customer", async ({ page }) => {
   await settle(page, "/cleaner/jobs");
   await expect(page.getByRole("heading", { level: 1, name: "Pekerjaan" })).toBeVisible();
@@ -101,13 +111,20 @@ test("the job page shows the address, the customer with a phone link, the note a
   await expect(details).toContainText(address.open);
   await expect(details).toContainText("Uji Pelanggan Pekerjaan");
   await expect(details.getByRole("link", { name: /Telepon/ })).toHaveAttribute("href", `tel:${jobPhone}`);
+  // Audit item 4: the address opens in Google Maps, in a new tab, with the whole address as the query.
+  const maps = details.getByRole("link", { name: "Buka di Maps (membuka tab baru)" });
+  await expect(maps).toHaveAttribute("href", `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.open)}`);
+  await expect(maps).toHaveAttribute("target", "_blank");
+  await expect(maps).toHaveAttribute("rel", "noopener noreferrer");
+  expect((await maps.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
   await expect(details.getByText("Catatan pelanggan")).toBeVisible();
   await expect(details.getByText(note)).toBeVisible();
   await expect(details).toContainText("Pelanggan sudah setuju pekerjaan ini disiarkan.");
   await expect(details).toContainText(jobs.open.code);
   await expect(page.getByRole("main").getByRole("link", { name: "Pekerjaan", exact: true })).toHaveAttribute("href", "/cleaner/jobs");
-  // The next step is shown, but cannot be pressed before check-in.
-  await expect(page.getByRole("button", { name: "Check-out, aktif setelah check-in" })).toBeDisabled();
+  // The next step is one quiet line, not a disabled button (2026-11-20, UX audit item 11).
+  await expect(page.getByRole("button", { name: /^Check-out/ })).toHaveCount(0);
+  await expect(page.getByText("Check-out tersedia setelah check-in.")).toBeVisible();
 });
 
 test("a job that opens later says when check-in opens and cannot be checked in yet", async ({ page }) => {
@@ -152,7 +169,7 @@ test("check-in records the time and the location", async ({ page, context }) => 
   await expect(main).toContainText("Sedang dikerjakan");
   await expect(main.getByRole("button", { name: "Check-in", exact: true })).toHaveCount(0);
   await expect(main.getByRole("button", { name: "Check-out", exact: true })).toBeVisible();
-  await expect(main.getByRole("button", { name: "Check-out, aktif setelah check-in" })).toHaveCount(0);
+  await expect(main.getByText("Check-out tersedia setelah check-in.")).toHaveCount(0);
   await expect(main.getByRole("button", { name: "Mulai siaran" })).toBeVisible();
 
   const { data } = await adminClient()
@@ -211,5 +228,6 @@ test("reads in English", async ({ page }) => {
   const opensAt = jakartaClock(Date.parse(jobs.early.startsAt) - 15 * 60_000);
   await expect(page.getByRole("main")).toContainText(`Check-in opens at ${opensAt} WIB`);
   await expect(page.getByRole("region", { name: "Job details" }).getByRole("link", { name: /Call/ })).toHaveAttribute("href", `tel:${jobPhone}`);
+  await expect(page.getByRole("region", { name: "Job details" }).getByRole("link", { name: "Open in Maps (opens in a new tab)" })).toHaveAttribute("target", "_blank");
   await expect(page.getByRole("main")).toContainText("The customer agreed to have this job streamed.");
 });

@@ -8,11 +8,11 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { currentFlowMemory } from "./flow-memory";
 
 /** Where the link leads without JavaScript (or opened in a new tab): the plain way back of each step. */
-const plainHref = { 1: flowFallback, 2: "/services", 3: "/orders" } as const;
+const plainHref = { 1: flowFallback, 2: "/services", 3: "/home" } as const;
 
 // "Kembali" in the booking flow's header (booking-shell.tsx). Step 2 goes to step 1 with the choice
 // (what was typed is kept in the tab, src/components/customer/order-draft.ts); step 3 goes to the
-// customer's orders, where the placed order waits with its payment; step 1 goes back to where the
+// customer home, where the placed order waits with its payment (/orders is the history since 2026-11-20); step 1 goes back to where the
 // customer came from (src/components/customer/booking-flow.ts, bookingBack). It is a real link with a
 // plain address, so it works without JavaScript and opens in a new tab; a plain click reads the current
 // address (step 2 keeps its choice there) and how the customer came in, then goes there. A 44 px

@@ -65,10 +65,14 @@ test("live cards show the order number, the status chip, the job and Buka", asyn
     await expect(card.locator("video")).toHaveCount(1);
   }
 
-  // A disconnected stream's frame says so on a sunken panel, and there is nothing to open.
+  // A disconnected stream's frame says so on a sunken panel; with no picture to enlarge, "Buka" opens
+  // the order's page instead of sitting greyed out (2026-11-20, UX audit item 19).
   const disconnected = feed(page, data.live.disconnected.id);
   await expect(disconnected.getByText("Siaran terputus")).toBeVisible();
-  await expect(disconnected.getByRole("button", { name: /^Buka/ })).toBeDisabled();
+  await expect(disconnected.getByRole("button", { name: /^Buka/ })).toHaveCount(0);
+  const openOrder = disconnected.getByRole("link", { name: `Lihat detail pesanan ${data.live.disconnected.code}` }).filter({ hasText: "Buka" });
+  await expect(openOrder).toBeVisible();
+  await expect(openOrder).toHaveAttribute("href", `/admin/orders/${data.live.disconnected.code}`);
 });
 
 test("a job of today whose cleaner has not checked in is a card with its start time and no Buka", async ({ page }) => {

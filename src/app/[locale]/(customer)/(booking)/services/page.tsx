@@ -8,6 +8,7 @@ import { BookingTrust } from "@/components/customer/booking-trust";
 import { CatalogSkeleton } from "@/components/customer/catalog-skeleton";
 import { flowPageTitle } from "@/components/customer/flow-styles";
 import { ServiceCatalog } from "@/components/customer/service-catalog";
+import { StaffRedirect } from "@/components/auth/staff-redirect";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("ServicesPage");
@@ -30,6 +31,7 @@ export default function ServicesPage({ searchParams }: PageProps<"/[locale]/serv
         <BookingTrust />
       </header>
       <Suspense fallback={<CatalogSkeleton />}>
+        <StaffRedirect />
         <ServiceCatalog searchParams={searchParams} />
       </Suspense>
     </PageContainer>

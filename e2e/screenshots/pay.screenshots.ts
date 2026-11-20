@@ -76,7 +76,7 @@ for (const device of ["phone", "desktop"] as const) {
     await page.waitForURL(/\/orders\?booked=/, { timeout: 20_000 });
     orders.push(new URL(page.url()).searchParams.get("booked") ?? "");
 
-    const pay = page.getByRole("button", { name: "Bayar sekarang" });
+    const pay = page.getByRole("button", { name: "Bayar sekarang" }).first();
     await expect(pay).toBeVisible();
     await page.getByRole("radio", { name: /QRIS/ }).evaluate(
       (input) =>

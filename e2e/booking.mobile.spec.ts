@@ -157,7 +157,7 @@ test.describe("as a signed-in customer", () => {
       await expect(confirmation.getByText(`${dayText(target.startsAt)}, ${windowText(target)} WIB`)).toBeVisible();
       await expect(confirmation.getByText(address)).toBeVisible();
       // The next step is paying (T10, e2e/payment.mobile.spec.ts).
-      await expect(confirmation.getByRole("button", { name: "Bayar sekarang" })).toBeVisible();
+      await expect(confirmation.getByRole("button", { name: "Bayar sekarang" }).first()).toBeVisible();
 
       // One brand: neither the page nor the data sent to the browser names or identifies the agency.
       const marks = await agencyMarks();
@@ -360,6 +360,23 @@ test.describe("as a signed-in customer", () => {
         });
         expect(fits).toBe(true);
       }
+    });
+
+    test("a service tapped on a phone brings its free times into view; the arrow keys do not move the page", async ({ page }) => {
+      await page.goto(`/services?area=${area}`);
+      const times = page.getByRole("region", { name: /^Jam kosong/ });
+      const radios = page.getByRole("radiogroup", { name: "Layanan" }).getByRole("radio");
+      await radios.first().scrollIntoViewIfNeeded();
+      await expect(times).not.toBeInViewport();
+      await radios.first().click({ force: true });
+      await expect(times).toBeInViewport();
+
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await radios.first().focus();
+      const before = await page.evaluate(() => window.scrollY);
+      await page.keyboard.press("ArrowDown");
+      await expect(radios.nth(1)).toBeChecked();
+      expect(await page.evaluate(() => window.scrollY)).toBeLessThanOrEqual(before + 200);
     });
 
     test("keeps the choice, the price and the button in a bar at the bottom while the button is out of sight", async ({ page }) => {

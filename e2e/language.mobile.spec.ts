@@ -3,9 +3,9 @@ import { signedInAs } from "./setup/auth-state";
 
 // T4 on a 360 px phone: the language switch fits the existing bars without a second row
 // (markdown/design.md, Layout). The landing header keeps one 64 px row with the wordmark, a compact
-// link to the other language and "Pesan sekarang"; the cleaner app bar carries the full ID | EN toggle (the
-// customer pages have a floating one, e2e/language-floating.spec.ts); the
-// back office puts it in its menu, under the sections.
+// link to the other language and "Pesan sekarang"; the cleaner and customer app bars carry the full
+// ID | EN toggle (the customer's since the UX audit of 2026-11-18, e2e/language-customer-bar.spec.ts);
+// the back office puts it in its menu, under the sections.
 // Public pages are checked signed out; the cleaner app and the back office by a signed-in user with
 // their role (T5).
 test.use({ viewport: { width: 360, height: 740 } });
@@ -57,6 +57,8 @@ for (const { path, cta, other, group } of [
 for (const { path, group, role, session } of [
   { path: "/cleaner", group: "Bahasa", role: "Petugas", session: signedInAs.cleaner },
   { path: "/en/cleaner", group: "Language", role: "Cleaner", session: signedInAs.cleaner },
+  { path: "/orders", group: "Bahasa", role: "", session: signedInAs.customer },
+  { path: "/en/orders", group: "Language", role: "", session: signedInAs.customer },
 ]) {
   test.describe(`app bar on ${path}`, () => {
     test.use(session);

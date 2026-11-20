@@ -20,6 +20,17 @@ export function localPhone(phone: string | null): string | null {
   return digits.match(/.{1,4}/g)?.join(" ") ?? digits;
 }
 
+/**
+ * The job page's "Buka di Maps" link (audit item 4): Google Maps' search URL for the address, which
+ * opens the Maps app on a phone that has it. It is a plain link, so the address goes to Google only
+ * when the cleaner taps it; the page loads nothing from Google. Null for no address (no link).
+ * Source: https://developers.google.com/maps/documentation/urls/get-started ("Search action")
+ */
+export function mapsSearchUrl(address: string): string | null {
+  const value = address.trim();
+  return value ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(value)}` : null;
+}
+
 /** The hours tile: one decimal at most, never negative. */
 export function roundHours(hours: number): number {
   if (!Number.isFinite(hours) || hours <= 0) return 0;
@@ -28,13 +39,23 @@ export function roundHours(hours: number): number {
 
 type TodayJob = { id: string; startsAt: string; endsAt: string; checkedInAt: string | null; completedAt: string | null };
 
-/** The job marked "Berikutnya": the first of today's jobs still to do (in progress, open or later today). */
-export function nextJobId(today: readonly TodayJob[], now: Date): string | null {
-  const next = today.find((job) => {
+/**
+ * The job the list and the home put first: the first of today's jobs still to do (in progress, open or
+ * later today). `now` is true when the cleaner has checked in to it: then it reads "Sekarang", never
+ * "Berikutnya" (2026-11-20, UX audit item 10: a job in progress wore "Berikutnya").
+ */
+export function focusJob<T extends TodayJob>(today: readonly T[], now: Date): { job: T; now: boolean } | null {
+  for (const job of today) {
     const state = checkInState(job, now);
-    return state === "checkedIn" || state === "open" || state === "early";
-  });
-  return next?.id ?? null;
+    if (state === "checkedIn") return { job, now: true };
+    if (state === "open" || state === "early") return { job, now: false };
+  }
+  return null;
+}
+
+/** The id of focusJob's job, or null. */
+export function nextJobId(today: readonly TodayJob[], now: Date): string | null {
+  return focusJob(today, now)?.job.id ?? null;
 }
 
 /** The live state the job page starts from, from my_stream_status: an ended stream, or none, is off. */

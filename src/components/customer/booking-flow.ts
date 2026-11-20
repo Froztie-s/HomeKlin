@@ -44,13 +44,14 @@ export type BackAction = { kind: "history" } | { kind: "push"; href: string };
 
 /**
  * Where "Kembali" goes. Step 2: step 1 with the choice in the address (the typed fields are kept in
- * the tab, ./order-draft.ts). Step 3: the customer's orders, because the order is placed by then and
- * step 2 would book it again. Step 1: one step back in the browser when the customer came straight
+ * the tab, ./order-draft.ts). Step 3: the customer home, where the placed order waits with its payment
+ * (since 2026-11-20 /orders is the history; the orders still to come are on /home), because the order
+ * is placed by then and step 2 would book it again. Step 1: one step back in the browser when the customer came straight
  * from another page of the site, that page again after moving inside the flow (going back in the
  * browser would only return to a step), and the customer home when the flow was opened from outside.
  */
 export function bookingBack(step: FlowStep, search: string, memory: FlowMemory): BackAction {
-  if (step === 3) return { kind: "push", href: "/orders" };
+  if (step === 3) return { kind: "push", href: "/home" };
   if (step === 2) {
     const params = Object.fromEntries(new URLSearchParams(search));
     return { kind: "push", href: serviceStepHref(parseOrderQuery(params)) };

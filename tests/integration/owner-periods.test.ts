@@ -76,6 +76,8 @@ type Numbers = {
   previous: Totals;
   daily: { date: string; revenue_idr: number }[];
   payouts_by_agency: { agency_id: string; name: string; paid_out_idr: number }[];
+  daily_period: { date: string; revenue_idr: number }[];
+  by_status_period: Record<"pending_payment" | "paid" | "failed" | "cancelled", number>;
 };
 
 async function numbers(days: number): Promise<Numbers> {
@@ -116,6 +118,28 @@ describe("the owner's numbers for a period", { timeout: 30_000 }, () => {
     expect(daily).toHaveLength(14);
     expect(daily.at(-1)?.date.slice(0, 10)).toBe(jakartaToday());
     expect(daily.at(-1)?.revenue_idr).toBeGreaterThanOrEqual(3 * world.price);
+  });
+
+  // 20261120100000_owner_numbers_period.sql: the chart and the status counts follow the period.
+  it("has the daily revenue over the whole period, ending today, and the period's orders by status", async () => {
+    for (const days of [7, 30, 90]) {
+      const data = await numbers(days);
+      expect(data.daily_period, String(days)).toHaveLength(days);
+      expect(data.daily_period.at(-1)?.date.slice(0, 10)).toBe(jakartaToday());
+      const sum = data.daily_period.reduce((total, day) => total + Number(day.revenue_idr), 0);
+      expect(sum).toBeGreaterThanOrEqual(3 * world.price);
+      expect(Object.keys(data.by_status_period).sort()).toEqual(["cancelled", "failed", "paid", "pending_payment"]);
+    }
+    // Dated as revenue is (20261120110000): the period's paid orders and "Dibayar" agree.
+    for (const days of [7, 30, 90]) {
+      const data = await numbers(days);
+      expect(data.by_status_period.paid, String(days)).toBe(data.period.paid_orders);
+    }
+    // A longer period holds at least the orders of a shorter one.
+    const [week, quarter] = [await numbers(7), await numbers(90)];
+    expect(quarter.by_status_period.paid).toBeGreaterThanOrEqual(week.by_status_period.paid);
+    // The old keys stay as they were, for the code already deployed.
+    expect(week.daily).toHaveLength(14);
   });
 
   it("splits the payouts by agency for the period", async () => {

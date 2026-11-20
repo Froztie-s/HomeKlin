@@ -20,6 +20,8 @@ type BackOfficeTopBarProps = {
   tone?: ShellTone;
   /** Forest tone: the wordmark becomes a link to the console's start page. */
   home?: HomeLink;
+  /** A tool shown at the top of the menu, above the sections (admin's order search). */
+  tool?: ReactNode;
 };
 
 export type HomeLink = { href: string; label: string };
@@ -65,7 +67,7 @@ const menuId = "back-office-menu";
 // (pushing content down), so nothing is covered and no focus trap is needed. The account and the
 // language switch sit in the menu, under the sections: at 360 px the bar has no room next to the
 // wordmark, the role and the Menu button.
-export function BackOfficeTopBar({ nav, roleLabel, account, tone = "default", home }: BackOfficeTopBarProps) {
+export function BackOfficeTopBar({ nav, roleLabel, account, tone = "default", home, tool }: BackOfficeTopBarProps) {
   const t = useTranslations("BackOfficeShell");
   // The address as the browser shows it (with /en), so switching the language also counts as
   // navigating; next-intl's usePathname would return the same path in both languages.
@@ -116,6 +118,7 @@ export function BackOfficeTopBar({ nav, roleLabel, account, tone = "default", ho
         </button>
       </div>
       <div id={menuId} hidden={!open} className={look.menu}>
+        {tool ? <div className="mb-3 px-1">{tool}</div> : null}
         <SideNavList nav={nav} tone={tone} onNavigate={() => setOpenedOn(null)} />
         {/* In the forest tone the switch comes first, as at the foot of the dark sidebar. */}
         <div className={look.footer}>

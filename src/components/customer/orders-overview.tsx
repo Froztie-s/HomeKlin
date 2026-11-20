@@ -1,4 +1,4 @@
-import { ArrowRight, Check, ClipboardList, Lock } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, ClipboardList, History, Lock } from "lucide-react";
 import Image from "next/image";
 import { getLocale, getTranslations } from "next-intl/server";
 import { SignOutButton } from "@/components/auth/sign-out-button";
@@ -20,20 +20,19 @@ type OrdersOverviewProps = {
   /** The signed-in customer: their name (empty for an account made by ordering) and email. */
   account: { name: string; email: string };
   now: Date;
-  /** On /home only the latest few orders show, with a link to all of them on /orders. */
-  limit?: number;
 };
 
-// "Pesanan Anda" (D5, mocks Customer-Home and Phone-Home): the signed-in customer's orders, on /orders
-// and as the signed-in home. A job in progress comes first under "Sedang berlangsung", on a dark band
-// with its Petugas HomeKlin and "Tonton langsung"; then every other order, newest first (T12). Beside
-// them the account (who is signed in, and how: with the email they ordered with), what happens to
+// "Pesanan Anda" (D5, mocks Customer-Home and Phone-Home): the signed-in home, /home. Since 2026-11-20
+// it holds only the orders not finished yet (rules in ./orders-overview-data.ts): a job in progress
+// under "Sedang berlangsung", on a dark band with its Petugas HomeKlin and "Tonton langsung", then
+// "Akan datang", the orders waiting for payment or for their time, the soonest first. The finished
+// ones have their own page, /orders (./orders-history.tsx), linked under the list. Beside them the account (who is signed in, and how: with the email they ordered with), what happens to
 // recordings, and the way to help. Everything is the customer's own (listMyOrders), never the agency.
-export async function OrdersOverview({ orders, serviceName, account, now, limit }: OrdersOverviewProps) {
+export async function OrdersOverview({ orders, serviceName, account, now }: OrdersOverviewProps) {
   const locale = await getLocale();
   const [t, words] = await Promise.all([getTranslations("OrdersOverview"), getOrderWords(locale)]);
-  const { ongoing, history } = splitOrders(orders);
-  const shown = limit === undefined ? history : history.slice(0, limit);
+  const split = splitOrders(orders, now);
+  const ongoingCount = split.live.length + split.upcoming.length;
   const firstName = account.name.trim().split(/\s+/)[0] ?? "";
 
   return (
@@ -52,12 +51,12 @@ export async function OrdersOverview({ orders, serviceName, account, now, limit 
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)]">
         <div className="flex min-w-0 flex-col gap-6">
-          {ongoing.length > 0 ? (
+          {split.live.length > 0 ? (
             <section aria-labelledby="sedang-berlangsung" className="flex flex-col gap-3">
               <h2 id="sedang-berlangsung" className={flowCardTitle}>
                 {t("ongoingTitle")}
               </h2>
-              {ongoing.map((order) => (
+              {split.live.map((order) => (
                 <article
                   key={order.id}
                   aria-labelledby={`berlangsung-${order.id}`}
@@ -103,24 +102,40 @@ export async function OrdersOverview({ orders, serviceName, account, now, limit 
               ))}
             </section>
           ) : null}
-
-          <section aria-labelledby="riwayat-pesanan" className="flex flex-col gap-3">
-            <h2 id="riwayat-pesanan" className={flowCardTitle}>
-              {t("historyTitle")}
-            </h2>
-            {shown.length > 0 ? (
-              <OrderList orders={shown} serviceName={serviceName} now={now} />
-            ) : (
-              <EmptyState tone="forest" icon={ClipboardList} title={t(ongoing.length > 0 ? "historyEmptyTitle" : "emptyTitle")}>
-                {t(ongoing.length > 0 ? "historyEmptyBody" : "emptyBody")}
-              </EmptyState>
-            )}
-            {limit !== undefined && history.length > limit ? (
-              <Link href="/orders" className={`${flowTextLink} self-start`}>
-                {t("seeAll", { count: String(history.length) })}
-              </Link>
-            ) : null}
-          </section>
+          {split.upcoming.length > 0 ? (
+            <section aria-labelledby="akan-datang" className="flex flex-col gap-3">
+              {/* "Akan datang" (user, 2026-11-17): says why these white cards differ from the dark
+                  live card above; same heading style as "Sedang berlangsung". */}
+              <h2 id="akan-datang" className={flowCardTitle}>
+                {t("upcomingTitle")}
+              </h2>
+              <OrderList orders={split.upcoming} serviceName={serviceName} now={now} />
+            </section>
+          ) : null}
+          {ongoingCount === 0 ? (
+            <EmptyState tone="forest" icon={ClipboardList} title={orders.length === 0 ? t("emptyTitle") : t("ongoingEmptyTitle")}>
+              {orders.length === 0 ? t("emptyBody") : t("ongoingEmptyBody")}
+            </EmptyState>
+          ) : null}
+          {split.history.length > 0 ? (
+            // The finished orders have their own page, /orders (2026-11-20); here only the way there.
+            <Link
+              href="/orders"
+              className="group flex items-center gap-4 rounded-lg bg-card p-4 inset-ring-1 inset-ring-border transition-shadow duration-150 ease-out-quart hover:shadow-card-hover active:bg-sunken md:p-5"
+            >
+              <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full bg-lime-wash text-on-lime-wash">
+                <History className="size-5" />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                <span className="font-semibold text-ink">{t("historyLinkTitle")}</span>
+                <span className="text-sm text-ink-muted">{t("historyLinkBody", { count: split.history.length })}</span>
+              </span>
+              <ChevronRight
+                className="size-5 shrink-0 text-ink-muted transition-transform duration-150 ease-out-quart group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
+            </Link>
+          ) : null}
         </div>
 
         <aside aria-label={t("asideLabel")} className="flex flex-col gap-4">

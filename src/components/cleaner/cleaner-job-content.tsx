@@ -1,4 +1,4 @@
-import { Hash, MapPin, MessageSquareText, Phone, SearchX, UserRound, Video, type LucideIcon } from "lucide-react";
+import { Hash, MapPin, MessageSquareText, Navigation, Phone, SearchX, UserRound, Video, type LucideIcon } from "lucide-react";
 import { unstable_rethrow } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -13,7 +13,7 @@ import { checkInOpensAt } from "@/lib/jobs/check-in";
 import { listMyJobs, type CleanerJob } from "@/lib/jobs/jobs";
 import { myStreamStatus } from "@/lib/stream/streams";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { localPhone, streamFromStatus } from "./cleaner-views";
+import { localPhone, mapsSearchUrl, streamFromStatus } from "./cleaner-views";
 import { JobActions } from "./job-actions";
 import type { CleanerStream } from "./stream-control-state";
 import { ReadFailed } from "./read-failed";
@@ -73,6 +73,7 @@ export async function CleanerJobContent({ code: raw }: { code: string }) {
   const now = new Date();
   const labels = await getSlotLabels(locale);
   const customer = job.customerName || t("customerFallback");
+  const maps = mapsSearchUrl(job.address);
 
   return (
     <>
@@ -84,16 +85,24 @@ export async function CleanerJobContent({ code: raw }: { code: string }) {
       <section aria-label={t("detailsLabel")} className="flex flex-col gap-3.5 rounded-lg bg-card p-4">
         <dl className="flex flex-col gap-3.5">
           <Fact icon={MapPin} term={t("fields.address")}>
-            {job.address}
+            <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+              <span>{job.address}</span>
+              {/* Audit item 4: the address in Google Maps, in a new tab (the Maps app on most phones). A
+                  plain link: the address goes to Google only when the cleaner taps it (cleaner-views.ts). */}
+              {maps ? (
+                <a href={maps} target="_blank" rel="noopener noreferrer" className={pillLink}>
+                  <Navigation className="size-4 shrink-0 text-primary" aria-hidden="true" />
+                  {t("maps")}
+                  <span className="sr-only"> {t("newTab")}</span>
+                </a>
+              ) : null}
+            </span>
           </Fact>
           <Fact icon={UserRound} term={t("fields.customer")}>
             <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
               <span>{customer}</span>
               {job.contactPhone ? (
-                <a
-                  href={`tel:${job.contactPhone}`}
-                  className="inline-flex min-h-touch items-center gap-2 rounded-full bg-card px-4 text-sm font-semibold whitespace-nowrap text-ink tabular-nums inset-ring-[1.5px] inset-ring-outline transition-colors duration-150 ease-out-quart hover:bg-sunken active:bg-lime-wash"
-                >
+                <a href={`tel:${job.contactPhone}`} className={`${pillLink} tabular-nums`}>
                   <Phone className="size-4 shrink-0 text-primary" aria-hidden="true" />
                   <span className="sr-only">{t("call")} </span>
                   {localPhone(job.contactPhone)}
@@ -132,6 +141,10 @@ export async function CleanerJobContent({ code: raw }: { code: string }) {
 }
 
 // One fact of the job: a lime-wash icon well, the term small and muted, the value in semibold ink.
+/** The job's outlined pill links: the phone number and "Buka di Maps". */
+const pillLink =
+  "inline-flex min-h-touch items-center gap-2 rounded-full bg-card px-4 text-sm font-semibold whitespace-nowrap text-ink inset-ring-[1.5px] inset-ring-outline transition-colors duration-150 ease-out-quart hover:bg-sunken active:bg-lime-wash";
+
 function Fact({ icon: Icon, term, children }: { icon: LucideIcon; term: string; children: ReactNode }) {
   return (
     <div className="flex items-start gap-3">

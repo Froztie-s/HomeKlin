@@ -1,6 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
 import { testProject } from "../tests/integration/test-project";
 import { agencyMarks } from "./booking-test-data";
+import { openHistoryMonthOf } from "./history-months";
 import { signInWithPassword } from "./order-test-data";
 import { createReplayWorld, type ReplayWorld } from "./recording-test-data";
 import type { StorageState } from "./setup/auth-state";
@@ -113,9 +114,12 @@ test.describe("the customer", () => {
   });
 
   test("the list says until when each recording is kept", async ({ page }) => {
-    await page.goto("/orders");
+    // The history shows one month at a time, so each row is looked for in its own month.
+    await openHistoryMonthOf(page, world.orders.available);
     await expect(rowOf(page, world.orders.available)).toContainText(/Rekaman tersedia sampai \S+, \d{1,2} \S+, \d{2}\.\d{2} WIB/);
+    await openHistoryMonthOf(page, world.orders.expired);
     await expect(rowOf(page, world.orders.expired)).toContainText("Rekaman sudah dihapus");
+    await openHistoryMonthOf(page, world.orders.none);
     await expect(rowOf(page, world.orders.none)).toContainText("Rekaman tidak tersedia");
     await expect(page.locator("video")).toHaveCount(0);
   });
@@ -136,8 +140,9 @@ test.describe("the customer", () => {
     await expect(page.getByText("For your privacy, recordings are deleted automatically 7 days after the job ends.")).toBeVisible();
     await expect(page.locator("video")).toHaveCount(0);
 
-    await page.goto("/en/orders");
+    await openHistoryMonthOf(page, world.orders.available, "/en");
     await expect(rowOf(page, world.orders.available, "/en")).toContainText(/Recording available until/);
+    await openHistoryMonthOf(page, world.orders.expired, "/en");
     await expect(rowOf(page, world.orders.expired, "/en")).toContainText("Recording deleted");
   });
 

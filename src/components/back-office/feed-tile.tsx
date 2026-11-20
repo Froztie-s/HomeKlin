@@ -48,7 +48,7 @@ export async function FeedTile({ stream, serviceName, areaName }: { stream: Live
           service={serviceName ?? t("serviceFallback")}
           areaName={areaName}
           agencyName={stream.agencyName}
-          action={<FeedOpen name={cleaner} />}
+          action={<FeedOpen name={cleaner} order={{ href: `/admin/orders/${stream.orderCode}`, label: t("orderLink", { code: stream.orderCode }) }} />}
           labels={{ orderLink: t("orderLink", { code: stream.orderCode }), agency: t("agency") }}
         />
       </FeedCard>

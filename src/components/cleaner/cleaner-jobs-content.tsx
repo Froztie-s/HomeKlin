@@ -12,7 +12,7 @@ import type { Service } from "@/lib/catalog/catalog";
 import { formatJakartaDay } from "@/lib/catalog/slots-days";
 import { listMyJobs, type CleanerJob } from "@/lib/jobs/jobs";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { nextJobId, pillBase } from "./cleaner-views";
+import { focusJob, pillBase } from "./cleaner-views";
 import { JobStatePill } from "./job-state";
 import { ReadFailed } from "./read-failed";
 
@@ -21,7 +21,8 @@ import { ReadFailed } from "./read-failed";
 // jobs assigned to this cleaner, never another cleaner's and never the agency), then lists them in
 // three groups: today (earliest first, an unfinished one from before included), upcoming, and just
 // finished. Each job is one white card that opens its page (/cleaner/jobs/HK-1042), where check-in,
-// the stream and check-out are; the next job to do today wears a forest edge and "Berikutnya".
+// the stream and check-out are; the next job to do today wears a forest edge and "Berikutnya", or
+// "Sekarang" once the cleaner has checked in to it (2026-11-20, UX audit item 10).
 export async function CleanerJobsContent() {
   const locale = await getLocale();
   const t = await getTranslations("CleanerJobsPage");
@@ -47,7 +48,7 @@ export async function CleanerJobsContent() {
   const now = new Date();
   const groups = groupCleanerJobs(jobs, now);
   const labels = await getSlotLabels(locale);
-  const next = nextJobId(groups.today, now);
+  const focus = focusJob(groups.today, now);
   const today = formatJakartaDay(jakartaDayOf(now.toISOString(), now).date, locale);
   const serviceName = (job: CleanerJob) =>
     services.find((service) => service.id === job.serviceId)?.name[locale] ?? t("serviceFallback");
@@ -60,8 +61,8 @@ export async function CleanerJobsContent() {
         labels={labels}
         renderedAt={now.toISOString()}
         upcomingDay={kind === "upcoming" ? labels.day(jakartaDayOf(job.startsAt, now)) : null}
-        isNext={job.id === next}
-        nextLabel={t("next")}
+        isNext={job.id === focus?.job.id}
+        nextLabel={focus?.now ? t("now") : t("next")}
         customerLine={t("customerLine", { name: job.customerName || t("customerFallback") })}
       />
     </li>

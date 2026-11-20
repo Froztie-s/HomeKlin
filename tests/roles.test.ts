@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  publicPageRedirect,
   appRoles,
   isAllowed,
   rolesFor,
@@ -39,8 +40,15 @@ describe("stripLocale", () => {
 
 describe("rolesFor", () => {
   it("leaves the landing page, the app home, services, help and sign-in public", () => {
-    for (const path of ["/", "/home", "/services", "/pesan", "/book", "/support", "/login", "/signup"]) {
+    for (const path of ["/", "/home", "/services", "/support", "/login", "/signup"]) {
       expect(rolesFor(path)).toBeNull();
+    }
+  });
+
+  // 2026-11-20 (the user): ordering needs a customer account.
+  it("keeps ordering (step 2 and its old address) for customers", () => {
+    for (const path of ["/pesan", "/pesan?layanan=regular", "/book"]) {
+      expect(rolesFor(path.split("?")[0])).toEqual(["customer"]);
     }
   });
 
@@ -69,6 +77,16 @@ describe("rolesFor", () => {
 
   it("ignores a trailing slash", () => {
     expect(rolesFor("/agency/")).toEqual(["agency"]);
+  });
+});
+
+describe("publicPageRedirect", () => {
+  it("sends staff from the public pages to their own home and leaves customers there", () => {
+    expect(publicPageRedirect("customer")).toBeNull();
+    expect(publicPageRedirect("admin")).toBe("/admin/monitor");
+    expect(publicPageRedirect("agency")).toBe("/agency");
+    expect(publicPageRedirect("cleaner")).toBe("/cleaner");
+    expect(publicPageRedirect("owner")).toBe("/owner");
   });
 });
 

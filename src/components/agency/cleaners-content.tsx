@@ -13,7 +13,7 @@ import { AgencyError, getMyAgency, listAgencySlots, type AgencySlot, type MyAgen
 import { getServiceAreas } from "@/lib/catalog/cached";
 import { JobsError, listAgencyCleaners, listAgencyJobs, type AgencyCleaner, type AgencyJob } from "@/lib/jobs/jobs";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { AddCleanerForm } from "./add-cleaner-form";
+import { AddCleanerDialog } from "./add-cleaner-dialog";
 import { CleanerRow } from "./cleaner-row";
 import { availabilityGrid, cleanerWeekJobs, formatAgencyDate, jakartaWeek, type AvailabilityCell } from "./agency-views";
 import { Panel } from "./agency-ui";
@@ -215,14 +215,13 @@ export async function CleanersContent({ searchParams }: { searchParams: Promise<
         </div>
       </Panel>
 
-      <div id="add-cleaner" className="scroll-mt-6 lg:max-w-xl">
-        <AddCleanerForm addCleaner={addCleaner} />
-      </div>
+      {/* Opened by the header's "Tambah petugas" (UX audit item 17), not a form at the end of the page. */}
+      <AddCleanerDialog addCleaner={addCleaner} />
     </ClientMessages>
   );
 }
 
-/** The header's "Tambah petugas": a jump to the form at the end of the page. */
+/** The header's "Tambah petugas": a link to #add-cleaner, which AddCleanerDialog opens as a dialog. */
 export async function AddCleanerJump() {
   const t = await getTranslations("AgencyCleanersPage");
   return (

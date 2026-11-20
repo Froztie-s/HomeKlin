@@ -1,4 +1,6 @@
+import { ChevronDown } from "lucide-react";
 import { chartScale, formatAgencyDate, formatRupiahCompact } from "@/components/agency/agency-views";
+import { secondaryButton } from "@/components/agency/styles";
 import { formatRupiah } from "@/lib/format";
 
 // The summary pieces the redesigned agency and owner dashboards share (D2 "Partner-Summary", lifted at
@@ -90,9 +92,12 @@ export function DailyBars({ series, locale, sentence, table }: { series: readonl
           </div>
         </div>
       ) : null}
+      {/* The toggle looks like the page's other secondary buttons ("Lihat semua mitra"), with a chevron
+          that turns when open, so it reads as something to press (2026-11-20, UX audit item 21). */}
       <details className="group text-sm">
-        <summary className="inline-flex min-h-touch cursor-pointer items-center rounded-sm font-semibold text-primary underline-offset-4 hover:underline">
+        <summary className={`${secondaryButton} w-fit cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
           {table.show}
+          <ChevronDown className="size-4 shrink-0 transition-transform duration-150 ease-out-quart group-open:rotate-180" aria-hidden="true" />
         </summary>
         <div className="mt-2 max-h-96 overflow-auto">
           <table className="w-full border-collapse text-sm">

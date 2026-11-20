@@ -10,7 +10,7 @@ import { secondaryButton } from "@/components/agency/styles";
 import { GateFallback } from "@/components/auth/gate-fallback";
 import { RoleGate } from "@/components/auth/role-gate";
 import { DailyBars, ShareBars } from "@/components/back-office/summary-pieces";
-import { growth, payoutShares, statusRows, type Growth } from "@/components/owner/numbers";
+import { chartBuckets, growth, payoutShares, statusRows, type Growth } from "@/components/owner/numbers";
 import { PageHeader } from "@/components/ui/page-header";
 import { Link } from "@/i18n/navigation";
 import { formatRupiah } from "@/lib/format";
@@ -26,8 +26,9 @@ type SearchParams = Record<string, string | string[] | undefined>;
 
 // "Ringkasan", the owner's start page (T29b; D3, after the mock Owner-Overview), the owner only: the
 // chosen period's revenue, paid orders, average order and what went to the partner agencies, each
-// against the period before (7, 30 or 90 days, ?days=, 30 when absent); revenue per day for the last
-// 14 days; the agency fees per partner in the period; and every order by status (SPEC, Owner). The
+// against the period before (7, 30 or 90 days, ?days=, 30 when absent); revenue over the same period
+// (per day, per week for 90 days); the agency fees per partner in the period; and the orders made in
+// the period by status (SPEC, Owner). Since 2026-11-20 every part follows the chosen period. The
 // title is prerendered; the range toggle and the numbers render inside the page's own role checks (a
 // layout's check would not protect them) and are read with the owner's own session through
 // owner_numbers(p_days), which answers the owner role only and carries no customer data. Never cached.
@@ -94,7 +95,7 @@ async function OwnerOverview({ searchParams }: { searchParams: Promise<SearchPar
   const money = (amount: number) => formatRupiah(amount, locale);
   const { period, previous } = numbers;
   const shares = payoutShares(numbers.payoutsByAgency.map((agency) => ({ id: agency.id, name: agency.name, amountIdr: agency.paidOutIdr })));
-  const statuses = statusRows(numbers.byStatus);
+  const statuses = statusRows(numbers.byStatusPeriod);
   const totalOrders = statuses.reduce((sum, row) => sum + row.count, 0);
 
   return (
@@ -115,7 +116,7 @@ async function OwnerOverview({ searchParams }: { searchParams: Promise<SearchPar
       </ul>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:items-start">
-        <DailyRevenue daily={numbers.daily} />
+        <DailyRevenue daily={numbers.dailyPeriod} days={days} />
         <Panel id="owner-payouts" title={t("payouts.title")} description={t("payouts.description", { days, total: money(shares.totalIdr) })}>
           <ShareBars rows={shares.rows} locale={locale} empty={t("payouts.empty")} />
           <Link href="/owner/agencies" className={`${secondaryButton} w-fit`}>
@@ -125,7 +126,7 @@ async function OwnerOverview({ searchParams }: { searchParams: Promise<SearchPar
         </Panel>
       </div>
 
-      <Panel id="owner-status" title={t("status.title")} description={t("status.description")}>
+      <Panel id="owner-status" title={t("status.title")} description={t("status.description", { days })}>
         <p className="text-sm font-semibold text-ink">{t("status.total", { count: totalOrders })}</p>
         <ul className="grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-4">
           {statuses.map((row) => (
@@ -176,37 +177,50 @@ async function GrowthLine({ change, days }: { change: Growth; days: number }) {
   return <>{words}</>;
 }
 
-async function DailyRevenue({ daily }: { daily: BusinessNumbers["daily"] }) {
+async function DailyRevenue({ daily, days }: { daily: BusinessNumbers["dailyPeriod"]; days: number }) {
   const [t, locale] = await Promise.all([getTranslations("OwnerDashboardPage"), getLocale()]);
   const money = (amount: number) => formatRupiah(amount, locale);
-  const series = daily.map((day) => ({ date: day.date, amountIdr: day.revenueIdr }));
+  // One bar a day for 7 and 30 days, one a week for 90 (chartBuckets).
+  const { unit, buckets: series } = chartBuckets(daily);
+  const weekly = unit === "week";
+  const dayLabel = (date: string) => formatAgencyDate(date, locale, "short");
   const first = series[0];
   const last = series[series.length - 1];
   const total = series.reduce((sum, day) => sum + day.amountIdr, 0);
   // What the bars say, in one sentence for screen readers (the bars themselves are hidden from them).
-  let sentence = t("daily.noneSentence", { count: series.length });
+  let sentence = t("daily.noneSentence", { count: days });
   if (first && total > 0) {
     const highest = series.reduce((best, day) => (day.amountIdr > best.amountIdr ? day : best), first);
-    sentence = t("daily.sentence", {
-      count: series.length,
+    sentence = t(weekly ? "daily.sentenceWeekly" : "daily.sentence", {
+      count: days,
       total: money(total),
       high: money(highest.amountIdr),
-      highDay: formatAgencyDate(highest.date, locale, "short"),
+      highDay: weekly ? t("daily.weekRange", { from: dayLabel(highest.date), to: dayLabel(highest.end) }) : dayLabel(highest.date),
     });
   }
-  const span = first && last ? { from: formatAgencyDate(first.date, locale, "short"), to: formatAgencyDate(last.date, locale, "short") } : { from: "", to: "" };
+  const span = first && last ? { from: dayLabel(first.date), to: dayLabel(last.end) } : { from: "", to: "" };
 
   return (
-    <Panel id="owner-daily" title={t("daily.title")} description={t("daily.description", span)}>
+    <Panel
+      id="owner-daily"
+      title={weekly ? t("daily.titleWeekly") : t("daily.title")}
+      description={t(weekly ? "daily.descriptionWeekly" : "daily.description", { ...span, days })}
+    >
       <DailyBars
         series={series}
         locale={locale}
         sentence={sentence}
         table={{
-          show: t("daily.showTable"),
-          caption: t("daily.tableCaption"),
-          columns: [t("daily.day"), t("daily.revenue")],
-          rows: series.map((day) => ({ key: day.date, cells: [formatAgencyDate(day.date, locale, "weekday"), money(day.amountIdr)] })),
+          show: weekly ? t("daily.showTableWeekly") : t("daily.showTable"),
+          caption: t(weekly ? "daily.tableCaptionWeekly" : "daily.tableCaption", { days }),
+          columns: [weekly ? t("daily.week") : t("daily.day"), t("daily.revenue")],
+          rows: series.map((bucket) => ({
+            key: bucket.date,
+            cells: [
+              weekly ? t("daily.weekRange", { from: dayLabel(bucket.date), to: dayLabel(bucket.end) }) : formatAgencyDate(bucket.date, locale, "weekday"),
+              money(bucket.amountIdr),
+            ],
+          })),
         }}
       />
     </Panel>

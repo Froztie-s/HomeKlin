@@ -112,6 +112,12 @@ describe("liveInProgress", () => {
     expect(liveInProgress({ ...base, completedAt: "2026-11-04T05:00:00.000Z" })).toBe(false);
     expect(liveInProgress({ ...base, status: "pending_payment" })).toBe(false);
   });
+
+  it("is false once the window ended hours ago without a check-out, given the time (2026-11-20)", () => {
+    const job = { ...base, endsAt: "2026-11-04T05:00:00.000Z" };
+    expect(liveInProgress(job, new Date("2026-11-04T06:00:00.000Z"))).toBe(true);
+    expect(liveInProgress(job, new Date("2026-11-10T06:00:00.000Z"))).toBe(false);
+  });
 });
 
 describe("the stream messages", () => {

@@ -1,4 +1,5 @@
 import type { CustomerOrder } from "@/lib/booking/orders";
+import { checkOutOverdue } from "@/lib/jobs/overdue";
 
 // The customer's live view (T23), as pure rules: whether an order's job is in progress (the only time
 // it can be watched), and how the viewer reads GET /api/streams/<order id> (src/app/api/streams):
@@ -47,7 +48,15 @@ export function readVideoLink(body: unknown): string | null {
   }
 }
 
-/** A paid job the cleaner has checked in to and not yet finished: the only time it can be watched. */
-export function liveInProgress(order: Pick<CustomerOrder, "status" | "checkedInAt" | "completedAt">): boolean {
-  return order.status === "paid" && order.checkedInAt !== null && order.completedAt === null;
+/**
+ * A paid job the cleaner has checked in to and not yet finished: the only time it can be watched. Given
+ * `now`, a job whose window ended more than a few hours ago without a check-out no longer counts
+ * (2026-11-20: such jobs read "Sedang berlangsung" for days; src/lib/jobs/overdue.ts).
+ */
+export function liveInProgress(
+  order: Pick<CustomerOrder, "status" | "checkedInAt" | "completedAt"> & { endsAt?: string },
+  now?: Date,
+): boolean {
+  if (order.status !== "paid" || order.checkedInAt === null || order.completedAt !== null) return false;
+  return !(now && order.endsAt && checkOutOverdue({ ...order, endsAt: order.endsAt }, now));
 }

@@ -216,7 +216,7 @@ test.describe("step 3, the payment", () => {
     expect(await clear()).toBe(true);
 
     await pressBack(page, "Ke pesanan Anda");
-    await expect(page).toHaveURL("/orders");
+    await expect(page).toHaveURL("/home");
     await expect(mainNav(page)).toBeVisible();
   });
 });

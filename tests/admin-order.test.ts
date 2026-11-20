@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   agencyPercent,
   findOrderTicket,
+  normalizeOrderNumber,
   orderState,
   orderTimeline,
   parseOrderCode,
@@ -47,6 +48,28 @@ describe("parseOrderCode", () => {
   it("refuses anything else, so nothing odd reaches the lookup", () => {
     for (const value of ["", "hk-1042", "HK-12", "HK-1042x", "1042", "HK-1042;drop", "%48K-1042"]) {
       expect(parseOrderCode(value)).toBeNull();
+    }
+  });
+});
+
+describe("normalizeOrderNumber", () => {
+  // Admin's order search (audit item 1): what an admin may type for an order number.
+  it("reads the usual ways of writing an order number as the database writes it", () => {
+    for (const value of ["HK-1170", "hk1170", "1170", "  HK-1170  ", "hk-1170", "Hk 1170", "HK1170", "\t1170\n"]) {
+      expect(normalizeOrderNumber(value), JSON.stringify(value)).toBe("HK-1170");
+    }
+    expect(normalizeOrderNumber("123456")).toBe("HK-123456");
+  });
+
+  it("refuses what cannot be an order number", () => {
+    for (const value of ["", "   ", "HK-", "117", "HK-12", "HK-1170x", "HX-1170", "1170 1171", "HK--1170", "#1170", "11.70", "HK-1170;drop", "1".repeat(40)]) {
+      expect(normalizeOrderNumber(value), JSON.stringify(value)).toBeNull();
+    }
+  });
+
+  it("always gives a number the order page accepts", () => {
+    for (const value of ["hk1170", "1170", " HK 0042 "]) {
+      expect(parseOrderCode(normalizeOrderNumber(value) ?? "")).not.toBeNull();
     }
   });
 });

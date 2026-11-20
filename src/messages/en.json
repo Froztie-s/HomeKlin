@@ -75,6 +75,17 @@
     "ownerTitle": "HomeKlin owner",
     "ownerHome": "HomeKlin, to Overview"
   },
+  "AdminOrderSearch": {
+    "label": "Find an order number",
+    "placeholder": "HK-1170",
+    "submit": "Find",
+    "pending": "Finding…",
+    "errors": {
+      "empty": "Type an order number, such as HK-1170.",
+      "invalid": "That is not an order number. Write it like HK-1170 or 1170.",
+      "forbidden": "Only admins can search for orders."
+    }
+  },
   "MarketingHeader": {
     "nav": "Site navigation",
     "cta": "Book now",
@@ -264,14 +275,26 @@
     "errorBody": "The free slots could not be loaded right now. Reload the page to try again.",
     "loading": "Loading free slots…"
   },
+  "OrderStage": {
+    "pending_payment": "Awaiting payment",
+    "paid": "Paid",
+    "assigned": "Cleaner assigned",
+    "inProgress": "In progress",
+    "completed": "Done",
+    "missed": "Did not take place",
+    "failed": "Payment failed",
+    "cancelled": "Cancelled",
+    "awaitingCheckOut": "Awaiting completion"
+  },
   "OrdersPage": {
     "title": "Your orders",
     "listLabel": "Your orders",
-    "backToList": "Back to your orders",
+    "backToList": "Back to your order history",
     "emptyTitle": "No orders yet",
     "emptyBody": "Your orders appear here with their status, from paid to done. While your cleaner works, you can watch the live stream from this page.",
     "orderLine": "Order {code}",
-    "orderLineWithTime": "Order {code}, {arrival}"
+    "orderLineWithTime": "Order {code}, {arrival}",
+    "backToHome": "Back to Home"
   },
   "SupportPage": {
     "title": "Help",
@@ -704,7 +727,14 @@
     "statsErrorBody": "This week’s and this month’s numbers cannot be loaded right now. Your jobs are still on the Jobs page.",
     "errorTitle": "Home could not be loaded",
     "errorBody": "Your account details cannot be loaded right now. Check your connection, then try again.",
-    "retry": "Reload"
+    "retry": "Reload",
+    "nextTitle": "Next job",
+    "nowTitle": "In progress",
+    "openNext": "Open to check in",
+    "openNow": "Continue the job",
+    "noneToday": "No more jobs today.",
+    "allJobs": "See all jobs",
+    "serviceFallback": "HomeKlin service"
   },
   "CleanerProfile": {
     "role": "HomeKlin cleaner",
@@ -729,7 +759,8 @@
     "customerFallback": "HomeKlin customer",
     "errorTitle": "Your jobs could not be loaded",
     "errorBody": "The job list cannot be loaded right now. Check your connection, then try again.",
-    "retry": "Reload"
+    "retry": "Reload",
+    "now": "Now"
   },
   "CleanerJobPage": {
     "title": "Job",
@@ -746,6 +777,8 @@
     "consentYes": "The customer agreed to have this job streamed.",
     "consentNo": "The customer did not agree to streaming, so this job is not streamed.",
     "call": "Call",
+    "maps": "Open in Maps",
+    "newTab": "(opens in a new tab)",
     "serviceFallback": "HomeKlin service",
     "customerFallback": "HomeKlin customer",
     "notFoundTitle": "Job not found",
@@ -796,7 +829,7 @@
       "started": "This job has already started. Reload the page.",
       "unavailable": "Could not connect. Check your connection, then try again."
     },
-    "checkOutLocked": "Check-out, available after check-in"
+    "checkOutLocked": "Check-out is available after check-in."
   },
   "BackOfficeJobs": {
     "table": {
@@ -812,7 +845,8 @@
       "unassigned": "No cleaner yet",
       "assigned": "Assigned",
       "inProgress": "Checked in at {time}",
-      "completed": "Finished at {time}"
+      "completed": "Finished at {time}",
+      "overdue": "Not checked out"
     },
     "noCleaner": "Not assigned",
     "serviceFallback": "Service switched off"
@@ -865,7 +899,13 @@
       "noneSentence": "No fees in the last {count, number} days.",
       "showTable": "See the numbers per day",
       "day": "Day",
-      "fee": "Fee"
+      "fee": "Fee",
+      "titleWeekly": "Weekly fees",
+      "descriptionWeekly": "Last {count, number} days by week, {from} to {to}",
+      "sentenceWeekly": "Fees in the last {count, number} days add up to {total}. The highest week was {high}, {highDay}.",
+      "showTableWeekly": "See the numbers per week",
+      "week": "Week",
+      "weekRange": "{from} to {to}"
     },
     "payouts": {
       "title": "Payouts from HomeKlin",
@@ -900,7 +940,7 @@
     "window": "{start}-{end} WIB",
     "places": "{booked, number} of {capacity, number} booked",
     "full": "Full",
-    "bookedLock": "Has bookings",
+    "bookedLock": "Cannot be removed, already booked",
     "capacity": "Capacity",
     "capacityFor": "Capacity of {window}, {area}",
     "save": "Save",
@@ -928,7 +968,8 @@
       "pending": "Adding…",
       "added": "Slot added: {weekday} {date}, {start}-{end} WIB, {area}.",
       "areaMissing": "Choose an area first."
-    }
+    },
+    "back": "Cleaners"
   },
   "AgencyCleanersPage": {
     "title": "Cleaners and availability",
@@ -955,7 +996,8 @@
       "pending": "Adding…",
       "added": "{name} was added. They can sign in with the code sent to {email}.",
       "choosePhoto": "Choose a photo",
-      "changePhoto": "Change photo"
+      "changePhoto": "Change photo",
+      "close": "Close"
     },
     "atWork": "At a job now",
     "upcoming": "{count, plural, =0 {No upcoming jobs} one {# upcoming job} other {# upcoming jobs}}",
@@ -1053,7 +1095,8 @@
       "unassigned": "Needs a cleaner",
       "assigned": "Assigned",
       "inProgress": "In progress",
-      "completed": "Completed"
+      "completed": "Completed",
+      "overdue": "Not checked out"
     },
     "detailFor": "See details of {service}, {day}",
     "assign": {
@@ -1166,7 +1209,8 @@
       "unassigned": "Needs a cleaner",
       "assigned": "Assigned",
       "inProgress": "In progress",
-      "completed": "Completed"
+      "completed": "Completed",
+      "overdue": "Not checked out"
     },
     "recordingTitle": "Job recording",
     "loading": "Loading the video…",
@@ -1354,7 +1398,14 @@
     },
     "filteredEmptyTitle": "No matching jobs",
     "filteredEmptyBody": "No jobs match these filters right now.",
-    "orderLink": "View order {code} details"
+    "orderLink": "View order {code} details",
+    "playLabel": "Play {name}",
+    "summaryOverdue": "{count, plural, other {# not checked out}}.",
+    "overdue": {
+      "title": "Not checked out ({count, number})",
+      "body": "The cleaner checked in but has not checked out, more than 3 hours after the window ended. Open the order to contact the cleaner.",
+      "ended": "Window ended {day}, {time} WIB"
+    }
   },
   "AdminTicketsPage": {
     "title": "Support chats",
@@ -1620,13 +1671,20 @@
     },
     "daily": {
       "title": "Daily revenue",
-      "description": "Last 14 days, {from} to {to}",
+      "description": "Last {days, number} days, {from} to {to}",
       "sentence": "Revenue over the last {count, number} days: {total}. Highest {high} on {highDay}.",
       "noneSentence": "No revenue in the last {count, number} days.",
       "showTable": "See the numbers per day",
-      "tableCaption": "Revenue per day, last 14 days",
+      "tableCaption": "Revenue per day, last {days, number} days",
       "day": "Date",
-      "revenue": "Revenue"
+      "revenue": "Revenue",
+      "titleWeekly": "Weekly revenue",
+      "descriptionWeekly": "Last {days, number} days by week, {from} to {to}",
+      "sentenceWeekly": "Revenue over the last {count, number} days: {total}. Highest week {high}, {highDay}.",
+      "showTableWeekly": "See the numbers per week",
+      "tableCaptionWeekly": "Revenue per week, last {days, number} days",
+      "week": "Week",
+      "weekRange": "{from} to {to}"
     },
     "payouts": {
       "title": "Payouts per agency",
@@ -1636,8 +1694,8 @@
     },
     "status": {
       "title": "Orders by status",
-      "description": "Every order so far, including those not paid yet or not paid at all.",
-      "total": "{count, plural, one {# order} other {# orders}} in total",
+      "description": "Orders in the last {days, number} days by the date of their payment; those still waiting by the date they were made.",
+      "total": "{count, plural, one {# order} other {# orders}} in this period",
       "share": "{percent, number}%",
       "paid": "Paid",
       "pending_payment": "Waiting for payment",
@@ -1667,14 +1725,14 @@
       "cancelled": "Cancelled",
       "paidOut": "Paid out",
       "noOnTime": "None yet",
-      "signIn": "Sign-in",
+      "signIn": "Agency account",
       "actions": "Actions",
       "since": "Since {date}",
       "noAreas": "No areas yet"
     },
     "signIn": {
-      "yes": "Yes",
-      "no": "Not yet"
+      "yes": "Created",
+      "no": "Not created yet"
     },
     "status": {
       "active": "Active",
@@ -1752,7 +1810,8 @@
       "yesterday": "Yesterday, {time}",
       "never": "Never signed in",
       "active": "Active",
-      "notYet": "Not signed in yet"
+      "notYet": "Not signed in yet",
+      "manage": "Manage"
     },
     "empty": {
       "title": "No admin accounts yet",
@@ -1846,17 +1905,24 @@
   "LoginPage": {
     "metaTitle": "Log in",
     "title": "Log in",
-    "leadCode": "Enter your email and we send you a 6-digit code. Customers log in without a password.",
-    "leadPassword": "Use the email and password of your account. For HomeKlin cleaner and staff accounts, and demo accounts.",
+    "leadCode": "Enter your account's email and we send you a 6-digit code to log in.",
+    "leadPassword": "Log in with your account's email and password.",
     "linkExpired": "The link in this email no longer works. Sign in with the code we email you to see your order.",
     "helpPrompt": "Need help logging in?",
     "helpLink": "Contact the HomeKlin team"
+  },
+  "SignupPage": {
+    "metaTitle": "Sign up",
+    "title": "Sign up",
+    "lead": "Create an account to book, pay, and watch the work in your home live."
   },
   "Auth": {
     "fields": {
       "email": "Email",
       "password": "Password",
-      "showPassword": "Show password"
+      "showPassword": "Show password",
+      "fullName": "Full name",
+      "passwordHint": "At least 8 characters."
     },
     "login": {
       "submit": "Log in",
@@ -1878,6 +1944,12 @@
       "confirmEmail": "Your account is created. Open the email from HomeKlin to activate it, then log in.",
       "unavailable": "We could not process this right now. Try again in a moment.",
       "codeInvalid": "The code is wrong or has expired. Check your email or send a new code."
+    },
+    "signup": {
+      "submit": "Create account",
+      "pending": "Creating your account…",
+      "switchPrompt": "Already have an account?",
+      "switchLink": "Log in"
     }
   },
   "AuthLogin": {
@@ -1887,10 +1959,20 @@
     "verifying": "Logging in…",
     "codeTitle": "Enter the code from the email",
     "codeSentTo": "If <strong>{email}</strong> has a HomeKlin account, we sent a 6-digit code to that email.",
-    "withPassword": "Log in with a password",
     "forgotPassword": "Forgot your password? Use an email code",
-    "firstTimePrompt": "Never booked before?",
-    "firstTimeLink": "Book a service"
+    "modeLabel": "How to log in",
+    "modes": {
+      "code": {
+        "title": "Email code",
+        "hint": "No password"
+      },
+      "password": {
+        "title": "Password",
+        "hint": "Email + password"
+      }
+    },
+    "signupPrompt": "No account yet?",
+    "signupLink": "Sign up"
   },
   "CodeEntry": {
     "codeLabel": "6-digit code",
@@ -1952,7 +2034,8 @@
       "playRecording": "Play recording",
       "recordingExpired": "The recording was deleted after 7 days.",
       "recordingNone": "This job has no recording.",
-      "retention": "Recordings are kept for 7 days after the job, then deleted automatically."
+      "retention": "Recordings are kept for 7 days after the job, then deleted automatically.",
+      "callCleaner": "Call the cleaner"
     },
     "details": {
       "title": "Order details",
@@ -1976,7 +2059,9 @@
       "role": "Cleaner at {agency}",
       "none": "The agency has not assigned a cleaner yet.",
       "agency": "Agency",
-      "area": "Service area"
+      "area": "Service area",
+      "call": "Call",
+      "noPhone": "The agency has not added this cleaner's mobile number yet."
     },
     "payment": {
       "title": "Payment",
@@ -2101,7 +2186,7 @@
     "totalNote": "Full price, no extra fees.",
     "submit": "Book now",
     "chooseServiceFirst": "Choose a service first to carry on.",
-    "nextNote": "You add your address and email in the next step. No account needed.",
+    "nextNote": "To book, log in or create an account first. You add your address and phone number in the next step.",
     "asideLabel": "Order summary",
     "servicesLegend": "Choose one service",
     "serviceMissing": "Choose one of the services to carry on.",
@@ -2337,8 +2422,8 @@
   },
   "OrdersOverview": {
     "title": "Your orders",
-    "lead": "Here you see the orders in progress and your past orders, and replay the recordings of finished ones.",
-    "leadNamed": "Hello, {name}. Here you see the orders in progress and your past orders, and replay the recordings of finished ones.",
+    "lead": "Here you see your orders in progress and coming up. Finished orders are in your order history.",
+    "leadNamed": "Hello, {name}. Here you see your orders in progress and coming up. Finished orders are in your order history.",
     "bookAgain": "Book another service",
     "ongoingTitle": "In progress",
     "livePill": "In progress",
@@ -2349,12 +2434,11 @@
     "recordingLater": "The recording is available once the job is done.",
     "watch": "Watch live",
     "seeOrder": "See the order",
-    "historyTitle": "Order history",
+    "upcomingTitle": "Upcoming",
+    "ongoingEmptyTitle": "No ongoing orders",
+    "ongoingEmptyBody": "Orders waiting for payment, waiting for their time or being done appear here. Finished orders are in your order history.",
     "emptyTitle": "No orders yet",
     "emptyBody": "Your orders appear here with their status, from paid to done. While your cleaner works, you can watch the live stream from this page.",
-    "historyEmptyTitle": "No other orders yet",
-    "historyEmptyBody": "Orders that are done or waiting for their time appear here.",
-    "seeAll": "See all orders ({count})",
     "asideLabel": "Account and help",
     "accountTitle": "Your account",
     "accountBody": "You log in with the email you gave when you ordered. Order and recording links are sent to this email.",
@@ -2364,7 +2448,36 @@
       "kept": "Kept for 7 days, then deleted automatically.",
       "private": "Only you and the HomeKlin team can see it."
     },
-    "seeRecordings": "See all recordings"
+    "seeRecordings": "See all recordings",
+    "historyLinkTitle": "Order history",
+    "historyLinkBody": "{count, plural, one {# order} other {# orders}} done or not taken place, with their recordings"
+  },
+  "OrdersHistory": {
+    "title": "Order history",
+    "lead": "Every order that is done or did not go ahead, newest first. Open an order to see its details or replay its recording.",
+    "ongoingNote": "{count, plural, one {# order is} other {# orders are}} still ongoing.",
+    "ongoingLink": "See them on Home",
+    "summaryLabel": "History summary",
+    "stats": {
+      "done": "Jobs done",
+      "recordings": "Recordings to watch",
+      "paid": "Total paid"
+    },
+    "filterLabel": "Filter the history",
+    "filters": {
+      "all": "All",
+      "done": "Done",
+      "notDone": "Did not go ahead"
+    },
+    "rowLine": "{code} · {start}-{end} WIB",
+    "emptyTitle": "No order history yet",
+    "emptyBody": "Orders that are done, cancelled or whose payment failed appear here, with their recordings.",
+    "filterEmptyTitle": "No orders here",
+    "filterEmptyBody": "There are no orders with this status yet. Choose All to see the whole history.",
+    "monthSelect": "Choose a month",
+    "monthOption": "{month} ({count})",
+    "olderMonth": "Previous month",
+    "newerMonth": "Next month"
   },
   "SupportGuestForm": {
     "name": "Your name",

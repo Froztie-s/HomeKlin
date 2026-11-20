@@ -120,6 +120,27 @@ test("a disconnected order says so in the chip, the frame and the steps", async 
   await expect(card(page, "Pembayaran")).not.toContainText("Dibayar dengan");
 });
 
+// 2026-11-20 (UX audit item 18): when the stream drops, admin can call the cleaner from the page.
+test("a disconnected order offers to call the cleaner, once their agency has set a phone", async ({ page }) => {
+  const admin = adminClient();
+  const { data: row } = await admin.from("orders").select("cleaner_id").eq("code", data.live.disconnected.code).single<{ cleaner_id: string }>();
+  const cleanerId = row?.cleaner_id ?? "";
+  const phone = "+6281298765432";
+  try {
+    await admin.from("cleaners").update({ phone: null }).eq("user_id", cleanerId);
+    await page.goto(`/admin/orders/${data.live.disconnected.code}`);
+    await expect(page.getByRole("link", { name: /^Telepon petugas/ })).toHaveCount(0);
+    await expect(card(page, "Petugas dan agensi")).toContainText("Agensi belum mengisi nomor HP petugas ini.");
+
+    await admin.from("cleaners").update({ phone }).eq("user_id", cleanerId);
+    await page.reload();
+    await expect(card(page, "Siaran langsung").getByRole("link", { name: `Telepon petugas ${phone}` })).toHaveAttribute("href", `tel:${phone}`);
+    await expect(card(page, "Petugas dan agensi").getByRole("link", { name: `Telepon ${phone}` })).toHaveAttribute("href", `tel:${phone}`);
+  } finally {
+    await admin.from("cleaners").update({ phone: null }).eq("user_id", cleanerId);
+  }
+});
+
 test("an order not checked in yet shows its start time and no video", async ({ page }) => {
   await page.goto(`/admin/orders/${data.waiting.code}`);
   await expect(page.getByText("Belum check-in", { exact: true })).toBeVisible();

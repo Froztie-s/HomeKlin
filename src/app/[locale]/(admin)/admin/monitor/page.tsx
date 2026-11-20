@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MonitorPlay, RefreshCw, SearchX } from "lucide-react";
+import { ChevronRight, ClockAlert, MonitorPlay, RefreshCw, SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 import { cache, Suspense } from "react";
@@ -12,9 +12,12 @@ import {
   parseMonitorFilters,
   waitingForCheckIn,
   type MonitorFilters,
+  liveStreamsOnly,
+  overdueJobs,
 } from "@/components/back-office/admin-console";
 import { CheckInTile, FeedTile } from "@/components/back-office/feed-tile";
 import { MonitorFiltersForm } from "@/components/back-office/monitor-filters";
+import { jakartaDayOf } from "@/components/customer/booking-query";
 import { getSlotLabels } from "@/components/customer/slot-labels";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
@@ -80,6 +83,8 @@ type MonitorData = {
   streams: LiveStream[] | null;
   /** Today's jobs not checked in yet; null when the jobs could not be read. */
   waiting: AdminJob[] | null;
+  /** Jobs checked in to but never checked out, hours past their window (overdueJobs); [] when unread. */
+  overdue: AdminJob[];
 };
 
 // Both lists at once, read once per request: the summary and the cards share the result.
@@ -91,9 +96,13 @@ const readMonitor = cache(async (): Promise<MonitorData> => {
     if (result.status === "rejected" && !(result.reason instanceof StreamError || result.reason instanceof JobsError)) throw result.reason;
     if (result.status === "rejected") console.error("[monitor] could not read the list:", result.reason);
   }
+  const now = new Date();
+  const overdue = jobs.status === "fulfilled" ? overdueJobs(jobs.value, now) : [];
   return {
-    streams: streams.status === "fulfilled" ? streams.value : null,
-    waiting: jobs.status === "fulfilled" ? waitingForCheckIn(jobs.value, new Date()) : null,
+    // A stream whose job is overdue for check-out is not live any more (2026-11-20).
+    streams: streams.status === "fulfilled" ? liveStreamsOnly(streams.value, overdue) : null,
+    waiting: jobs.status === "fulfilled" ? waitingForCheckIn(jobs.value, now) : null,
+    overdue,
   };
 });
 
@@ -106,20 +115,22 @@ async function readFilters(searchParams: SearchParams): Promise<{ filters: Monit
 
 /** The cards the filters leave: the streams and today's jobs not checked in yet. */
 async function shownCards(searchParams: SearchParams) {
-  const [{ streams, waiting }, { filters }] = await Promise.all([readMonitor(), readFilters(searchParams)]);
+  const [{ streams, waiting, overdue }, { filters }] = await Promise.all([readMonitor(), readFilters(searchParams)]);
   const shown = filterMonitor({ streams: streams ?? [], waiting: waiting ?? [] }, filters);
-  return { streams, waiting, filters, shown };
+  const area = filters.area;
+  return { streams, waiting, filters, shown, overdue: area ? overdue.filter((job) => job.areaId === area) : overdue };
 }
 
 /** "6 pekerjaan sedang berlangsung. 2 terkendala." and, when there are any, "1 belum check-in." */
 async function MonitorSummary({ searchParams }: { searchParams: SearchParams }) {
-  const [t, { streams, shown }] = await Promise.all([getTranslations("AdminMonitorPage"), shownCards(searchParams)]);
+  const [t, { streams, shown, overdue }] = await Promise.all([getTranslations("AdminMonitorPage"), shownCards(searchParams)]);
   if (!streams) return null;
   const counts = monitorCounts(shown.streams, shown.waiting.length);
   return (
     <span data-testid="monitor-summary">
       {t("summary", counts)}
       {counts.waiting > 0 ? ` ${t("summaryWaiting", counts)}` : null}
+      {overdue.length > 0 ? ` ${t("summaryOverdue", { count: overdue.length })}` : null}
     </span>
   );
 }
@@ -151,7 +162,7 @@ async function RefreshLink() {
 }
 
 async function MonitorCards({ searchParams }: { searchParams: SearchParams }) {
-  const [t, locale, { streams, waiting, shown }] = await Promise.all([
+  const [t, locale, { streams, waiting, shown, overdue }] = await Promise.all([
     getTranslations("AdminMonitorPage"),
     getLocale(),
     shownCards(searchParams),
@@ -186,6 +197,7 @@ async function MonitorCards({ searchParams }: { searchParams: SearchParams }) {
             {t("filters.showAll")}
           </Link>
         </EmptyState>
+        <OverdueList jobs={overdue} />
       </>
     );
   }
@@ -199,6 +211,7 @@ async function MonitorCards({ searchParams }: { searchParams: SearchParams }) {
             {t("emptyBody")}
           </EmptyState>
         ) : null}
+        <OverdueList jobs={overdue} />
       </>
     );
   }
@@ -220,6 +233,49 @@ async function MonitorCards({ searchParams }: { searchParams: SearchParams }) {
           <CheckInTile key={job.id} job={job} startsAt={labels.time(job.startsAt)} {...names(job)} />
         ))}
       </ul>
+      <OverdueList jobs={overdue} />
     </ClientMessages>
+  );
+}
+
+/**
+ * "Belum check-out" (2026-11-20): jobs checked in to but never checked out, hours past their window,
+ * as links to their order pages, where admin can call the cleaner.
+ */
+async function OverdueList({ jobs }: { jobs: AdminJob[] }) {
+  if (jobs.length === 0) return null;
+  const [t, locale] = await Promise.all([getTranslations("AdminMonitorPage"), getLocale()]);
+  const labels = await getSlotLabels(locale);
+  const now = new Date();
+  return (
+    <section aria-labelledby="monitor-overdue" className="flex flex-col gap-3">
+      <div className="flex flex-col gap-0.5">
+        <h2 id="monitor-overdue" className="flex items-center gap-2 font-display text-lg font-semibold text-ink">
+          <ClockAlert className="size-5 shrink-0 text-warning" aria-hidden="true" />
+          {t("overdue.title", { count: jobs.length })}
+        </h2>
+        <p className="text-sm text-ink-muted">{t("overdue.body")}</p>
+      </div>
+      <ul className="divide-y divide-border overflow-hidden rounded-lg bg-card">
+        {jobs.map((job) => (
+          <li key={job.id}>
+            <Link
+              href={`/admin/orders/${job.orderCode}`}
+              className="group flex items-center gap-3 px-4 py-3 transition-colors duration-150 ease-out-quart hover:bg-sunken/60 md:px-5"
+            >
+              <span className="flex min-w-0 flex-1 flex-col gap-0.5 text-sm">
+                <span className="font-semibold text-ink">
+                  {job.orderCode} · {job.cleanerName ?? t("cleanerFallback")}
+                </span>
+                <span className="text-ink-muted">
+                  {t("overdue.ended", { day: labels.day(jakartaDayOf(job.endsAt, now)), time: labels.time(job.endsAt) })} · {job.agencyName}
+                </span>
+              </span>
+              <ChevronRight className="size-5 shrink-0 text-ink-muted transition-transform duration-150 ease-out-quart group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }

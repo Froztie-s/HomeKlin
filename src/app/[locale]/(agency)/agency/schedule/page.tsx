@@ -19,7 +19,8 @@ export default function AgencySchedulePage({ searchParams }: PageProps<"/[locale
   const t = useTranslations("AgencySchedulePage");
   return (
     <>
-      <PageHeader size="compact" title={t("title")} description={t("description")} />
+      {/* Opened from "Atur jadwal" on Petugas (the sidebar keeps Petugas lit): the way back (UX audit item 13). */}
+      <PageHeader size="compact" title={t("title")} description={t("description")} back={{ href: "/agency/cleaners", label: t("back") }} />
       <Suspense fallback={<GateFallback />}>
         <RoleGate roles={["agency"]}>
           <ScheduleContent searchParams={searchParams} />

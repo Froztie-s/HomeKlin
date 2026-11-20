@@ -12,7 +12,8 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { parseOpenedOrderId, paymentHrefFromOrders } from "./booking-query";
 import { flowOutlineButton } from "./flow-styles";
 import { OrderDetails } from "./order-details";
-import { OrdersOverview } from "./orders-overview";
+import { OrdersHistory } from "./orders-history";
+import { parseHistoryFilter, parseHistoryMonth, splitOrders } from "./orders-overview-data";
 import { PaymentConfirmed, PaymentStep } from "./payment-step";
 import { cameBackFromPayment } from "./payment-query";
 import { ServiceDuration } from "./service-duration";
@@ -42,9 +43,10 @@ export async function readCustomerOrders(): Promise<
 }
 
 // The content of /orders for a signed-in customer, inside the page's role check (D5 after the
-// Customer-* mocks). Without an order in the address: "Pesanan Anda" (./orders-overview.tsx). An order
-// opened from the list is /orders?order=<order id>, the order's own page (./order-details.tsx). Step 3
-// of booking used to be /orders?booked=<order id>; since the focused booking layout (2026-11-17) it is
+// Customer-* mocks). Without an order in the address: "Riwayat pesanan" (./orders-history.tsx, since
+// 2026-11-20; the orders still to come are on /home). An order opened from a list is
+// /orders?order=<order id>, the order's own page (./order-details.tsx). Step 3 of booking used to be
+// /orders?booked=<order id>; since the focused booking layout (2026-11-17) it is
 // /orders/pay?order=<order id> (PaymentContent below), and the old address leads there with its
 // fields, for the emails already sent. Everything is read with the customer's own session through
 // listMyOrders, which returns only their own orders and never the agency, so another customer's id in
@@ -58,7 +60,7 @@ export async function OrdersContent({ searchParams }: { searchParams: Promise<Se
 
   const read = await readCustomerOrders();
   if (!read) return <OrdersContentUnavailable />;
-  const { orders, services, areas, account } = read;
+  const { orders, services, areas } = read;
 
   // One clock for the whole page: whether a recording is still kept, and its countdown (T15).
   const now = new Date();
@@ -77,16 +79,25 @@ export async function OrdersContent({ searchParams }: { searchParams: Promise<Se
         duration={service ? <ServiceDuration minutes={service.durationMinutes} /> : undefined}
         areaName={areaName}
         now={now}
+        fromHome={splitOrders([order], now).history.length === 0}
       />
     );
   }
-  return <OrdersOverview orders={orders} serviceName={serviceName} account={account} now={now} />;
+  return (
+    <OrdersHistory
+      orders={orders}
+      serviceName={serviceName}
+      now={now}
+      filter={parseHistoryFilter(params.filter)}
+      month={parseHistoryMonth(params.bulan)}
+    />
+  );
 }
 
 // Step 3 of booking, /orders/pay?order=<order id> (the booking flow's layout, where the order actions
 // send the customer): the payment (./payment-step.tsx), and once Midtrans' signed notification has
 // marked the order paid, the confirmation; Midtrans sends the customer back to the same address. The
-// header's "Kembali" leads to the orders list, so the page has no link of its own for that. The order
+// header's "Kembali" leads to the home (the orders still to come), so the page has no link of its own for that. The order
 // is read with the customer's own session (listMyOrders), so another customer's id, or none, finds
 // nothing and leads to the list.
 export async function PaymentContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -97,7 +108,8 @@ export async function PaymentContent({ searchParams }: { searchParams: Promise<S
   const read = await readCustomerOrders();
   if (!read) return <OrdersContentUnavailable />;
   const order = read.orders.find((candidate) => candidate.id === orderId);
-  if (!order) return redirect({ href: "/orders", locale });
+  // No such order of this customer: the home, which lists the orders still to come.
+  if (!order) return redirect({ href: "/home", locale });
 
   const serviceName = read.services.find((candidate) => candidate.id === order.serviceId)?.name[locale];
   const areaName = read.areas.find((candidate) => candidate.id === order.areaId)?.name[locale] ?? order.areaId;

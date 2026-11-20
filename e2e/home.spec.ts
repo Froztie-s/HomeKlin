@@ -57,7 +57,9 @@ test.describe("customer home when signed in", () => {
   test("shows Pesanan Anda with the account, the recording facts and the way to book again", async ({ page }) => {
     await page.goto("/home");
     await expect(page.getByRole("heading", { level: 1, name: "Pesanan Anda" })).toBeVisible();
-    await expect(page.getByRole("heading", { level: 2, name: "Riwayat pesanan" })).toBeVisible();
+    // Since 2026-11-20 the home holds only the orders still to come; the finished ones are on /orders
+    // (e2e/orders.mobile.spec.ts checks what goes where, with its own customers).
+    await expect(page.getByRole("tablist")).toHaveCount(0);
     const aside = page.getByRole("complementary", { name: "Akun dan bantuan" });
     await expect(aside.getByRole("heading", { name: "Akun Anda" })).toBeVisible();
     await expect(aside.getByRole("button", { name: "Keluar" })).toBeVisible();

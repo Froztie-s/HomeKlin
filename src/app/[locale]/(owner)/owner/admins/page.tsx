@@ -67,7 +67,7 @@ function AddAdminLink({ label }: { label: string }) {
 
 /** The columns of a row from 1024 px, as in the mock: name and email, role, created, last sign-in, status, the open arrow. */
 const rowGrid =
-  "lg:grid lg:grid-cols-[minmax(0,2.2fr)_minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1.3fr)_2.75rem] lg:items-center lg:gap-4";
+  "lg:grid lg:grid-cols-[minmax(0,2.2fr)_minmax(0,0.8fr)_minmax(0,1fr)_minmax(0,1.2fr)_minmax(0,1.3fr)_auto] lg:items-center lg:gap-4";
 
 async function OwnerAdminsContent() {
   const [t, locale] = await Promise.all([getTranslations("OwnerAdminsPage"), getLocale()]);
@@ -162,8 +162,11 @@ async function OwnerAdminsContent() {
                   <span className="hidden text-sm whitespace-nowrap text-ink tabular-nums lg:block">{date}</span>
                   <span className={`hidden text-sm tabular-nums lg:block ${signedIn ? "text-ink" : "text-ink-muted"}`}>{lastSignIn}</span>
                   <span className="hidden lg:block">{status}</span>
-                  <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-full text-primary">
-                    <ChevronDown className="size-5 transition-transform duration-150 ease-out-quart group-open:rotate-180" />
+                  {/* A word beside the chevron (2026-11-20, owner review): the row opens to the account's
+                      details and "Hapus akun", which a bare chevron did not say. */}
+                  <span className="inline-flex min-h-touch shrink-0 items-center gap-1 rounded-full px-3 text-sm font-semibold text-primary transition-colors duration-150 ease-out-quart group-hover:bg-sunken">
+                    <span aria-hidden="true">{t("list.manage")}</span>
+                    <ChevronDown className="size-4.5 transition-transform duration-150 ease-out-quart group-open:rotate-180" aria-hidden="true" />
                   </span>
                   <span className="sr-only">{t("list.open", { name })}</span>
                 </summary>
