@@ -3,7 +3,7 @@
 import { CircleAlert, CirclePause, CirclePlay, LoaderCircle, TriangleAlert, UserMinus } from "lucide-react";
 import { useActionState, useEffect, useId, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { dangerButton, primaryButton, secondaryButton } from "@/components/agency/styles";
+import { dangerButton, primaryButton, quietButton, quietDangerButton, secondaryButton } from "@/components/agency/styles";
 import type { OwnerActionState, OwnerFailureKey } from "@/lib/owner/actions";
 
 // Icons by name: a component cannot be passed from the server page to this client component.
@@ -17,7 +17,16 @@ type ConfirmActionProps = {
   icon: keyof typeof icons;
   /** "danger" for a change that takes something away (suspend, remove); "default" otherwise. */
   tone: "danger" | "default";
-  /** "inline": at the end of a table row, the question opens under the button on the right (full width below 640 px); "block": in a panel, full width. */
+  /**
+   * "button" (default): an outlined pill. "quiet": a small text button without an edge, for a row
+   * action that should not compete with the page's own (audit item 5, /owner/agencies).
+   */
+  trigger?: "button" | "quiet";
+  /**
+   * "inline": at the end of a table row; the question opens in a dialog over the page (2026-11-20, UX
+   * audit: in the row it widened the table past the screen at 1280 px). "block": in a panel, in place,
+   * full width.
+   */
   layout?: "inline" | "block";
   labels: {
     /** The visible word ("Tangguhkan"). */
@@ -52,13 +61,25 @@ const boxes = {
 // saved change closes the question and puts focus back on the button.
 // Sources: https://react.dev/reference/react/useActionState and
 // https://react.dev/reference/react/useState#storing-information-from-previous-renders
-export function ConfirmAction({ action, fields, icon, tone, layout = "inline", labels, errors }: ConfirmActionProps) {
+const triggers = {
+  button: { danger: dangerButton, default: secondaryButton },
+  quiet: { danger: quietDangerButton, default: quietButton },
+};
+
+export function ConfirmAction({ action, fields, icon, tone, trigger = "button", layout = "inline", labels, errors }: ConfirmActionProps) {
   const Icon = icons[icon];
   const [state, formAction, pending] = useActionState(action, null);
   const [asking, setAsking] = useState(false);
   const [seen, setSeen] = useState(state);
   const button = useRef<HTMLButtonElement>(null);
+  const dialog = useRef<HTMLDialogElement>(null);
   const questionId = useId();
+  const inline = layout === "inline";
+
+  // The row's question is a modal dialog: opened as it appears, closed by unmounting it.
+  useEffect(() => {
+    if (asking && inline) dialog.current?.showModal();
+  }, [asking, inline]);
 
   // A saved change closes the question (React's pattern for reacting to a new value during render)...
   if (state !== seen) {
@@ -76,19 +97,15 @@ export function ConfirmAction({ action, fields, icon, tone, layout = "inline", l
   }
 
   const failure = state?.formError && !pending ? errors[state.formError] : null;
-  const inline = layout === "inline";
 
-  return (
-    // relative: the hidden status line stays inside the table's scrolling box.
-    <div className={`relative flex flex-col gap-2 ${inline ? "items-start sm:items-end" : "items-start"}`}>
-      {asking ? (
+  const question = (
         <form
           action={formAction}
           onSubmit={(event) => {
             if (pending) event.preventDefault();
           }}
           aria-labelledby={questionId}
-          className={`flex flex-col gap-3 rounded-md bg-card p-4 text-left ${boxes[tone]} ${inline ? "w-full sm:w-72" : "w-full max-w-2xl"}`}
+          className={`flex flex-col gap-3 rounded-md bg-card text-left ${boxes[tone]} ${inline ? "w-full p-5" : "w-full max-w-2xl p-4"}`}
         >
           {Object.entries(fields).map(([name, value]) => (
             <input key={name} type="hidden" name={name} value={value} />
@@ -120,18 +137,40 @@ export function ConfirmAction({ action, fields, icon, tone, layout = "inline", l
             </button>
           </div>
         </form>
+  );
+
+  return (
+    // relative: the hidden status line stays inside the table's scrolling box.
+    <div className={`relative flex flex-col gap-2 ${inline ? "items-start sm:items-end" : "items-start"}`}>
+      {asking && !inline ? (
+        question
       ) : (
         <button
           ref={button}
           type="button"
           aria-label={labels.buttonLabel}
           onClick={() => setAsking(true)}
-          className={tone === "danger" ? dangerButton : secondaryButton}
+          // A quiet button in a row: its word lines up with the row's text (left below 640 px, right above).
+          className={`${triggers[trigger][tone]} ${trigger === "quiet" && inline ? "max-sm:-ml-3 sm:-mr-3" : ""}`}
         >
           <Icon className="size-4 shrink-0" aria-hidden="true" />
           {labels.button}
         </button>
       )}
+      {asking && inline ? (
+        // Escape cancels like "Batal" (not while the change is being saved); focus goes back to the row's button.
+        <dialog
+          ref={dialog}
+          aria-labelledby={questionId}
+          onCancel={(event) => {
+            event.preventDefault();
+            if (!pending) cancel();
+          }}
+          className="m-auto w-[min(28rem,calc(100vw-2rem))] max-w-none bg-transparent p-0 backdrop:bg-ink/40"
+        >
+          {question}
+        </dialog>
+      ) : null}
       <p role="status" className="sr-only">
         {state?.ok && !pending ? labels.done : ""}
       </p>

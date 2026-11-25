@@ -45,8 +45,8 @@ export function chartScale(max: number): { top: number; ticks: number[] } {
   return { top, ticks: [0, top / 2, top] };
 }
 
-/** The statuses "Pekerjaan masuk" can show one at a time (?status=). */
-export type IncomingStatus = Exclude<JobProgress, "completed">;
+/** The statuses "Pekerjaan masuk" can show one at a time (?status=). An overdue job shows under "Semua" only. */
+export type IncomingStatus = Exclude<JobProgress, "completed" | "overdue">;
 const incomingStatuses: readonly IncomingStatus[] = ["unassigned", "assigned", "inProgress"];
 
 export function parseIncomingStatus(value: Param): IncomingStatus | null {
@@ -55,9 +55,9 @@ export function parseIncomingStatus(value: Param): IncomingStatus | null {
 }
 
 /** The jobs not finished yet, earliest first, optionally of one status. */
-export function incomingJobs<T extends AgencyJob>(jobs: readonly T[], status: IncomingStatus | null): T[] {
+export function incomingJobs<T extends AgencyJob>(jobs: readonly T[], status: IncomingStatus | null, now: Date): T[] {
   return jobs
-    .filter((job) => !job.completedAt && (status === null || jobProgress(job) === status))
+    .filter((job) => !job.completedAt && (status === null || jobProgress(job, now) === status))
     .sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt));
 }
 
@@ -68,7 +68,9 @@ export function incomingCounts(jobs: readonly AgencyJob[], now: Date): IncomingC
   const week = jakartaWeek(now);
   const counts: IncomingCounts = { unassigned: 0, assigned: 0, inProgress: 0, completedThisWeek: 0 };
   for (const job of jobs) {
-    const progress = jobProgress(job);
+    // A job overdue for check-out is not under way any more; it is listed, not counted (overdue.ts).
+    const progress = jobProgress(job, now);
+    if (progress === "overdue") continue;
     if (progress !== "completed") counts[progress] += 1;
     else if (job.completedAt && inWeek(jakartaDateOf(job.completedAt), week)) counts.completedThisWeek += 1;
   }

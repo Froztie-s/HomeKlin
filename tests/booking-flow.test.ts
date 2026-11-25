@@ -109,7 +109,7 @@ describe("bookingBack", () => {
   });
 
   it("goes from the payment to the customer's orders, where the placed order waits", () => {
-    expect(bookingBack(3, `?order=${orderId}`, { exit: "/", moves: 3 })).toEqual({ kind: "push", href: "/orders" });
+    expect(bookingBack(3, `?order=${orderId}`, { exit: "/", moves: 3 })).toEqual({ kind: "push", href: "/home" });
   });
 
   it("goes from step 1 back in the browser's history when the customer came straight from another page", () => {

@@ -9,7 +9,8 @@ import { forestFontVariables } from "@/app/fonts-forest";
 //   from 768 px and the bottom bar on phones (./(app)/layout.tsx).
 // - (booking): the three booking steps (/services, /pesan, /orders/pay), focused: one minimal header
 //   with "Kembali" and no navigation (./(booking)/layout.tsx).
-// Both hold the floating ID | EN switch at the bottom-left, each in its own place.
+// The app has the ID | EN switch in its top bar (UX audit item 3, 2026-11-18: floating, it covered
+// content); the booking flow, which has no bar, keeps the floating switch at the bottom-left.
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className={`theme-forest ${forestFontVariables} flex flex-1 flex-col bg-canvas font-sans text-ink`}>{children}</div>

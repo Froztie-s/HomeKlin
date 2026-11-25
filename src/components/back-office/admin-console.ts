@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { AdminJob } from "@/lib/jobs/jobs";
+import { checkOutOverdue } from "@/lib/jobs/overdue";
 import type { StreamStatus } from "@/lib/stream/streams";
 
 // The admin console's rules (T26, M1): which past jobs the recordings page shows and what it says
@@ -110,4 +111,19 @@ export function filterMonitor<S extends { status: StreamStatus; areaId: string }
     streams: cards.streams.filter((stream) => inArea(stream) && (!troubled || stream.status === "weak" || stream.status === "disconnected")),
     waiting: troubled ? [] : cards.waiting.filter(inArea),
   };
+}
+
+/**
+ * The jobs checked in to but never checked out, hours past their window (src/lib/jobs/overdue.ts,
+ * 2026-11-20): they leave the live grid, whose streams were still marked live days later, and are
+ * listed under it as "Belum check-out", the latest first, for admin to follow up.
+ */
+export function overdueJobs<J extends AdminJob>(jobs: readonly J[], now: Date): J[] {
+  return jobs.filter((job) => checkOutOverdue(job, now)).sort((a, b) => Date.parse(b.endsAt) - Date.parse(a.endsAt));
+}
+
+/** The live streams without those of overdue jobs (matched by order id). */
+export function liveStreamsOnly<S extends { orderId: string }>(streams: readonly S[], overdue: readonly { id: string }[]): S[] {
+  const stale = new Set(overdue.map((job) => job.id));
+  return streams.filter((stream) => !stale.has(stream.orderId));
 }

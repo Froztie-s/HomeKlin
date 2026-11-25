@@ -34,6 +34,13 @@ export type BusinessNumbers = {
   daily: { date: string; revenueIdr: number }[];
   /** Agency fees per agency in the period, largest first; agencies that earned nothing are left out. */
   payoutsByAgency: { id: string; name: string; paidOutIdr: number }[];
+  /**
+   * Revenue per Jakarta day over the whole chosen period, oldest first (2026-11-20). Before
+   * 20261120100000_owner_numbers_period.sql is applied the database has no such key: then `daily`.
+   */
+  dailyPeriod: { date: string; revenueIdr: number }[];
+  /** The orders made in the chosen period, by status (2026-11-20); all time (`byStatus`) before the migration. */
+  byStatusPeriod: OrderStatusCounts;
 };
 
 type TotalsRow = { revenue_idr: number; paid_orders: number; avg_order_idr: number; paid_out_idr: number; homeklin_idr: number };
@@ -58,7 +65,12 @@ type NumbersRow = {
   previous: TotalsRow;
   daily: { date: string; revenue_idr: number }[];
   payouts_by_agency: { agency_id: string; name: string; paid_out_idr: number }[];
+  daily_period?: { date: string; revenue_idr: number }[];
+  by_status_period?: OrderStatusCounts;
 };
+
+const dailyFrom = (rows: { date: string; revenue_idr: number }[]) =>
+  rows.map((day) => ({ date: day.date.slice(0, 10), revenueIdr: Number(day.revenue_idr) }));
 
 export async function getBusinessNumbers(client: SupabaseClient, days: ValidDays = 30): Promise<BusinessNumbers> {
   const { data, error } = await client.rpc("owner_numbers", { p_days: days });
@@ -81,7 +93,9 @@ export async function getBusinessNumbers(client: SupabaseClient, days: ValidDays
     days: row.days,
     period: totals(row.period),
     previous: totals(row.previous),
-    daily: row.daily.map((day) => ({ date: day.date.slice(0, 10), revenueIdr: Number(day.revenue_idr) })),
+    daily: dailyFrom(row.daily),
+    dailyPeriod: dailyFrom(row.daily_period ?? row.daily),
+    byStatusPeriod: row.by_status_period ?? row.by_status,
     payoutsByAgency: row.payouts_by_agency.map((agency) => ({ id: agency.agency_id, name: agency.name, paidOutIdr: Number(agency.paid_out_idr) })),
   };
 }

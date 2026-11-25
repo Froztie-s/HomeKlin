@@ -1,11 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import { signedInAs } from "./setup/auth-state";
 
-// The customer pages' language switch floats at the bottom-left of the viewport (the customer layout),
-// on every page, above the phone's bottom bar and clear of the content. Runs on a phone and a desktop.
-// /services is step 1 of the booking flow, which has no bottom bar: there the switch sits over the
-// bottom edge and moves up above the phone's booking bar while it shows (e2e/booking-flow.spec.ts).
-const paths = ["/home", "/services", "/support", "/orders", "/en/home"];
+// In the booking flow, which has no bar, the language switch floats at the bottom-left of the viewport,
+// over the bottom edge, and moves up above the phone's booking bar while it shows
+// (e2e/booking-flow.spec.ts). The rest of the customer app has it in the top bar
+// (e2e/language-customer-bar.spec.ts). Runs on a phone and a desktop.
+const paths = ["/services", "/en/services"];
 
 test.use(signedInAs.customer);
 
@@ -92,8 +92,8 @@ test("is reachable by keyboard and switches the language, keeping the page", asy
 });
 
 test("stays in place while the page scrolls", async ({ page }) => {
-  await page.goto("/support");
-  const group = toggle(page, "/support");
+  await page.goto("/services");
+  const group = toggle(page, "/services");
   const before = (await group.boundingBox())!;
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const after = (await group.boundingBox())!;

@@ -6,6 +6,7 @@ import { GateFallback } from "@/components/auth/gate-fallback";
 import { SupportContent } from "@/components/support/support-content";
 import { PageContainer } from "@/components/ui/page-container";
 import { PageHeader } from "@/components/ui/page-header";
+import { StaffRedirect } from "@/components/auth/staff-redirect";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("SupportPage");
@@ -25,6 +26,7 @@ export default function SupportPage({ searchParams }: PageProps<"/[locale]/suppo
     <PageContainer wide>
       <PageHeader title={t("title")} description={t("description")} size="flow" />
       <Suspense fallback={<GateFallback />}>
+        <StaffRedirect />
         <SupportContent searchParams={searchParams} />
       </Suspense>
     </PageContainer>

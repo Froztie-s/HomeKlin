@@ -32,6 +32,14 @@ export function SlotRowActions({ slotId, capacity, booked, label, setSlotCapacit
   const [removeState, removeAction, removing] = useActionState(deleteSlot, null);
   const [confirming, setConfirming] = useState(false);
   const [last, setLast] = useState<"capacity" | "remove" | null>(null);
+  // "Simpan" shows only once the number differs from the saved one (UX audit item 16: every row had one).
+  const [draft, setDraft] = useState<string | null>(null);
+  const [savedFrom, setSavedFrom] = useState(capacity);
+  if (savedFrom !== capacity) {
+    setSavedFrom(capacity);
+    setDraft(null);
+  }
+  const changed = draft !== null && draft.trim() !== String(capacity);
   const removeButton = useRef<HTMLButtonElement>(null);
   const yesButton = useRef<HTMLButtonElement>(null);
   const backToRemove = useRef(false);
@@ -79,16 +87,20 @@ export function SlotRowActions({ slotId, capacity, booked, label, setSlotCapacit
             min={Math.max(1, booked)}
             max={20}
             defaultValue={capacity}
+            onChange={(event) => setDraft(event.target.value)}
             aria-invalid={last === "capacity" && capacityState?.formError ? true : undefined}
             className={`${rowControl} w-20 text-center tabular-nums`}
           />
-          <button type="submit" onClick={hold} aria-disabled={saving || undefined} className={secondaryButton}>
-            {saving ? <LoaderCircle className="size-4 shrink-0 animate-spin" aria-hidden="true" /> : null}
-            {saving ? t("saving") : t("save")}
-          </button>
+          {changed || saving ? (
+            <button type="submit" onClick={hold} aria-disabled={saving || undefined} className={`${secondaryButton} partner-swap-in`}>
+              {saving ? <LoaderCircle className="size-4 shrink-0 animate-spin" aria-hidden="true" /> : null}
+              {saving ? t("saving") : t("save")}
+            </button>
+          ) : null}
         </form>
 
         {booked > 0 ? (
+          // Says what the lock means: the window cannot be removed (UX audit item 16).
           <span className="inline-flex min-h-touch items-center gap-1.5 px-2 text-sm text-ink-muted md:min-w-44">
             <Lock className="size-4 shrink-0" aria-hidden="true" />
             {t("bookedLock")}

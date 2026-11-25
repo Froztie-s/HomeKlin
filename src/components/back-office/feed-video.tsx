@@ -1,16 +1,18 @@
 "use client";
 
-import { CircleAlert, CircleStop, LoaderCircle, RotateCw, Video, WifiOff, type LucideIcon } from "lucide-react";
+import { CircleAlert, CircleStop, LoaderCircle, Play, RotateCw, Video, WifiOff, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useCallback, useEffect, useEffectEvent, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { coveredBy, useFeedCard } from "./feed-card";
 
 // One feed's video on the admin monitor (T25): the short-lived link the server made for this admin
 // (watchStream, src/lib/stream/streams.ts), played muted, looped and inline so a whole grid plays at
 // once without sound. The link works for 10 minutes, so on the first error the tile asks
 // GET /api/streams/<order id> for a fresh one, once. If that fails too it says so and offers "Coba
-// lagi"; if the stream has ended meanwhile (404) it says that instead. With reduced motion the video
-// does not start by itself: it shows its controls and admin presses play.
+// lagi"; if the stream has ended meanwhile (404) it says that instead. With reduced motion, or when
+// the browser blocks autoplay, the video does not start by itself: a "Putar" button over the frame
+// starts it (2026-11-20, UX audit item 19: the browser's own controls showed a 0:00 / 0:01 bar on a
+// live view).
 // The frame (M1, the user's mock): a 16:9 pale green frame with a white icon circle until the picture
 // arrives; a problem on a calm panel over it (never a black box); and, when the card's status says the
 // cleaner's phone dropped or the job ended (FeedCard), a sunken panel with "Siaran terputus". It tells
@@ -52,6 +54,12 @@ export function FeedVideo({ orderId, src: firstSrc, initialProblem, label }: Fee
   const [load, setLoad] = useState(0);
   const [problem, setProblem] = useState<Problem | null>(initialProblem ?? (firstSrc ? null : "failed"));
   const [reloading, setReloading] = useState(false);
+  // The video waits for admin to start it with reduced motion, or when the browser blocked autoplay;
+  // `started` is set once admin pressed "Putar".
+  const reduced = useSyncExternalStore(subscribeReducedMotion, prefersReducedMotion, () => false);
+  const [blocked, setBlocked] = useState(false);
+  const [started, setStarted] = useState(false);
+  const needsPlay = (reduced || blocked) && !started;
   const retriedOnItsOwn = useRef(false);
 
   async function reload() {
@@ -90,21 +98,30 @@ export function FeedVideo({ orderId, src: firstSrc, initialProblem, label }: Fee
   useEffect(() => checkEarlyError(), []);
 
   // React sets `muted` as a property only, so it is set here as well before playing. With reduced
-  // motion, or when the browser blocks autoplay, the video shows its controls and admin starts it.
-  // The controls are set on the element, not through a prop, so React never takes them away again.
+  // motion, or when the browser blocks autoplay, the "Putar" button shows and admin starts it.
   useEffect(() => {
     const element = video.current;
     if (!element) return;
     element.muted = true;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (prefersReducedMotion()) {
       element.pause();
-      element.controls = true;
       return;
     }
-    element.play().catch(() => {
-      element.controls = true;
-    });
+    element.play().then(
+      () => setBlocked(false),
+      () => setBlocked(true),
+    );
   }, [load]);
+
+  function play() {
+    const element = video.current;
+    if (!element) return;
+    element.muted = true;
+    element.play().then(
+      () => setStarted(true),
+      (error: unknown) => console.error("[monitor] could not start %s:", orderId, error),
+    );
+  }
 
   const ended = problem === "ended";
   const failed = problem === "failed";
@@ -165,6 +182,18 @@ export function FeedVideo({ orderId, src: firstSrc, initialProblem, label }: Fee
           </>
         ) : null}
       </div>
+      {showing && needsPlay ? (
+        <button
+          type="button"
+          onClick={play}
+          aria-label={t("playLabel", { name: label })}
+          className="absolute inset-0 grid place-items-center bg-ink/10 transition-colors duration-150 ease-out-quart hover:bg-ink/20"
+        >
+          <span className="inline-flex size-14 items-center justify-center rounded-full bg-card text-primary shadow-card">
+            <Play className="size-6 translate-x-0.5 fill-current" aria-hidden="true" />
+          </span>
+        </button>
+      ) : null}
       {cover ? (
         <div className={`${panel} bg-sunken`}>
           {cover === "disconnected" ? (
@@ -178,6 +207,14 @@ export function FeedVideo({ orderId, src: firstSrc, initialProblem, label }: Fee
       ) : null}
     </div>
   );
+}
+
+const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
+const prefersReducedMotion = () => window.matchMedia(reducedMotionQuery).matches;
+function subscribeReducedMotion(onChange: () => void) {
+  const query = window.matchMedia(reducedMotionQuery);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
 }
 
 const circle = "inline-flex size-11 items-center justify-center rounded-full bg-card";

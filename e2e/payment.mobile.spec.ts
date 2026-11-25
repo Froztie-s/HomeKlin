@@ -37,7 +37,8 @@ test.afterAll(async () => {
   for (const orderId of await ordersAt(id, area, usedStarts)) await cancelOrder(orderId);
 });
 
-const payButton = (page: Page) => page.getByRole("button", { name: "Bayar sekarang" });
+// The card's own button comes first; the phone bar (./booking-bar.tsx, 2026-11-20) repeats it below.
+const payButton = (page: Page) => page.getByRole("button", { name: "Bayar sekarang" }).first();
 // Step 3 of ordering (D5, mock Customer-Payment).
 const confirmation = (page: Page) => page.getByRole("region", { name: "Pembayaran" });
 const book = (page: Page, window: Window) => bookSignedIn(page, service, area, window);
@@ -77,6 +78,19 @@ test.describe("as a signed-in customer", () => {
       await expect(page.getByRole("radio", { name: /Virtual account/ })).not.toBeChecked();
       await expect(page.getByRole("radio", { name: /Kartu kredit atau debit/ })).not.toBeChecked();
       await hydrated(page);
+
+      // On a phone the card's button is far below the methods: a bar keeps the chosen method, the
+      // price and its own "Bayar sekarang" in reach, and steps aside once the card's button is on screen.
+      const bar = page.getByRole("region", { name: "Pilihan Anda" });
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await expect(bar).toBeVisible();
+      await expect(bar).toContainText("QRIS");
+      await page.getByRole("radio", { name: /Virtual account/ }).check();
+      await expect(bar).toContainText("Virtual account BCA");
+      await page.getByRole("radio", { name: /QRIS/ }).check();
+      await payButton(page).scrollIntoViewIfNeeded();
+      await expect(bar).toHaveCount(0);
+      await expect(page.getByTestId("booking-bar")).toHaveAttribute("data-shown", "false");
 
       // 1. QRIS: the QR code appears on this page, and nothing took the customer to Midtrans.
       await payButton(page).click();
@@ -192,7 +206,7 @@ test.describe("as a signed-in customer", () => {
       await page.setViewportSize({ width: 360, height: 740 });
       for (const prefix of ["", "/en"]) {
         await page.goto(`${prefix}/orders/pay?order=${orderId}&status_code=200&transaction_status=settlement`);
-        await expect(page.getByRole("button", { name: prefix ? "Pay now" : "Bayar sekarang" })).toBeVisible();
+        await expect(page.getByRole("button", { name: prefix ? "Pay now" : "Bayar sekarang" }).first()).toBeVisible();
         // Every way is open to read at this width, the card's fields included.
         await page.getByRole("radio", { name: /Kartu|card/i }).check();
         await expect(page.getByLabel(prefix ? "Card number" : "Nomor kartu")).toBeVisible();

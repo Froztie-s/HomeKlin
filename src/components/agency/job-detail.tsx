@@ -98,7 +98,7 @@ export async function JobDetail({ searchParams, from }: { searchParams: Promise<
   const service = services.find((candidate) => candidate.id === job.serviceId);
   const serviceName = service?.name[locale] ?? t("serviceFallback");
   const area = areas.find((candidate) => candidate.id === job.areaId)?.name[locale] ?? job.areaId;
-  const progress = jobProgress(job);
+  const progress = jobProgress(job, new Date());
   const date = formatAgencyDate(jakartaDateOf(job.startsAt), locale, "long");
   const window = labels.window(job);
   const when = t("whenValue", { date, window });

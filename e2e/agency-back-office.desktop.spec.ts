@@ -181,6 +181,8 @@ test.describe("the agency", () => {
   test("adds a window in one of its areas, which a visitor then sees free", async ({ page }) => {
     await page.goto("/agency/schedule");
     await expect(page.getByRole("heading", { level: 1, name: "Jadwal" })).toBeVisible();
+    // The way back to Petugas, where "Atur jadwal" opened it (2026-11-20, UX audit item 13).
+    await expect(page.getByRole("main").getByRole("link", { name: "Petugas", exact: true })).toHaveAttribute("href", "/agency/cleaners");
     const form = page.getByRole("form", { name: "Tambah jendela" });
     await expect(form.getByLabel("Area")).toHaveValue(jobArea); // its only area is chosen already
     await form.getByLabel("Tanggal").fill(windowDate);
@@ -211,9 +213,12 @@ test.describe("the agency", () => {
     await page.goto(`/agency/schedule?week=4`);
     const row = slotRow(page, id);
     await expect(row).toBeVisible();
+    // "Simpan" shows only once the number is changed (2026-11-20, UX audit item 16).
+    await expect(row.getByRole("button", { name: "Simpan" })).toHaveCount(0);
     await row.getByRole("spinbutton").fill("3");
     await row.getByRole("button", { name: "Simpan" }).click();
     await expect(row.getByRole("status")).toHaveText("Kapasitas disimpan.", { timeout: 20_000 });
+    await expect(row.getByRole("button", { name: "Simpan" })).toHaveCount(0);
     await expect(row).toContainText("0 dari 3 terisi");
     const { data } = await adminClient().from("availability_slots").select("capacity").eq("id", id).single<{ capacity: number }>();
     expect(data?.capacity).toBe(3);
@@ -242,7 +247,7 @@ test.describe("the agency", () => {
     await page.goto("/agency/schedule");
     const row = slotRow(page, data?.slot_id ?? "");
     await expect(row).toContainText("1 dari 1 terisi");
-    await expect(row).toContainText("Sudah ada pesanan");
+    await expect(row).toContainText("Tidak bisa dihapus, sudah ada pesanan");
     await expect(row.getByRole("button", { name: /^Hapus/ })).toHaveCount(0);
   });
 
@@ -255,6 +260,10 @@ test.describe("the agency", () => {
     // The week's windows sit under the list, with the way to change them.
     await expect(page.getByRole("region", { name: "Jadwal ketersediaan" }).getByRole("link", { name: "Atur jadwal" })).toHaveAttribute("href", "/agency/schedule");
 
+    // The header's button opens the form in a dialog (2026-11-20, UX audit item 17).
+    await expect(page.getByRole("dialog", { name: "Tambah petugas" })).toBeHidden();
+    await page.getByRole("link", { name: "Tambah petugas" }).click();
+    await expect(page.getByRole("dialog", { name: "Tambah petugas" })).toBeVisible();
     const form = page.getByRole("form", { name: "Tambah petugas" });
     await expect(form).toContainText("kode 6 angka yang kami kirim ke email ini");
     await form.getByLabel("Nama lengkap").fill(newCleaner.name);
@@ -310,6 +319,12 @@ test.describe("the agency", () => {
     await page.goto("/agency/orders");
     const counts = page.getByRole("list", { name: "Jumlah pekerjaan" });
     await expect(counts).toContainText("Sedang berlangsung");
+    // A count filters the list as its tab does (2026-11-20, UX audit item 14); "Selesai minggu ini" has no list here.
+    await counts.getByRole("link", { name: /Perlu petugas/ }).click();
+    await expect(page).toHaveURL("/agency/orders?status=unassigned");
+    await expect(counts.getByRole("link", { name: /Perlu petugas/ })).toHaveAttribute("aria-current", "true");
+    await expect(counts.getByRole("link")).toHaveCount(3);
+    await page.goto("/agency/orders");
     const filters = page.getByRole("navigation", { name: "Filter status" });
     await filters.getByRole("link", { name: "Berlangsung" }).click();
     await expect(page).toHaveURL("/agency/orders?status=inProgress");
@@ -507,7 +522,13 @@ test.describe("the agency", () => {
     await expect(range.getByRole("link", { name: "7 hari" })).toHaveAttribute("aria-current", "true");
     // The numbers come from the T40 summary functions. The test project's agency role cannot read
     // order_fees yet (docs/redesign-gaps.md, Partner agency); the page then says so instead of showing 0.
-    await expect(page.getByRole("list", { name: "Angka utama, 7 hari terakhir" }).or(page.getByRole("main").getByRole("alert"))).toBeVisible();
+    await expect(page.getByRole("list", { name: "Angka utama, 7 hari terakhir" }).or(page.getByRole("main").getByRole("alert"))).toBeVisible();    // The fee chart follows the chosen period (2026-11-20): 7 bars for 7 days, 13 weekly bars for 90.
+    const chart = page.getByRole("region", { name: /^Imbalan (harian|mingguan)$/ });
+    if (await chart.count()) {
+      await expect(chart.locator("[data-day]")).toHaveCount(7);
+      await page.goto("/agency?days=90");
+      await expect(page.getByRole("region", { name: "Imbalan mingguan" }).locator("[data-day]")).toHaveCount(13);
+    }
   });
 
   test("watches its own cleaner's live stream, whose status follows the cleaner's", async ({ page }) => {

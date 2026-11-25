@@ -26,9 +26,12 @@ export const roleHome = {
 export const authPaths = ["/login", "/signup"] as const;
 
 // The protected sections and the one role that owns each. Every other page is public: the landing
-// page, the app home and services (browsing needs no account), help, and the sign-in pages.
+// page, the app home and services (browsing needs no account), help, and the sign-in pages. Ordering
+// needs a customer account since 2026-11-20 (the user): step 2 (/pesan) and its old address (/book).
 const protectedSections: readonly { prefix: string; roles: readonly AppRole[] }[] = [
   { prefix: "/orders", roles: ["customer"] },
+  { prefix: "/pesan", roles: ["customer"] },
+  { prefix: "/book", roles: ["customer"] },
   { prefix: "/cleaner", roles: ["cleaner"] },
   { prefix: "/agency", roles: ["agency"] },
   { prefix: "/admin", roles: ["admin"] },
@@ -56,6 +59,16 @@ export function stripLocale(pathname: string): string {
 export function rolesFor(pathname: string): readonly AppRole[] | null {
   const path = trimTrailingSlash(pathname);
   return protectedSections.find(({ prefix }) => inSection(path, prefix))?.roles ?? null;
+}
+
+/**
+ * Where a signed-in user who opens a public page is sent instead (2026-11-20, the user: staff could
+ * reach the customer pages by typing their address): staff (cleaner, agency, admin, owner) to their
+ * own home; a customer, whose pages these are, nowhere (null). The sign-in pages already send everyone
+ * signed in on (redirectIfSignedIn).
+ */
+export function publicPageRedirect(role: AppRole): string | null {
+  return role === "customer" ? null : roleHome[role];
 }
 
 export function isAllowed(role: AppRole, pathname: string): boolean {

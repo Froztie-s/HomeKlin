@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-// The customer pages' floating language switch: the customer app's layout and the booking flow's layout
-// hold it, the app bar no longer does, and its place respects the phone's safe-area insets. The
+// The customer pages' language switch (merged 2026-11-20): the booking flow's layout holds the floating
+// one (no bar there); the customer app shows it in its top bar (UX audit item 3), not floating. Its
+// floating place respects the phone's safe-area insets. The
 // behaviour is in e2e/language-floating.spec.ts and e2e/booking-flow.spec.ts; this keeps the wiring
 // from drifting.
 const read = (path: string) => readFileSync(path, "utf8");
@@ -14,10 +15,10 @@ const utility = (css: string, name: string) => {
 };
 
 describe("floating language switch", () => {
-  it("is rendered by the customer app's layout, which keeps the room for it under the page", () => {
+  it("is not floating in the customer app, whose top bar holds the switch", () => {
     const layout = read("src/app/[locale]/(customer)/(app)/layout.tsx");
-    expect(layout).toContain("<FloatingLanguageSwitch />");
-    expect(layout).toContain("floatingControl");
+    expect(layout).not.toContain("FloatingLanguageSwitch");
+    expect(layout).not.toContain("floatingControl");
   });
 
   it("is rendered by the booking flow's layout in its own place, with no app navigation there", () => {
@@ -29,9 +30,10 @@ describe("floating language switch", () => {
     expect(shell).toContain("pb-clear-switch");
   });
 
-  it("is left out of the customer app bar, and kept in the cleaner's", () => {
+  it("is in the app bar for the customer as for the cleaner", () => {
     const header = read("src/components/shell/app-header.tsx");
-    expect(header).toContain('nav === "customer" ? null : <LanguageSwitch');
+    expect(header).toContain("<LanguageSwitch");
+    expect(header).not.toContain('nav === "customer" ? null : <LanguageSwitch');
   });
 
   it("is placed with the safe-area insets and above the phone's bottom bar", () => {

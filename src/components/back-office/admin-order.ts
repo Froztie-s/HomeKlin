@@ -13,6 +13,20 @@ export function parseOrderCode(value: string): string | null {
   return orderCodePattern.test(value) ? value : null;
 }
 
+// What an admin may type in the shell's order search (audit item 1): the number as shown ("HK-1170"),
+// in any case, with or without the dash or a space after "HK", or the digits alone ("1170"), with
+// spaces around it. The digits follow orders_code_format (supabase/migrations/20261112090000_order_codes.sql).
+const typedOrderNumber = /^(?:HK[-\s]?)?([0-9]{4,})$/i;
+
+/** The order number admin typed, written as the database writes it ("HK-1170"), or null. */
+export function normalizeOrderNumber(value: string): string | null {
+  const trimmed = value.trim();
+  // Longer than any order number the sequence will reach; nothing that long is looked at further.
+  if (trimmed.length > 24) return null;
+  const match = typedOrderNumber.exec(trimmed);
+  return match ? `HK-${match[1]}` : null;
+}
+
 /** The chip under the title: the live stream's state while there is one, else how far the job is. */
 export type OrderState = "unassigned" | "assigned" | "active" | "weak" | "disconnected" | "inProgress" | "completed";
 

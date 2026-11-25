@@ -4,7 +4,8 @@ import { getAdminOrderDetail } from "@/lib/jobs/admin-order";
 import { adminClient, visitorClient } from "./test-project";
 import { createWorld, hours, type World } from "./world";
 
-// B2 (Phase 15, supabase/migrations/20261114130000_admin_order_detail.sql): admin's read of one order
+// B2 (Phase 15, supabase/migrations/20261114130000_admin_order_detail.sql, the cleaner's phone added in
+// 20261120090000_admin_cleaner_phone.sql): admin's read of one order
 // for the Admin-Order and Admin-Order-Issue screens, against the real test project: who, where and when,
 // the fee split (real after check-out, expected before), the status times and the stream's state.
 
@@ -54,6 +55,21 @@ describe("admin_order_detail", { timeout: 60_000 }, () => {
     });
     expect(order?.createdAt).toBe(new Date(codeRow?.created_at ?? 0).toISOString());
     expect(order?.checkedInAt).not.toBeNull();
+  });
+
+  // 2026-11-20 (20261120090000_admin_cleaner_phone.sql): admin can call the cleaner when a stream drops.
+  it("gives admin the cleaner's phone once their agency has set it, and null before", async () => {
+    const job = await world.job({ startsAt: new Date(Date.now() - hours(1)), checkedIn: true });
+    const cleaner = world.users.cleanerA.id;
+    const { data: before } = await adminClient().from("cleaners").select("phone").eq("user_id", cleaner).single<{ phone: string | null }>();
+    try {
+      await adminClient().from("cleaners").update({ phone: null }).eq("user_id", cleaner);
+      expect((await getAdminOrderDetail(world.users.admin.client, job))?.cleanerPhone).toBeNull();
+      await adminClient().from("cleaners").update({ phone: "+6281298765432" }).eq("user_id", cleaner);
+      expect((await getAdminOrderDetail(world.users.admin.client, job))?.cleanerPhone).toBe("+6281298765432");
+    } finally {
+      await adminClient().from("cleaners").update({ phone: before?.phone ?? null }).eq("user_id", cleaner);
+    }
   });
 
   it("has the assigned time, the stream's state and its last change", async () => {

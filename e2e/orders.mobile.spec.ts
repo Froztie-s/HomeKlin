@@ -2,15 +2,19 @@ import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
 import { adminClient, createTestUser, deleteTestUsers, type TestUser } from "../tests/integration/test-project";
 import { agencyMarks, cancelOrder, dayText, lateWindow, windowText, type Window } from "./booking-test-data";
+import { historyMonths, openHistoryMonthOf } from "./history-months";
 import { signInWithPassword } from "./order-test-data";
 import { notification, notify } from "./payment-test-data";
 import type { StorageState } from "./setup/auth-state";
 
-// T12 on a phone: /orders lists the customer's own orders, newest first, each with its status, and a
-// paid order shows its job slot. A row opens the order on /orders?order=<id>, which never says the
-// order was just made; step 3 of booking, /orders/pay?order=<id>, is the payment, the confirmation and
-// Midtrans' return (its old address /orders?booked=<id> leads there). An id the customer has no order
-// with falls back to the list and reveals nothing.
+// T12 on a phone: the customer's own orders, each with its status, and a paid order shows its job slot.
+// Since 2026-11-20 they are on two pages: /home lists the orders still to come under "Akan datang"
+// (waiting for payment or for the job, the soonest first), and /orders is "Riwayat pesanan" (finished,
+// failed, cancelled, or a window that has passed; one month at a time, ?bulan=2026-11, the latest job
+// first, with a filter kept in the address as ?filter=selesai or ?filter=tidak-jadi). A row opens the
+// order on /orders?order=<id>, which never says the order was just made; step 3 of booking,
+// /orders/pay?order=<id>, is the payment, the confirmation and Midtrans' return (its old address
+// /orders?booked=<id> leads there). An id the customer has no order with reveals nothing.
 // The spec makes its own customers, so the list holds exactly what it booked, whatever other specs do
 // with the shared customer at the same time. The tests build on each other (empty first), so they run
 // in order. Paid, failed and cancelled are set with signed notifications (e2e/payment-test-data.ts).
@@ -72,18 +76,24 @@ async function book(user: TestUser, window: Window, address: string): Promise<st
 
 const ordersList = (page: Page, name = "Daftar pesanan") => page.getByRole("list", { name });
 const rowOf = (page: Page, orderId: string, prefix = "") => page.locator(`a[href="${prefix}/orders?order=${orderId}"]`);
-const backLink = (page: Page) => page.getByRole("link", { name: "Kembali ke daftar pesanan" });
+const backLink = (page: Page) => page.getByRole("link", { name: "Kembali ke riwayat pesanan" });
+const backHome = (page: Page) => page.getByRole("link", { name: "Kembali ke Beranda" });
 
-test("a customer without orders sees the empty state", async ({ page }) => {
-  await page.goto("/orders");
-  await expect(page.getByRole("heading", { level: 1, name: "Pesanan" })).toBeVisible();
-  await expect(page.getByText("Belum ada pesanan")).toBeVisible();
+test("a customer without orders sees the empty states", async ({ page }) => {
+  await page.goto("/home");
+  await expect(page.getByRole("heading", { level: 1, name: "Pesanan Anda" })).toBeVisible();
+  await expect(page.getByText("Belum ada pesanan", { exact: true })).toBeVisible();
   await expect(ordersList(page)).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /^Riwayat pesanan/ })).toHaveCount(0);
+  await page.goto("/orders");
+  await expect(page.getByRole("heading", { level: 1, name: "Riwayat pesanan" })).toBeVisible();
+  await expect(page.getByText("Belum ada riwayat pesanan")).toBeVisible();
+  await expect(page.locator('a[href^="/orders?order="]')).toHaveCount(0);
 });
 
 test.describe("with an order of each status", () => {
   const ids = { waiting: "", paid: "", failed: "", cancelled: "", past: "", off: "", others: "" };
-  const windows: Partial<Record<"waiting" | "paid" | "failed" | "cancelled", Window>> = {};
+  const windows: Partial<Record<"waiting" | "paid" | "failed" | "cancelled" | "off", Window>> = {};
   const windowOf = (name: keyof typeof windows): Window => {
     const window = windows[name];
     if (!window) throw new Error(`The ${name} order was not booked`);
@@ -103,6 +113,7 @@ test.describe("with an order of each status", () => {
     windows.paid = await lateWindow(area, "10.00");
     windows.failed = await lateWindow(area, "13.00");
     windows.cancelled = await lateWindow(area, "15.00");
+    windows.off = await lateWindow(area, "10.00", 1);
 
     // The order of booking matters: the list shows the newest first. Each outcome is applied right after
     // its booking, because a customer may hold at most 3 unpaid orders (T34 security review, M2).
@@ -111,7 +122,7 @@ test.describe("with an order of each status", () => {
       return id;
     };
     ids.past = await settle(await book(customer, await lateWindow(area, "08.00", 1), addressOf("Lampau")), midtransOutcome.paid);
-    ids.off = await book(customer, await lateWindow(area, "10.00", 1), addressOf("Dimatikan"));
+    ids.off = await book(customer, windowOf("off"), addressOf("Dimatikan"));
     ids.cancelled = await settle(await book(customer, windowOf("cancelled"), addressOf("Batal")), midtransOutcome.cancelled);
     ids.failed = await settle(await book(customer, windowOf("failed"), addressOf("Gagal")), midtransOutcome.failed);
     ids.paid = await settle(await book(customer, windowOf("paid"), addressOf("Lunas")), midtransOutcome.paid);
@@ -148,20 +159,27 @@ test.describe("with an order of each status", () => {
     if (ids.off) await cancelOrder(ids.off);
   });
 
-  test("lists every order newest first, each with the right status word", async ({ page }) => {
-    await page.goto("/orders");
-    const list = ordersList(page);
-    await expect(list.getByRole("listitem")).toHaveCount(6);
-    const hrefs = await list.getByRole("link").evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-    expect(hrefs).toEqual(
-      [ids.waiting, ids.paid, ids.failed, ids.cancelled, ids.off, ids.past].map((id) => `/orders?order=${id}`),
+  const hrefsOf = (page: Page, name?: string) =>
+    ordersList(page, name)
+      .getByRole("link")
+      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+  const historyHrefs = (page: Page) =>
+    page.locator('main a[href*="/orders?order="]').evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+  const filterLink = (page: Page, name: string) => page.getByRole("navigation", { name: "Saring riwayat" }).getByRole("link", { name: new RegExp(`^${name}`) });
+
+  test("the home lists the orders still to come under Akan datang, the soonest first", async ({ page }) => {
+    await page.goto("/home");
+    await expect(page.getByRole("tablist")).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "Akan datang" })).toBeVisible();
+    await expect(ordersList(page).getByRole("listitem")).toHaveCount(3);
+    const soonest = (["waiting", "paid", "off"] as const).toSorted(
+      (a, b) => Date.parse(windowOf(a).startsAt) - Date.parse(windowOf(b).startsAt),
     );
+    expect(await hrefsOf(page)).toEqual(soonest.map((name) => `/orders?order=${ids[name]}`));
 
     for (const [id, word] of [
       [ids.waiting, "Menunggu pembayaran"],
       [ids.paid, "Sudah dibayar"],
-      [ids.failed, "Pembayaran gagal"],
-      [ids.cancelled, "Dibatalkan"],
     ]) {
       const row = rowOf(page, id);
       await expect(row.getByText(word, { exact: true })).toBeVisible();
@@ -169,30 +187,79 @@ test.describe("with an order of each status", () => {
       await expect(row.getByText(/^Rp\s[\d.]+$/)).toBeVisible();
     }
     await expect(rowOf(page, ids.waiting)).toContainText(arrival(windowOf("waiting")));
-    await expect(rowOf(page, ids.failed)).toContainText(arrival(windowOf("failed")));
+    // The finished ones are only linked, to their own page.
+    for (const id of [ids.failed, ids.cancelled, ids.past]) await expect(rowOf(page, id)).toHaveCount(0);
+    await page.getByRole("link", { name: /^Riwayat pesanan/ }).click();
+    await expect(page).toHaveURL("/orders");
+  });
+
+  test("Riwayat pesanan holds the failed, cancelled and passed orders, one month at a time, with a filter", async ({ page }) => {
+    await page.goto("/orders");
+    await expect(page.getByRole("heading", { level: 1, name: "Riwayat pesanan" })).toBeVisible();
+    await expect(page.getByText("3 pesanan masih berjalan.")).toBeVisible();
+    // The latest month opens first: the failed and cancelled orders' windows are still to come, the
+    // passed order's window is 40 days back, in an earlier month.
+    expect(await historyHrefs(page)).toEqual([ids.cancelled, ids.failed].map((id) => `/orders?order=${id}`));
+    const months = await historyMonths(page);
+    expect(months).toHaveLength(2);
+    await expect(page.getByLabel("Pilih bulan")).toHaveValue(months[0]);
+    for (const [id, word] of [
+      [ids.failed, "Pembayaran gagal"],
+      [ids.cancelled, "Dibatalkan"],
+    ]) {
+      await expect(rowOf(page, id).getByText(word, { exact: true })).toBeVisible();
+    }
+    await expect(rowOf(page, ids.failed)).toContainText(`${windowText(windowOf("failed"))} WIB`);
+
+    // The arrow and the select both change the month, kept in the address.
+    await page.getByRole("link", { name: /^Bulan sebelumnya/ }).click();
+    await expect(page).toHaveURL(`/orders?bulan=${months[1]}`);
+    expect(await historyHrefs(page)).toEqual([`/orders?order=${ids.past}`]);
+    // Paid, but its window passed with no check-in: the pill says where the order is (order-stage.ts).
+    await expect(rowOf(page, ids.past).getByText("Tidak terlaksana", { exact: true })).toBeVisible();
+    await page.getByLabel("Pilih bulan").selectOption(months[0]);
+    await expect(page).toHaveURL(`/orders?bulan=${months[0]}`);
+    await expect(rowOf(page, ids.failed)).toBeVisible();
+
+    await expect(filterLink(page, "Semua")).toHaveAttribute("aria-current", "page");
+    await filterLink(page, "Tidak jadi").click();
+    await expect(page).toHaveURL(`/orders?filter=tidak-jadi&bulan=${months[0]}`);
+    await expect(filterLink(page, "Tidak jadi")).toHaveAttribute("aria-current", "page");
+    expect(await historyHrefs(page)).toEqual([ids.cancelled, ids.failed].map((id) => `/orders?order=${id}`));
+    await filterLink(page, "Selesai").click();
+    await expect(page.getByText("Tidak ada pesanan di sini")).toBeVisible();
+    expect(await historyHrefs(page)).toEqual([]);
+
+    // Back from an order, the same filter and month are open.
+    await filterLink(page, "Tidak jadi").click();
+    await rowOf(page, ids.failed).click();
+    await expect(page).toHaveURL(`/orders?order=${ids.failed}`);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/orders\?filter=tidak-jadi/);
+    await expect(rowOf(page, ids.failed)).toBeVisible();
   });
 
   test("a paid order shows its job slot on a labelled line; the others do not", async ({ page }) => {
-    await page.goto("/orders");
+    await page.goto("/home");
     const slot = rowOf(page, ids.paid).getByTestId("job-slot");
     await expect(slot).toContainText("Jadwal kedatangan");
     await expect(slot).toContainText(arrival(windowOf("paid")));
-    for (const id of [ids.waiting, ids.failed, ids.cancelled]) {
-      await expect(rowOf(page, id).getByTestId("job-slot")).toHaveCount(0);
-    }
+    await expect(rowOf(page, ids.waiting).getByTestId("job-slot")).toHaveCount(0);
   });
 
   test("a past order shows its real date, and a switched-off service the fallback name", async ({ page }) => {
-    await page.goto("/orders");
+    await openHistoryMonthOf(page, ids.past);
     const row = rowOf(page, ids.past);
-    await expect(row).toContainText(arrival(past));
+    await expect(row).toBeVisible();
+    await expect(row).toContainText(`${windowText(past)} WIB`);
     await expect(row).not.toContainText(/Hari ini|Besok/);
+    await page.goto("/home");
     await expect(rowOf(page, ids.off).getByText("Layanan HomeKlin", { exact: true })).toBeVisible();
     await expect(page.getByText("Layanan Uji Nonaktif")).toHaveCount(0);
   });
 
   test("a row opens the order's details, which do not say it was just made, and leads back", async ({ page }) => {
-    await page.goto("/orders");
+    await page.goto("/home");
     await rowOf(page, ids.paid).click();
     await expect(page).toHaveURL(`/orders?order=${ids.paid}`);
     const details = page.getByRole("region", { name: "Detail pesanan" });
@@ -202,9 +269,17 @@ test.describe("with an order of each status", () => {
     await expect(page.getByRole("region", { name: "Pembayaran" })).toHaveCount(0);
     await expect(details.getByRole("button", { name: "Bayar sekarang" })).toHaveCount(0);
 
+    // A paid order still to come is listed on the home, so its way back leads there.
+    await backHome(page).click();
+    await expect(page).toHaveURL("/home");
+    await expect(ordersList(page)).toBeVisible();
+  });
+
+  test("a finished order leads back to the history", async ({ page }) => {
+    await page.goto(`/orders?order=${ids.past}`);
     await backLink(page).click();
     await expect(page).toHaveURL("/orders");
-    await expect(ordersList(page)).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Riwayat pesanan" })).toBeVisible();
   });
 
   test("a waiting order still leads to paying from its details (step 3 lets the customer choose how)", async ({ page }) => {
@@ -213,7 +288,7 @@ test.describe("with an order of each status", () => {
     await expect(details.getByText("Menunggu pembayaran")).toBeVisible();
     await details.getByRole("link", { name: "Bayar sekarang" }).click();
     await expect(page).toHaveURL(`/orders/pay?order=${ids.waiting}`);
-    await expect(page.getByRole("button", { name: "Bayar sekarang" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Bayar sekarang" }).first()).toBeVisible();
   });
 
   test("a failed order's details do not promise the slot", async ({ page }) => {
@@ -230,31 +305,39 @@ test.describe("with an order of each status", () => {
     await expect(page).toHaveURL(`/orders/pay?order=${ids.waiting}`);
     const confirmation = page.getByRole("region", { name: "Pembayaran" });
     await expect(confirmation.getByText("Menunggu pembayaran")).toBeVisible();
-    await expect(confirmation.getByRole("button", { name: "Bayar sekarang" })).toBeVisible();
+    await expect(confirmation.getByRole("button", { name: "Bayar sekarang" }).first()).toBeVisible();
     await expect(page.getByRole("status").filter({ hasText: "Pembayaran sedang dikonfirmasi" })).toHaveCount(0);
 
     await page.goto(`/orders?booked=${ids.waiting}&order_id=${ids.waiting}&status_code=201&transaction_status=pending`);
     await expect(page).toHaveURL(`/orders/pay?order=${ids.waiting}&order_id=${ids.waiting}&status_code=201&transaction_status=pending`);
     await expect(page.getByRole("status").filter({ hasText: "Pembayaran sedang dikonfirmasi" })).toBeVisible();
 
-    // The booking flow's header leads to the list.
+    // The booking flow's header leads to the home, where the placed order waits (2026-11-20).
     await page.getByRole("banner").getByRole("link", { name: "Ke pesanan Anda" }).click();
-    await expect(page).toHaveURL("/orders");
+    await expect(page).toHaveURL("/home");
     await expect(ordersList(page)).toBeVisible();
   });
 
   test("another customer's order is not listed, and its id or an unknown id reveals nothing", async ({ page }) => {
-    await page.goto("/orders");
-    await expect(ordersList(page)).toBeVisible();
-    await expect(rowOf(page, ids.others)).toHaveCount(0);
-    expect(await page.content()).not.toContain(ids.others);
+    for (const path of ["/home", "/orders"]) {
+      await page.goto(path);
+      await expect(page.locator('main a[href^="/orders?order="]').first()).toBeVisible();
+      await expect(rowOf(page, ids.others)).toHaveCount(0);
+      expect(await page.content()).not.toContain(ids.others);
+    }
 
     // The order's page shows the list in its place; the payment page (and its old address) leads to it.
     for (const address of ["/orders?order=", "/orders?booked=", "/orders/pay?order="]) {
       for (const id of [ids.others, randomUUID()]) {
         await page.goto(`${address}${id}`);
-        if (address !== "/orders?order=") await expect(page).toHaveURL("/orders");
-        await expect(ordersList(page).getByRole("listitem")).toHaveCount(6);
+        if (address === "/orders?order=") {
+          // The history page in its place, on its latest month: the failed and cancelled orders.
+          await expect(page.locator('main a[href^="/orders?order="]')).toHaveCount(2);
+        } else {
+          // The payment page (and its old address) leads to the home, with the orders still to come.
+          await expect(page).toHaveURL("/home");
+          await expect(ordersList(page).getByRole("listitem")).toHaveCount(3);
+        }
         await expect(page.getByRole("region", { name: /Detail pesanan|Pembayaran/ })).toHaveCount(0);
         const html = await (await page.request.get(`${address}${id}`)).text();
         for (const text of [await page.content(), html]) expect(text).not.toContain("Rahasia Orang Lain");
@@ -263,25 +346,36 @@ test.describe("with an order of each status", () => {
   });
 
   test("works in English, with the status, the slot, the details and the way back", async ({ page }) => {
-    await page.goto("/en/orders");
-    const list = ordersList(page, "Your orders");
-    await expect(list.getByRole("listitem")).toHaveCount(6);
+    await page.goto("/en/home");
+    await expect(page.getByRole("heading", { name: "Upcoming" })).toBeVisible();
+    await expect(ordersList(page, "Your orders").getByRole("listitem")).toHaveCount(3);
     const paid = rowOf(page, ids.paid, "/en");
     await expect(paid.getByText("Paid", { exact: true })).toBeVisible();
     await expect(paid.getByText(service.nameEn, { exact: true })).toBeVisible();
     await expect(paid.getByTestId("job-slot")).toContainText("Arrival time");
     await expect(paid.getByTestId("job-slot")).toContainText(arrival(windowOf("paid"), "en"));
     await expect(rowOf(page, ids.waiting, "/en").getByText("Awaiting payment", { exact: true })).toBeVisible();
-    await expect(rowOf(page, ids.failed, "/en").getByText("Payment failed", { exact: true })).toBeVisible();
-    await expect(rowOf(page, ids.cancelled, "/en").getByText("Cancelled", { exact: true })).toBeVisible();
     await expect(rowOf(page, ids.off, "/en").getByText("HomeKlin service", { exact: true })).toBeVisible();
 
+    await page.goto("/en/orders");
+    await expect(page.getByRole("heading", { level: 1, name: "Order history" })).toBeVisible();
+    await expect(rowOf(page, ids.failed, "/en").getByText("Payment failed", { exact: true })).toBeVisible();
+    await expect(rowOf(page, ids.cancelled, "/en").getByText("Cancelled", { exact: true })).toBeVisible();
+    await openHistoryMonthOf(page, ids.past, "/en");
+    await expect(rowOf(page, ids.past, "/en").getByText("Did not take place", { exact: true })).toBeVisible();
+    await page.goto("/en/orders");
+    await rowOf(page, ids.failed, "/en").click();
+    await page.getByRole("link", { name: "Back to your order history" }).click();
+    await expect(page).toHaveURL("/en/orders");
+
+    // An order still to come leads back to the home.
+    await page.goto("/en/home");
     await rowOf(page, ids.waiting, "/en").click();
     await expect(page).toHaveURL(`/en/orders?order=${ids.waiting}`);
     const details = page.getByRole("region", { name: "Order details" });
     await expect(details.getByRole("link", { name: "Pay now" })).toBeVisible();
-    await page.getByRole("link", { name: "Back to your orders" }).click();
-    await expect(page).toHaveURL("/en/orders");
+    await page.getByRole("link", { name: "Back to Home" }).click();
+    await expect(page).toHaveURL("/en/home");
   });
 
   test.describe("at 360 px", () => {
@@ -290,7 +384,7 @@ test.describe("with an order of each status", () => {
     test("the filled list and the details have no sideways scroll and name no agency, in both languages", async ({ page }) => {
       const marks = await agencyMarks();
       for (const prefix of ["", "/en"]) {
-        for (const path of [`${prefix}/orders`, `${prefix}/orders?order=${ids.waiting}`]) {
+        for (const path of [`${prefix}/home`, `${prefix}/orders`, `${prefix}/orders?order=${ids.waiting}`]) {
           await page.context().clearCookies({ name: "NEXT_LOCALE" });
           await page.goto(path);
           await expect(page.getByText(/Rp\s[\d.]+/).first()).toBeVisible();

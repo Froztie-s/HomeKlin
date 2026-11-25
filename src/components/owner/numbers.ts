@@ -57,6 +57,24 @@ export function statusRows(byStatus: OrderStatusCounts) {
   }));
 }
 
+export type ChartBucket = { date: string; end: string; amountIdr: number };
+
+/**
+ * The revenue chart's bars for the chosen period (2026-11-20): one bar a day up to 30 days; for a
+ * longer period one bar a week, so 90 days stay 13 readable bars. Weeks are counted back from the last
+ * day, so the last bar always ends today and only the first may be shorter. `date` is the bucket's
+ * first day (the label under the bar), `end` its last.
+ */
+export function chartBuckets(daily: readonly { date: string; revenueIdr: number }[]): { unit: "day" | "week"; buckets: ChartBucket[] } {
+  if (daily.length <= 30) return { unit: "day", buckets: daily.map((day) => ({ date: day.date, end: day.date, amountIdr: day.revenueIdr })) };
+  const buckets: ChartBucket[] = [];
+  for (let end = daily.length; end > 0; end -= 7) {
+    const week = daily.slice(Math.max(0, end - 7), end);
+    buckets.unshift({ date: week[0].date, end: week[week.length - 1].date, amountIdr: week.reduce((sum, day) => sum + day.revenueIdr, 0) });
+  }
+  return { unit: "week", buckets };
+}
+
 const monthYears = new Map<Locale, Intl.DateTimeFormat>();
 
 /** A moment as its Jakarta month and year: "Mar 2026" ("Sejak Mar 2026" on the partner list). */

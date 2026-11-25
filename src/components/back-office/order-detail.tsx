@@ -121,21 +121,20 @@ export async function OrderDetail(props: OrderDetailProps) {
         <aside aria-label={t("asideLabel")} className="flex min-w-0 flex-col gap-6">
           <Card id="order-customer" title={t("customer.title")}>
             <Person name={order.customerName || t("customer.fallback")} detail={order.contactPhone ? null : t("customer.noPhone")} />
-            {order.contactPhone ? (
-              <a
-                href={`tel:${order.contactPhone}`}
-                className="inline-flex min-h-touch w-fit items-center gap-2 rounded-full border-[1.5px] border-outline px-5 text-sm font-semibold whitespace-nowrap text-ink tabular-nums transition-[background-color,transform] duration-150 ease-out-quart hover:bg-field active:scale-[0.98] active:bg-sunken"
-              >
-                <Phone className="size-4.5 shrink-0" aria-hidden="true" />
-                <span className="sr-only">{t("customer.call")} </span>
-                {order.contactPhone}
-              </a>
-            ) : null}
+            {order.contactPhone ? <CallLink phone={order.contactPhone} label={t("customer.call")} /> : null}
           </Card>
 
           <Card id="order-cleaner" title={t("cleaner.title")}>
             {job.cleanerName ? (
-              <Person name={job.cleanerName} detail={t("cleaner.role", { agency: job.agencyName })} />
+              <>
+                <Person name={job.cleanerName} detail={t("cleaner.role", { agency: job.agencyName })} />
+                {/* The cleaner's phone (2026-11-20, UX audit item 18): set by their agency, so it may be missing. */}
+                {order.cleanerPhone ? (
+                  <CallLink phone={order.cleanerPhone} label={t("cleaner.call")} />
+                ) : (
+                  <p className="text-sm text-ink-muted">{t("cleaner.noPhone")}</p>
+                )}
+              </>
             ) : (
               <p className="text-sm text-ink-muted">{t("cleaner.none")}</p>
             )}
@@ -238,6 +237,20 @@ function Amount({ term, hint = null, value, strong = false }: { term: string; hi
   );
 }
 
+/** A phone number as an outlined pill that calls it; a screen reader hears "Telepon +62...". */
+function CallLink({ phone, label }: { phone: string; label: string }) {
+  return (
+    <a
+      href={`tel:${phone}`}
+      className="inline-flex min-h-touch w-fit items-center gap-2 rounded-full border-[1.5px] border-outline px-5 text-sm font-semibold whitespace-nowrap text-ink tabular-nums transition-[background-color,transform] duration-150 ease-out-quart hover:bg-field active:scale-[0.98] active:bg-sunken"
+    >
+      <Phone className="size-4.5 shrink-0" aria-hidden="true" />
+      <span className="sr-only">{label} </span>
+      {phone}
+    </a>
+  );
+}
+
 function Person({ name, detail }: { name: string; detail: string | null }) {
   return (
     <div className="flex items-center gap-3">
@@ -255,7 +268,7 @@ function Person({ name, detail }: { name: string; detail: string | null }) {
 type VideoCardProps = OrderDetailProps & { live: LiveStream | null };
 
 /** The live video when there is a stream; otherwise a calm frame that says why there is none. */
-async function VideoCard({ job, live, time, recording }: VideoCardProps) {
+async function VideoCard({ job, order, live, time, recording }: VideoCardProps) {
   const [t, tMonitor] = await Promise.all([getTranslations("AdminOrderPage"), getTranslations("AdminMonitorPage")]);
   const cleaner = job.cleanerName ?? tMonitor("cleanerFallback");
 
@@ -294,6 +307,17 @@ async function VideoCard({ job, live, time, recording }: VideoCardProps) {
         <p className="min-w-0 flex-1 text-ink-muted">{note}</p>
         {live ? <FeedOpen name={cleaner} /> : null}
       </div>
+      {/* The stream dropped (2026-11-20, UX audit item 18): the way to reach the cleaner, right here. */}
+      {live?.status === "disconnected" && order.cleanerPhone ? (
+        <a
+          href={`tel:${order.cleanerPhone}`}
+          className="inline-flex min-h-touch w-fit items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold whitespace-nowrap text-on-primary transition-[background-color,transform] duration-150 ease-out-quart hover:bg-primary-container active:scale-[0.98] active:bg-band"
+        >
+          <Phone className="size-4.5 shrink-0" aria-hidden="true" />
+          {t("video.callCleaner")}
+          <span className="sr-only"> {order.cleanerPhone}</span>
+        </a>
+      ) : null}
       {job.completedAt ? <RecordingLine job={job} recording={recording} /> : null}
       <p className="flex items-start gap-2 text-sm text-ink-muted">
         <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />

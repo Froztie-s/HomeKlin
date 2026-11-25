@@ -150,11 +150,13 @@ test.describe("free slots", () => {
     // The summary writes the time as the chips do ("15.00-17.00 WIB").
     await expect(summary).toContainText(`${windowText(window)} WIB`);
     await summary.getByRole("button", { name: "Pesan sekarang" }).click();
-    await expect(page).toHaveURL(/\/pesan\?/);
-    const params = Object.fromEntries(new URL(page.url()).searchParams);
+    // A visitor signs in (or up) first (2026-11-20); the choice waits in ?next=.
+    await expect(page).toHaveURL(/\/login\?next=%2Fpesan%3F/);
+    const next = new URL(new URL(page.url()).searchParams.get("next") ?? "", "http://x");
+    expect(next.pathname).toBe("/pesan");
+    const params = Object.fromEntries(next.searchParams);
     expect(params).toMatchObject({ area: "jakarta-barat", starts: window.startsAt });
     expect(params.layanan).toMatch(/\S/);
-    await expect(page.getByRole("heading", { level: 1, name: "Detail pemesanan" })).toBeVisible();
   });
 
   test.describe("in a browser set to another time zone", () => {

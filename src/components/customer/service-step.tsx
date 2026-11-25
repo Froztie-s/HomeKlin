@@ -2,7 +2,7 @@
 
 import { ArrowRight, CircleAlert, CalendarX2, ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { createContext, use, useState, type FormEvent, type ReactNode } from "react";
+import { createContext, use, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { BookingBar } from "./booking-bar";
 import { flowAccentButton, flowCard, flowCardTitle, flowInput } from "./flow-styles";
 import { TimeChip } from "./time-chip";
@@ -18,6 +18,9 @@ import { TimeChip } from "./time-chip";
 // Since the booking-flow fixes (2026-11-16) "Pesan sekarang" is never disabled: pressed without a
 // service, it says so next to the services and puts the cursor on the first one. "Ubah" on step 2
 // comes back here with the service, area and time in the address (?layanan=&area=&starts=).
+// On phones the times sit under the whole list of services, so a service tapped there scrolls the page
+// on to "Jam kosong" (2026-11-20, UX audit item 6). Only a tap or click does: arrowing through the
+// radio group with the keyboard, or a screen reader, keeps its place.
 
 export type StepWindow = { startsAt: string; start: string; end: string; isFull: boolean };
 export type StepDay = {
@@ -107,6 +110,19 @@ export function ServiceRadioGroup({ labelledBy, children }: { labelledBy: string
   );
 }
 
+/** The id of the "Jam kosong" section, the target of the scroll after a service is tapped on a phone. */
+const windowsSectionId = "pilih-jam";
+const phoneQuery = "(max-width: 47.9375rem)";
+
+/** On a phone, brings the times into view once the chosen card has rendered (smooth unless reduced motion). */
+function scrollToWindows() {
+  if (typeof window === "undefined" || !window.matchMedia(phoneQuery).matches) return;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  requestAnimationFrame(() =>
+    document.getElementById(windowsSectionId)?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" }),
+  );
+}
+
 /**
  * The service card's radio: invisible over the whole card (the card is the target), named by the
  * card's heading and described by its price and duration. The card shows the choice with its fill,
@@ -114,6 +130,8 @@ export function ServiceRadioGroup({ labelledBy, children }: { labelledBy: string
  */
 export function ServiceRadio({ serviceId, labelledBy, describedBy }: { serviceId: string; labelledBy: string; describedBy: string }) {
   const { formId, serviceId: chosen, setServiceId } = useStep();
+  // Set by a pointer press on the card, so only a tap or click (not the arrow keys) scrolls on.
+  const pointer = useRef(false);
   return (
     <input
       type="radio"
@@ -121,7 +139,17 @@ export function ServiceRadio({ serviceId, labelledBy, describedBy }: { serviceId
       form={formId}
       value={serviceId}
       checked={chosen === serviceId}
-      onChange={() => setServiceId(serviceId)}
+      onPointerDown={() => {
+        pointer.current = true;
+      }}
+      onKeyDown={() => {
+        pointer.current = false;
+      }}
+      onChange={() => {
+        setServiceId(serviceId);
+        if (pointer.current) scrollToWindows();
+        pointer.current = false;
+      }}
       aria-labelledby={labelledBy}
       aria-describedby={describedBy}
       className="absolute inset-0 z-0 size-full cursor-pointer appearance-none rounded-lg opacity-0"
@@ -150,7 +178,7 @@ export function WindowChooser({ windows, services, areaName, lookAheadDays }: Wi
   const day = days?.find((candidate) => candidate.date === chosenDate) ?? firstFree;
 
   return (
-    <section aria-labelledby="jam-kosong" className={flowCard}>
+    <section id={windowsSectionId} aria-labelledby="jam-kosong" className={`${flowCard} scroll-mt-4`}>
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:gap-6">
         <div className="flex min-w-0 flex-col gap-0.5">
           <h2 id="jam-kosong" className={flowCardTitle}>

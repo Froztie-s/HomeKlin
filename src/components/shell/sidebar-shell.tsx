@@ -23,6 +23,8 @@ type SidebarShellProps = {
       roleCard: RoleCard;
       /** Where the wordmark leads (the console's start page) and its accessible name. */
       home: HomeLink;
+      /** A tool on the dark band, under the role card and at the top of the narrow-screen menu (admin's order search). */
+      tool?: ReactNode;
     }
 );
 
@@ -48,7 +50,7 @@ export function SidebarShell(props: SidebarShellProps) {
       <div className="flex flex-1 flex-col lg:pl-sidebar">
         <SkipLink />
         {props.tone === "forest" ? (
-          <ForestSidebar nav={nav} roleCard={props.roleCard} home={props.home} />
+          <ForestSidebar nav={nav} roleCard={props.roleCard} home={props.home} tool={props.tool} />
         ) : (
           <LightSidebar nav={nav} roleLabel={roleLabel} />
         )}
@@ -57,6 +59,7 @@ export function SidebarShell(props: SidebarShellProps) {
           roleLabel={roleLabel}
           tone={forest ? "forest" : "default"}
           home={props.tone === "forest" ? props.home : undefined}
+          tool={props.tone === "forest" ? props.tool : undefined}
           account={
             <Suspense fallback={null}>
               <AccountSummary variant="sidebar" tone={forest ? "forest" : "default"} />
@@ -100,7 +103,8 @@ function LightSidebar({ nav, roleLabel }: { nav: BackOfficeNavKey; roleLabel: st
 // The redesign's sidebar (markdown/design.md, Layout, sidebar): 256 px of `band` with no edge, the lime
 // wordmark tile, a role card on band-raised, the dark items, then the on-dark language switch and the
 // signed-in user. on-dark-focus turns the focus ring lime (12.0:1 on band, 8.4:1 on band-raised).
-function ForestSidebar({ nav, roleCard, home }: { nav: BackOfficeNavKey; roleCard: RoleCard; home: HomeLink }) {
+// A tool (admin's order search) sits between the role card and the sections.
+function ForestSidebar({ nav, roleCard, home, tool }: { nav: BackOfficeNavKey; roleCard: RoleCard; home: HomeLink; tool?: ReactNode }) {
   return (
     <aside className="on-dark-focus fixed inset-y-0 left-0 z-(--z-sticky) hidden w-sidebar flex-col bg-band text-on-band lg:flex">
       <div className="flex h-16 items-center px-3">
@@ -112,6 +116,7 @@ function ForestSidebar({ nav, roleCard, home }: { nav: BackOfficeNavKey; roleCar
         </span>
         <span className="text-sm font-semibold text-on-band">{roleCard.title}</span>
       </p>
+      {tool ? <div className="mx-3 mt-4">{tool}</div> : null}
       <div className="flex-1 overflow-y-auto px-3 py-4">
         <SideNavList nav={nav} tone="forest" />
       </div>

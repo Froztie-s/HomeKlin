@@ -4,7 +4,8 @@ import type { StreamStatus } from "@/lib/stream/streams";
 import { JobsError } from "./jobs";
 
 // Admin's read of one order (B2), through admin_order_detail() in
-// supabase/migrations/20261114130000_admin_order_detail.sql, which answers admins only. Pass the
+// supabase/migrations/20261114130000_admin_order_detail.sql (last changed in
+// 20261120090000_admin_cleaner_phone.sql: the cleaner's phone), which answers admins only. Pass the
 // admin's session client (createSupabaseServerClient), behind <Suspense>.
 
 export type AdminOrderDetail = {
@@ -24,6 +25,8 @@ export type AdminOrderDetail = {
   agencyName: string;
   cleanerId: string | null;
   cleanerName: string | null;
+  /** The cleaner's mobile number (+628...), set by their agency (B11); null when none is set (2026-11-20). */
+  cleanerPhone: string | null;
   priceIdr: number;
   /** The agency's fee and HomeKlin's income; together they are the price. */
   agencyFeeIdr: number;
@@ -74,6 +77,7 @@ type Row = {
   stream_updated_at: string | null;
   customer_note: string | null;
   payment_type: string | null;
+  cleaner_phone: string | null;
 };
 
 const iso = (value: string) => new Date(value).toISOString();
@@ -103,6 +107,7 @@ export async function getAdminOrderDetail(client: SupabaseClient, orderId: strin
     agencyName: row.agency_name,
     cleanerId: row.cleaner_id,
     cleanerName: row.cleaner_name,
+    cleanerPhone: row.cleaner_phone ?? null,
     priceIdr: row.price_idr,
     agencyFeeIdr: Number(row.agency_fee_idr),
     homeklinIncomeIdr: Number(row.homeklin_income_idr),

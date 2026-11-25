@@ -5,6 +5,7 @@ import type { CustomerOrder } from "@/lib/booking/orders";
 import { formatRupiah } from "@/lib/format";
 import { jakartaDayOf } from "./booking-query";
 import { liveInProgress } from "./live-status";
+import { orderStage } from "./order-stage";
 import { getOrderWords, OrderStatusPill } from "./order-status";
 import { recordingState, type RecordingState } from "./recording-time";
 import { getSlotLabels } from "./slot-labels";
@@ -26,14 +27,31 @@ const recordingIcons: Record<Exclude<RecordingState, "none">, { Icon: LucideIcon
 
 // "Riwayat pesanan" (T12, restyled in D5 after the Customer-Home mock): each order a white card that is
 // one link to its page (/orders?order=<id>), with the service and price on top, the order number and
-// time under it, and below a line its status pill (a word with an icon, never colour alone) and, for a
-// finished job, whether its recording can still be replayed and until when (T15). A paid order's time
+// time under it, and below a line its stage pill (order-stage.ts: "Selesai", "Petugas ditugaskan" and so
+// on, a word with an icon, never colour alone) and, for a finished job, whether its recording can still be replayed and until when (T15). A paid order's time
 // is the job itself, so it stands out on a labelled line; on any other order it is only what was asked
 // for. A job in progress says it can be watched live (T23).
+/** What a row says about a finished job's recording: until when it is kept, deleted, or none. */
+export function recordingWords(
+  tRecording: Awaited<ReturnType<typeof getTranslations<"Recording">>>,
+  labels: Awaited<ReturnType<typeof getSlotLabels>>,
+  now: Date,
+) {
+  return (order: CustomerOrder, state: Exclude<RecordingState, "none">): string => {
+    if (state === "available" && order.recordingExpiresAt) {
+      const until = order.recordingExpiresAt;
+      const day = labels.day({ date: jakartaDayOf(until, now).date, relative: null });
+      return tRecording("listAvailable", { day, time: labels.time(until) });
+    }
+    return state === "expired" ? tRecording("listExpired") : tRecording("listNone");
+  };
+}
+
 export async function OrderList({ orders, serviceName, now }: OrderListProps) {
   const locale = await getLocale();
-  const [t, tConfirmation, tRecording, tLive, words, labels] = await Promise.all([
+  const [t, tStage, tConfirmation, tRecording, tLive, words, labels] = await Promise.all([
     getTranslations("OrdersPage"),
+    getTranslations("OrderStage"),
     getTranslations("OrderConfirmation"),
     getTranslations("Recording"),
     getTranslations("LiveStream"),
@@ -41,19 +59,13 @@ export async function OrderList({ orders, serviceName, now }: OrderListProps) {
     getSlotLabels(locale),
   ]);
 
-  function recordingText(order: CustomerOrder, state: Exclude<RecordingState, "none">): string {
-    if (state === "available" && order.recordingExpiresAt) {
-      const until = order.recordingExpiresAt;
-      const day = labels.day({ date: jakartaDayOf(until, now).date, relative: null });
-      return tRecording("listAvailable", { day, time: labels.time(until) });
-    }
-    return state === "expired" ? tRecording("listExpired") : tRecording("listNone");
-  }
+  const recordingText = recordingWords(tRecording, labels, now);
 
   return (
     <ul aria-label={t("listLabel")} className="flex flex-col gap-3">
       {orders.map((order) => {
         const recording = recordingState(order, now.getTime());
+        const stage = orderStage(order, now);
         return (
           <li key={order.id} className="flex">
             <Link
@@ -89,8 +101,8 @@ export async function OrderList({ orders, serviceName, now }: OrderListProps) {
                 </span>
               ) : null}
               <span className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-border pt-3">
-                <OrderStatusPill status={order.status} label={words.status(order.status)} />
-                {liveInProgress(order) ? (
+                <OrderStatusPill status={stage} label={tStage(stage)} />
+                {liveInProgress(order, now) ? (
                   <span data-testid="live-line" className="flex items-start gap-2 text-sm font-medium text-ink">
                     <Radio className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
                     <span>{tLive("listLine")}</span>
@@ -106,7 +118,8 @@ export async function OrderList({ orders, serviceName, now }: OrderListProps) {
   );
 }
 
-function RecordingLine({ state, text }: { state: Exclude<RecordingState, "none">; text: string }) {
+/** A finished job's recording line, shared with the history page (./orders-history.tsx). */
+export function RecordingLine({ state, text }: { state: Exclude<RecordingState, "none">; text: string }) {
   const { Icon, text: tone } = recordingIcons[state];
   return (
     <span data-testid="recording-line" className={`flex items-start gap-2 text-sm ${tone}`}>

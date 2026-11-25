@@ -1,21 +1,28 @@
-import { Ban, CircleCheck, CircleX, Hourglass, type LucideIcon } from "lucide-react";
+import { BadgeCheck, Ban, CalendarX, CircleCheck, CircleX, ClockAlert, Hourglass, Sparkles, UserCheck, type LucideIcon } from "lucide-react";
 import type { Locale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import type { CustomerOrder, OrderStatus } from "@/lib/booking/orders";
 import { jakartaDayOf } from "./booking-query";
+import type { OrderStage } from "./order-stage";
 import { getSlotLabels } from "./slot-labels";
 
 // What the order list (T12) and an order's page (T9) say about an order, in the same words.
 
-// The order's status, always as a word with an icon, never by colour alone.
-const statusStyles: Record<OrderStatus, { Icon: LucideIcon; pill: string }> = {
+// The order's status (its payment) or, on the order cards, its stage (order-stage.ts), always as a word
+// with an icon, never by colour alone.
+const statusStyles: Record<OrderStage, { Icon: LucideIcon; pill: string }> = {
   pending_payment: { Icon: Hourglass, pill: "bg-warning-surface text-warning" },
   paid: { Icon: CircleCheck, pill: "bg-success-surface text-success" },
+  assigned: { Icon: UserCheck, pill: "bg-info-surface text-info" },
+  inProgress: { Icon: Sparkles, pill: "bg-live-surface text-live" },
+  awaitingCheckOut: { Icon: ClockAlert, pill: "bg-warning-surface text-warning" },
+  completed: { Icon: BadgeCheck, pill: "bg-success-surface text-success" },
+  missed: { Icon: CalendarX, pill: "bg-sunken text-ink-muted" },
   failed: { Icon: CircleX, pill: "bg-danger-surface text-danger" },
   cancelled: { Icon: Ban, pill: "bg-sunken text-ink-muted" },
 };
 
-export function OrderStatusPill({ status, label }: { status: OrderStatus; label: string }) {
+export function OrderStatusPill({ status, label }: { status: OrderStage; label: string }) {
   const { Icon, pill } = statusStyles[status];
   return (
     <span className={`inline-flex w-fit items-center gap-1.5 rounded-full px-3 py-1 text-sm font-semibold ${pill}`}>

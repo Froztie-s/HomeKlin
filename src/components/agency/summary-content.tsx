@@ -20,6 +20,7 @@ import {
   type ValidDays,
 } from "@/lib/payouts";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { chartBuckets } from "@/components/owner/numbers";
 import { dailySeries, formatAgencyDate, parseDays, type DailyFee } from "./agency-views";
 import { FilterLinks, Panel } from "./agency-ui";
 import { NoAgency } from "./no-agency";
@@ -56,7 +57,7 @@ type SummaryData = {
 
 // "Ringkasan" (D2, after the mock Partner-Summary): what the agency earned in the chosen range (T40:
 // agency_summary and friends, SECURITY INVOKER, so row-level security keeps every number to this
-// agency), as four numbers, the daily fees of the last 14 days as bars, the fees per cleaner and per
+// agency), as four numbers, the daily fees of the chosen period as bars (a week each for 90 days), the fees per cleaner and per
 // service, and the payouts from HomeKlin. Every chart has its numbers in words too: a text summary for
 // screen readers and an open-able table of the days, so nothing is shown by bar length alone.
 export async function SummaryContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
@@ -83,7 +84,8 @@ export async function SummaryContent({ searchParams }: { searchParams: Promise<S
   const { summary } = data;
   const paid = Math.max(summary.totalFeeIdr - summary.pendingIdr, 0);
   const today = jakartaToday(new Date());
-  const series = dailySeries(data.daily, today, days === 7 ? 7 : 14);
+  // The bars cover the chosen period (2026-11-20, as on the owner's overview): a day each, a week each for 90 days.
+  const series = dailySeries(data.daily, today, days);
 
   return (
     <>
@@ -95,7 +97,7 @@ export async function SummaryContent({ searchParams }: { searchParams: Promise<S
       </ul>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] xl:items-start">
-        <DailyChart series={series} />
+        <DailyChart series={series} days={days} />
         <ShareList id="by-cleaner" title={t("byCleanerTitle")} total={summary.totalFeeIdr} days={days} rows={data.byCleaner} empty={t("byCleanerEmpty")} />
       </div>
 
@@ -108,10 +110,9 @@ export async function SummaryContent({ searchParams }: { searchParams: Promise<S
 }
 
 async function readSummary(client: Awaited<ReturnType<typeof createSupabaseServerClient>>, days: ValidDays, locale: "id" | "en"): Promise<SummaryData> {
-  // The daily bars always cover the last 14 days (7 in the 7-day range), so they read 30 days.
   const [summary, daily, byCleaner, byService, payouts, services] = await Promise.all([
     getAgencySummary(client, days),
-    getAgencyFeesDaily(client, days === 7 ? 7 : 30),
+    getAgencyFeesDaily(client, days),
     getAgencyFeesByCleaner(client, days),
     getAgencyFeesByService(client, days),
     listAgencyPayouts(client, shownPayouts),
@@ -132,37 +133,51 @@ async function readSummary(client: Awaited<ReturnType<typeof createSupabaseServe
   };
 }
 
-async function DailyChart({ series }: { series: DailyFee[] }) {
+async function DailyChart({ series: days, days: count }: { series: DailyFee[]; days: number }) {
   const [t, locale] = await Promise.all([getTranslations("AgencySummaryPage"), getLocale()]);
   const money = (amount: number) => formatRupiah(amount, locale);
-  const max = Math.max(0, ...series.map((day) => day.feeIdr));
+  const dayLabel = (date: string) => formatAgencyDate(date, locale, "short");
+  // One bar a day for 7 and 30 days, one a week for 90 (chartBuckets, shared with the owner's overview).
+  const { unit, buckets: series } = chartBuckets(days.map((day) => ({ date: day.date, revenueIdr: day.feeIdr })));
+  const weekly = unit === "week";
+  const max = Math.max(0, ...series.map((bucket) => bucket.amountIdr));
   const first = series[0];
   const last = series[series.length - 1];
-  const span = { from: formatAgencyDate(first.date, locale, "short"), to: formatAgencyDate(last.date, locale, "short") };
-  const total = series.reduce((sum, day) => sum + day.feeIdr, 0);
-  const highest = series.reduce((best, day) => (day.feeIdr > best.feeIdr ? day : best), first);
+  const span = { from: dayLabel(first.date), to: dayLabel(last.end) };
+  const total = series.reduce((sum, bucket) => sum + bucket.amountIdr, 0);
+  const highest = series.reduce((best, bucket) => (bucket.amountIdr > best.amountIdr ? bucket : best), first);
   // What the bars say, in one sentence for screen readers (the bars themselves are hidden from them).
   const sentence =
     max === 0
-      ? t("daily.noneSentence", { count: series.length })
-      : t("daily.sentence", {
-          count: series.length,
+      ? t("daily.noneSentence", { count })
+      : t(weekly ? "daily.sentenceWeekly" : "daily.sentence", {
+          count,
           total: money(total),
-          high: money(highest.feeIdr),
-          highDay: formatAgencyDate(highest.date, locale, "short"),
+          high: money(highest.amountIdr),
+          highDay: weekly ? t("daily.weekRange", { from: dayLabel(highest.date), to: dayLabel(highest.end) }) : dayLabel(highest.date),
         });
 
   return (
-    <Panel id="daily-title" title={t("daily.title")} description={t("daily.description", { count: series.length, ...span })}>
+    <Panel
+      id="daily-title"
+      title={weekly ? t("daily.titleWeekly") : t("daily.title")}
+      description={t(weekly ? "daily.descriptionWeekly" : "daily.description", { count, ...span })}
+    >
       <DailyBars
-        series={series.map((day) => ({ date: day.date, amountIdr: day.feeIdr }))}
+        series={series}
         locale={locale}
         sentence={sentence}
         table={{
-          show: t("daily.showTable"),
-          caption: t("daily.title"),
-          columns: [t("daily.day"), t("daily.fee")],
-          rows: series.map((day) => ({ key: day.date, cells: [formatAgencyDate(day.date, locale, "weekday"), money(day.feeIdr)] })),
+          show: weekly ? t("daily.showTableWeekly") : t("daily.showTable"),
+          caption: weekly ? t("daily.titleWeekly") : t("daily.title"),
+          columns: [weekly ? t("daily.week") : t("daily.day"), t("daily.fee")],
+          rows: series.map((bucket) => ({
+            key: bucket.date,
+            cells: [
+              weekly ? t("daily.weekRange", { from: dayLabel(bucket.date), to: dayLabel(bucket.end) }) : formatAgencyDate(bucket.date, locale, "weekday"),
+              money(bucket.amountIdr),
+            ],
+          })),
         }}
       />
     </Panel>

@@ -60,14 +60,8 @@ export function JobActions({ job, times, renderedAt, stream }: JobActionsProps) 
         {state === "open" ? (
           <div className="flex flex-col gap-3">
             <CheckInButton orderId={job.id} onCheckedIn={() => setCheckedInHere(true)} />
-            {/* The next step, shown but not yet available: a real disabled button, skipped by Tab. */}
-            <button
-              type="button"
-              disabled
-              className="inline-flex min-h-13 w-full items-center justify-center rounded-full bg-sunken px-6 text-body font-semibold text-ink-muted"
-            >
-              {t("checkOutLocked")}
-            </button>
+            {/* The next step in one quiet line, not a full-size disabled button (2026-11-20, UX audit item 11). */}
+            <p className="text-center text-sm text-ink-muted">{t("checkOutLocked")}</p>
           </div>
         ) : null}
         {state === "checkedIn" ? <StreamControl orderId={job.id} serverStream={stream} /> : null}

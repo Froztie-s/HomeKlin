@@ -108,9 +108,18 @@ describe("the incoming list", () => {
   ];
 
   it("leaves finished jobs out, and can show one status at a time", () => {
-    expect(incomingJobs(jobs, null).map((item) => item.id)).toEqual(["open", "assigned", "live"]);
-    expect(incomingJobs(jobs, "unassigned").map((item) => item.id)).toEqual(["open"]);
-    expect(incomingJobs(jobs, "inProgress").map((item) => item.id)).toEqual(["live"]);
+    expect(incomingJobs(jobs, null, now).map((item) => item.id)).toEqual(["open", "assigned", "live"]);
+    expect(incomingJobs(jobs, "unassigned", now).map((item) => item.id)).toEqual(["open"]);
+    expect(incomingJobs(jobs, "inProgress", now).map((item) => item.id)).toEqual(["live"]);
+  });
+
+  // 2026-11-20: a job checked in to but never checked out, days past its window, is not under way.
+  it("lists a job overdue for check-out under Semua only, and does not count it as under way", () => {
+    const stale = job({ id: "stale", cleanerId: "c1", cleanerName: "Wulan", startsAt: "2026-10-30T02:00:00.000Z", endsAt: "2026-10-30T04:00:00.000Z", checkedInAt: "2026-10-30T02:05:00.000Z" });
+    const all = [...jobs, stale];
+    expect(incomingJobs(all, null, now).map((item) => item.id)).toContain("stale");
+    expect(incomingJobs(all, "inProgress", now).map((item) => item.id)).toEqual(["live"]);
+    expect(incomingCounts(all, now)).toEqual({ unassigned: 1, assigned: 1, inProgress: 1, completedThisWeek: 1 });
   });
 
   it("counts each status, and the jobs finished in this Jakarta week (Monday to Sunday)", () => {

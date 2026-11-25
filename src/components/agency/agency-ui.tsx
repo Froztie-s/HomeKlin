@@ -1,5 +1,5 @@
-import { ArrowRight, CircleCheck, CircleDashed, Search, UserCheck, type LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import { ArrowRight, CircleCheck, CircleDashed, ClockAlert, Search, UserCheck, type LucideIcon } from "lucide-react";
+import type { ComponentProps, ReactNode } from "react";
 import { initialsOf } from "@/components/auth/user-avatar";
 import { StatusPill } from "@/components/back-office/status-pill";
 import { Link } from "@/i18n/navigation";
@@ -62,6 +62,8 @@ export function Initials({ name, size = "sm" }: { name: string; size?: "sm" | "m
 const jobPills: Record<Exclude<JobProgress, "inProgress">, { Icon: LucideIcon; pill: string }> = {
   unassigned: { Icon: CircleDashed, pill: "bg-warning-surface text-warning" },
   assigned: { Icon: UserCheck, pill: "bg-info-surface text-info" },
+  // Checked in, never checked out, hours past the window: a problem to follow up, not a live job.
+  overdue: { Icon: ClockAlert, pill: "bg-warning-surface text-warning" },
   completed: { Icon: CircleCheck, pill: "bg-info-surface text-info" },
 };
 
@@ -176,11 +178,43 @@ export function DetailArrow({ href, label }: { href: { pathname: string; query: 
 }
 
 /** A big number with what it counts under it (the jobs page's tiles); dark: the band look of the last tile. */
-export function CountTile({ value, label, dark = false }: { value: number; label: string; dark?: boolean }) {
-  return (
-    <li className={`flex flex-col gap-1.5 rounded-md px-5 py-4 ${dark ? "bg-band text-on-band" : "bg-card text-ink"}`}>
+/**
+ * A count above a list. With `href` it is a link that filters the list to what it counts (2026-11-20,
+ * UX audit item 14: the tiles looked pressable but did nothing); `current` marks the filter in use.
+ */
+export function CountTile({
+  value,
+  label,
+  dark = false,
+  href,
+  current = false,
+}: {
+  value: number;
+  label: string;
+  dark?: boolean;
+  href?: ComponentProps<typeof Link>["href"];
+  current?: boolean;
+}) {
+  const body = (
+    <>
       <span className="font-display text-fact font-semibold tabular-nums">{value}</span>
       <span className={`text-xs ${dark ? "text-on-band-muted" : "text-ink-muted"}`}>{label}</span>
+    </>
+  );
+  const look = `flex h-full flex-col gap-1.5 rounded-md px-5 py-4 ${dark ? "bg-band text-on-band" : "bg-card text-ink"}`;
+  if (!href) return <li className={look}>{body}</li>;
+  return (
+    <li>
+      <Link
+        href={href}
+        scroll={false}
+        aria-current={current ? "true" : undefined}
+        className={`${look} transition-[box-shadow,transform] duration-150 ease-out-quart hover:shadow-card-hover active:scale-[0.99] motion-reduce:active:scale-100 ${
+          current ? "inset-ring-2 inset-ring-primary" : ""
+        }`}
+      >
+        {body}
+      </Link>
     </li>
   );
 }

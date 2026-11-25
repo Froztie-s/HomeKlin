@@ -176,6 +176,8 @@ async function OwnerAgenciesContent() {
                       fields={{ agencyId: agency.id, status: suspended ? "active" : "suspended" }}
                       icon={suspended ? "reactivate" : "suspend"}
                       tone={suspended ? "default" : "danger"}
+                      // Audit item 5: a quiet text button, so the rows do not compete with "Tambah mitra".
+                      trigger="quiet"
                       labels={{
                         button: t(`${labels}.button`),
                         buttonLabel: t(`${labels}.label`, { name: agency.name }),

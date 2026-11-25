@@ -66,7 +66,7 @@ test("an order link that no longer works shows a notice above the code form", as
   const sendCode = page.getByRole("button", { name: "Kirim kode" });
   expect((await box(notice)).y).toBeLessThan((await box(page.getByLabel("Email", { exact: true }))).y);
   await expect(sendCode).toBeVisible();
-  await expect(page.getByRole("link", { name: "Masuk dengan kata sandi" })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: /^Staf & demo/ })).toHaveAttribute(
     "href",
     "/login?next=%2Forders&cara=sandi",
   );

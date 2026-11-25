@@ -1,4 +1,4 @@
-import { CircleCheck, CircleDashed, MapPinCheck, UserCheck, type LucideIcon } from "lucide-react";
+import { CircleCheck, CircleDashed, ClockAlert, MapPinCheck, UserCheck, type LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { jakartaDayOf } from "@/components/customer/booking-query";
@@ -33,6 +33,7 @@ const statusStyles: Record<JobProgress, { Icon: LucideIcon; pill: string }> = {
   unassigned: { Icon: CircleDashed, pill: "bg-warning-surface text-warning" },
   assigned: { Icon: UserCheck, pill: "bg-info-surface text-info" },
   inProgress: { Icon: MapPinCheck, pill: "bg-live-surface text-live" },
+  overdue: { Icon: ClockAlert, pill: "bg-warning-surface text-warning" },
   completed: { Icon: CircleCheck, pill: "bg-success-surface text-success" },
 };
 
@@ -49,7 +50,7 @@ export async function JobsTable({ rows, caption, when }: JobsTableProps) {
   const showAgency = rows.some((row) => row.agencyName !== undefined);
 
   function status(row: JobsTableRow) {
-    const progress = jobProgress(row);
+    const progress = jobProgress(row, now);
     const { Icon, pill } = statusStyles[progress];
     // jobProgress says inProgress only with a check-in time and completed only with a finish time.
     const label =

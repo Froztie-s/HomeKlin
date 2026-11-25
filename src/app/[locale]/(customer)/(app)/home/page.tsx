@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { GateFallback } from "@/components/auth/gate-fallback";
 import { HomeContent } from "@/components/customer/home-content";
 import { PageContainer } from "@/components/ui/page-container";
+import { StaffRedirect } from "@/components/auth/staff-redirect";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("HomePage");
@@ -19,6 +20,7 @@ export default function HomePage() {
   return (
     <PageContainer wide>
       <Suspense fallback={<GateFallback />}>
+        <StaffRedirect />
         <HomeContent />
       </Suspense>
     </PageContainer>

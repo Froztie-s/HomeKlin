@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { growth, monthYear, payoutShares, signInDay, statusRows } from "@/components/owner/numbers";
+import { chartBuckets, growth, monthYear, payoutShares, signInDay, statusRows } from "@/components/owner/numbers";
 
 // The owner pages' arithmetic (T29b; D3, after the mocks Owner-Overview, Owner-Partners and
 // Owner-Admins): the growth against the period before, the payouts per partner agency with their
@@ -77,6 +77,37 @@ describe("statusRows", () => {
   });
 });
 
+describe("chartBuckets (the revenue chart follows the period, 2026-11-20)", () => {
+  const days = (count: number) =>
+    Array.from({ length: count }, (_, index) => ({
+      date: new Date(Date.UTC(2026, 7, 23 + index)).toISOString().slice(0, 10),
+      revenueIdr: 1000,
+    }));
+
+  it("keeps one bar a day for 7 and 30 days", () => {
+    for (const count of [7, 30]) {
+      const chart = chartBuckets(days(count));
+      expect(chart.unit).toBe("day");
+      expect(chart.buckets).toHaveLength(count);
+      expect(chart.buckets[0]).toEqual({ date: "2026-08-23", end: "2026-08-23", amountIdr: 1000 });
+    }
+  });
+
+  it("makes 90 days 13 weekly bars, the last ending on the last day and only the first shorter", () => {
+    const series = days(90);
+    const chart = chartBuckets(series);
+    expect(chart.unit).toBe("week");
+    expect(chart.buckets).toHaveLength(13);
+    expect(chart.buckets.at(-1)).toEqual({ date: series[83].date, end: series[89].date, amountIdr: 7000 });
+    expect(chart.buckets[0]).toEqual({ date: series[0].date, end: series[5].date, amountIdr: 6000 });
+    expect(chart.buckets.reduce((sum, bucket) => sum + bucket.amountIdr, 0)).toBe(90_000);
+  });
+
+  it("draws nothing for no days", () => {
+    expect(chartBuckets([])).toEqual({ unit: "day", buckets: [] });
+  });
+});
+
 describe("monthYear", () => {
   it("writes when a partner joined as a short month and year in Jakarta, in either language", () => {
     expect(monthYear("2026-03-10T05:00:00.000Z", "id")).toBe("Mar 2026");
@@ -84,5 +115,22 @@ describe("monthYear", () => {
     expect(monthYear("2026-08-01T03:00:00.000Z", "en")).toBe("Aug 2026");
     // 31 May 20:00 UTC is already 1 June in Jakarta.
     expect(monthYear("2026-05-31T20:00:00.000Z", "id")).toBe("Jun 2026");
+  });
+});
+
+describe("the quiet row buttons", () => {
+  // Audit item 5: on /owner/agencies each row's "Tangguhkan" and "Aktifkan lagi" are quiet text buttons,
+  // so they do not compete with the page's own actions; the red shows only on hover, and the target
+  // stays 44 px.
+  it("have no outline or fill until hovered, and keep a 44 px target", async () => {
+    const { quietButton, quietDangerButton } = await import("@/components/agency/styles");
+    for (const look of [quietButton, quietDangerButton]) {
+      const classes = look.split(" ");
+      expect(classes).toContain("min-h-touch");
+      expect(classes.some((name) => name === "border" || name.startsWith("border-") || name.startsWith("inset-ring"))).toBe(false);
+      expect(classes.some((name) => name.startsWith("bg-"))).toBe(false);
+      expect(classes).toContain("text-ink-muted");
+    }
+    expect(quietDangerButton.split(" ").filter((name) => name.includes("danger")).every((name) => name.startsWith("hover:") || name.startsWith("active:"))).toBe(true);
   });
 });

@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   adminRecordingState,
   filterMonitor,
+  liveStreamsOnly,
   monitorCounts,
+  overdueJobs,
   parseMonitorFilters,
   parseRecordingParam,
   pastJobs,
@@ -104,6 +106,21 @@ describe("waitingForCheckIn", () => {
     const pastMidnight = new Date("2026-11-04T17:30:00.000Z").toISOString();
     const jobs = [job("late-evening", { startsAt: lateEvening }), job("past-midnight", { startsAt: pastMidnight })];
     expect(waitingForCheckIn(jobs, now).map((entry) => entry.id)).toEqual(["late-evening"]);
+  });
+});
+
+describe("overdueJobs and liveStreamsOnly (2026-11-20)", () => {
+  it("lists the jobs checked in to but never checked out hours past their window, the latest first", () => {
+    const stale = job("stale", { startsAt: at(-6 * day), endsAt: at(-6 * day + 2 * hour), checkedInAt: at(-6 * day) });
+    const staler = job("staler", { startsAt: at(-9 * day), endsAt: at(-9 * day + 2 * hour), checkedInAt: at(-9 * day) });
+    const late = job("late", { startsAt: at(-3 * hour), endsAt: at(-hour), checkedInAt: at(-3 * hour) });
+    const done = job("done", { startsAt: at(-6 * day), endsAt: at(-6 * day + 2 * hour), checkedInAt: at(-6 * day), completedAt: at(-6 * day + hour) });
+    expect(overdueJobs([staler, late, stale, done], now).map((item) => item.id)).toEqual(["stale", "staler"]);
+  });
+
+  it("takes the streams of those jobs out of the live grid", () => {
+    const streams = [{ orderId: "stale" }, { orderId: "live" }];
+    expect(liveStreamsOnly(streams, [{ id: "stale" }])).toEqual([{ orderId: "live" }]);
   });
 });
 

@@ -2,11 +2,11 @@ import { expect, test, type Browser, type Page } from "@playwright/test";
 import { createJobWorld, sessionOf, type JobWorld } from "../job-test-data";
 import type { StorageState } from "../setup/auth-state";
 
-// The customer's account menu (it replaced the account page) and the floating language switch, at two
-// phone widths and two desktop widths, in both languages: the home with the menu closed, with the menu
-// open, and the services page (a long page, scrolled to its end, to show the room under the switch).
-// Saved to docs/screenshots/account-menu/<surface>-<lang>-<width>.png, viewport only (both controls are
-// fixed to the screen). Fictional data in the Supabase test project, deleted at the end.
+// The customer's account menu (it replaced the account page), at two phone widths and two desktop
+// widths, in both languages: the home with the menu closed, with the menu open, and the services page
+// scrolled to its end. (The language switch floated at the bottom-left when these were first taken; it
+// is in the app bar since 2026-11-18.) Saved to docs/screenshots/account-menu/<surface>-<lang>-<width>.png,
+// viewport only. Fictional data in the Supabase test project, deleted at the end.
 // Run with: npm run screenshots -- account-menu
 
 const dir = "docs/screenshots/account-menu";
@@ -55,7 +55,7 @@ async function shoot(page: Page, name: string, width: number) {
 }
 
 for (const device of ["phone", "desktop"] as const) {
-  test(`the account menu and the floating switch on a ${device}`, async ({ browser }) => {
+  test(`the account menu on a ${device}`, async ({ browser }) => {
     test.setTimeout(180_000);
     const { context, page } = await newPage(browser, device);
     for (const [lang, prefix, account, navName] of languages) {

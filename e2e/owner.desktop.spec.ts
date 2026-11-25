@@ -43,19 +43,20 @@ test.describe("the owner", () => {
     await expect(stats.nth(3)).toContainText("Dibayarkan ke agensi mitra");
     await expect(stats.nth(3)).toContainText("Sisa untuk HomeKlin Rp");
 
-    // The bars say what they show in words, and every day is in a table. Today's revenue counts at
-    // least this spec's two paid jobs (made a moment ago).
+    // The bars cover the chosen period (2026-11-20), say what they show in words, and every day is in
+    // a table. Today's revenue counts at least this spec's two paid jobs (made a moment ago).
     const daily = page.getByRole("region", { name: "Pendapatan harian" });
-    await expect(daily.locator("[data-day]")).toHaveCount(14);
-    await expect(daily.locator("p.sr-only")).toContainText(/Pendapatan 14 hari terakhir|Belum ada pendapatan/);
+    await expect(daily.locator("[data-day]")).toHaveCount(30);
+    await expect(daily.locator("p.sr-only")).toContainText(/Pendapatan 30 hari terakhir|Belum ada pendapatan/);
     await daily.getByText("Lihat angka per hari").click();
-    const days = daily.getByRole("table", { name: "Pendapatan per hari, 14 hari terakhir" }).getByRole("row");
-    await expect(days).toHaveCount(15);
+    const days = daily.getByRole("table", { name: "Pendapatan per hari, 30 hari terakhir" }).getByRole("row");
+    await expect(days).toHaveCount(31);
     const today = Number(((await days.last().getByRole("cell").nth(1).textContent()) ?? "0").replace(/\D/g, ""));
     expect(today).toBeGreaterThanOrEqual(world.revenueIdr);
 
     const byStatus = page.getByRole("region", { name: "Pesanan menurut status" });
     for (const status of ["Dibayar", "Menunggu pembayaran", "Gagal", "Dibatalkan"]) await expect(byStatus).toContainText(status);
+    await expect(byStatus).toContainText("Pesanan dalam 30 hari terakhir");
     await expect(page.getByRole("region", { name: "Pembayaran per agensi" })).toContainText("30 hari terakhir, total Rp");
 
     // The range is a link: 7 days, then 90, each with its own numbers and the period before it.
@@ -65,9 +66,16 @@ test.describe("the owner", () => {
     await expect(page).toHaveURL("/owner?days=7");
     await expect(page.getByRole("list", { name: "Angka utama, 7 hari terakhir" })).toContainText(/7 hari sebelumnya/);
     await expect(page.getByRole("region", { name: "Pembayaran per agensi" })).toContainText("7 hari terakhir");
+    await expect(page.getByRole("region", { name: "Pendapatan harian" }).locator("[data-day]")).toHaveCount(7);
+    await expect(page.getByRole("region", { name: "Pesanan menurut status" })).toContainText("7 hari terakhir");
     await page.getByRole("navigation", { name: "Rentang waktu" }).getByRole("link", { name: "90 hari" }).click();
     await expect(page).toHaveURL("/owner?days=90");
     await expect(page.getByRole("list", { name: "Angka utama, 90 hari terakhir" })).toBeVisible();
+    // 90 days are 13 weekly bars, the weeks in their own table.
+    const weekly = page.getByRole("region", { name: "Pendapatan mingguan" });
+    await expect(weekly.locator("[data-day]")).toHaveCount(13);
+    await weekly.getByText("Lihat angka per minggu").click();
+    await expect(weekly.getByRole("table", { name: "Pendapatan per minggu, 90 hari terakhir" }).getByRole("row")).toHaveCount(14);
 
     await page.getByRole("region", { name: "Pembayaran per agensi" }).getByRole("link", { name: "Lihat semua mitra" }).click();
     await expect(page).toHaveURL("/owner/agencies");
@@ -125,9 +133,17 @@ test.describe("the owner", () => {
     expect(await windowOffered(world.window.startsAt)).toBe(true);
     await page.goto("/owner/agencies");
     const row = partnerRow(page, world.agency.name);
-    await row.getByRole("button", { name: `Tangguhkan ${world.agency.name}` }).click();
-    // The confirm step says what suspending does before anything happens.
+    // Audit item 5: a quiet text button, no fill and no outline until hovered, still a 44 px target.
+    const suspend = row.getByRole("button", { name: `Tangguhkan ${world.agency.name}` });
+    await expect(suspend).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(suspend).toHaveCSS("border-top-width", "0px");
+    expect((await suspend.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+    await suspend.click();
+    // The confirm step says what suspending does before anything happens, in a dialog over the page,
+    // so the table never grows past the screen (2026-11-20, UX audit).
     const question = row.getByRole("form", { name: `Tangguhkan ${world.agency.name}?` });
+    await expect(page.getByRole("dialog", { name: `Tangguhkan ${world.agency.name}?` })).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
     await expect(question).toContainText("tidak menerima pesanan baru");
     await expect(question).toContainText("Pekerjaan yang sudah dipesan tetap berjalan");
     await question.getByRole("button", { name: "Batal" }).click();

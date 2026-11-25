@@ -5,7 +5,7 @@ import { adminClient } from "../tests/integration/test-project";
 // T5 on a phone (customers and cleaners are mobile-first): signing in, `next`, signing out, and the
 // role check that refuses a signed-in user a section that is not theirs. Since T9b there is no separate
 // sign-up (the account is made by ordering, e2e/order.mobile.spec.ts) and customers sign in by emailed
-// code; these accounts have a password, which "Masuk dengan kata sandi" still accepts. Runs against
+// code; these accounts have a password, which "Staf & demo" (kata sandi) still accepts. Runs against
 // the separate Supabase test project (playwright.config.ts). Every user here is made for this file
 // with a unique address on example.com, and deleted again afterwards. Every test starts signed out.
 
@@ -47,9 +47,9 @@ test.afterAll(async () => {
   for (const id of createdIds.splice(0)) await admin.auth.admin.deleteUser(id);
 });
 
-/** On /login: "Masuk dengan kata sandi", then the email and password. */
+/** On /login: "Staf & demo" (kata sandi), then the email and password. */
 async function fillLogin(page: Page, account: Account, password = account.password) {
-  const withPassword = page.getByRole("link", { name: "Masuk dengan kata sandi" });
+  const withPassword = page.getByRole("link", { name: /^Staf & demo/ });
   const passwordField = page.getByLabel("Kata sandi", { exact: true });
   // The form streams in after the page shell; wait for it, then switch to the password if needed.
   await expect(withPassword.or(passwordField)).toBeVisible();
@@ -60,16 +60,26 @@ async function fillLogin(page: Page, account: Account, password = account.passwo
   await page.getByRole("button", { name: "Masuk", exact: true }).click();
 }
 
-test.describe("no separate sign-up", () => {
-  test("the old sign-up address leads to the order page, and /login offers ordering instead", async ({ page }) => {
-    await page.goto("/signup");
-    await expect(page).toHaveURL("/pesan");
-    await expect(page.getByRole("heading", { level: 1, name: "Detail pemesanan" })).toBeVisible();
-
+test.describe("signing up", () => {
+  // 2026-11-20 (the user): ordering needs an account, so /login offers "Daftar" and /signup is back.
+  test("/login offers Daftar, and /signup is the sign-up form with the way back", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByRole("link", { name: "Daftar", exact: true })).toHaveCount(0);
-    await expect(page.getByText("Belum pernah memesan?")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Pesan layanan" })).toHaveAttribute("href", "/services");
+    await expect(page.getByText("Belum punya akun?")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Daftar", exact: true })).toHaveAttribute("href", "/signup");
+    await expect(page.getByRole("link", { name: "Pesan layanan" })).toHaveCount(0);
+    // The two ways in are named by how one signs in, never "demo".
+    const ways = page.getByRole("navigation", { name: "Cara masuk" });
+    await expect(ways.getByRole("link")).toHaveText([/^Kode email/, /^Kata sandi/]);
+    await expect(page.getByText(/demo/i)).toHaveCount(0);
+
+    await page.getByRole("link", { name: "Daftar", exact: true }).click();
+    await expect(page).toHaveURL("/signup");
+    await expect(page.getByRole("heading", { level: 1, name: "Daftar" })).toBeVisible();
+    await expect(page.getByLabel("Nama lengkap")).toBeVisible();
+    await expect(page.getByLabel("Kata sandi", { exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "Buat akun" }).click();
+    await expect(page.getByText("Masukkan nama lengkap Anda.")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Masuk", exact: true })).toHaveAttribute("href", "/login");
   });
 });
 
@@ -93,7 +103,7 @@ test.describe("signing in", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Masuk", exact: true })).toBeVisible();
     // Customers get a code; the password way keeps the page the visitor wanted.
     await expect(page.getByRole("button", { name: "Kirim kode" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "Masuk dengan kata sandi" })).toHaveAttribute(
+    await expect(page.getByRole("link", { name: /^Staf & demo/ })).toHaveAttribute(
       "href",
       "/login?next=%2Forders&cara=sandi",
     );
@@ -181,7 +191,7 @@ test.describe("in English", () => {
   test("signs in from /en/login, with English messages, and stays in English", async ({ page }) => {
     await page.goto("/en/login");
     await expect(page.getByRole("heading", { level: 1, name: "Log in", exact: true })).toBeVisible();
-    await page.getByRole("link", { name: "Log in with a password" }).click();
+    await page.getByRole("link", { name: /^Staff & demo/ }).click();
     await expect(page).toHaveURL("/en/login?cara=sandi");
     await page.getByLabel("Email", { exact: true }).fill(customer.email);
     await page.getByLabel("Password", { exact: true }).fill("not-the-password");

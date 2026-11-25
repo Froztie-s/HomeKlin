@@ -104,7 +104,7 @@ export async function PaymentStep({
         ) : null}
 
         {awaiting ? (
-          <ClientMessages namespaces={["Payment", "PaymentChooser"]}>
+          <ClientMessages namespaces={["Payment", "PaymentChooser", "BookingBar"]}>
             <PaymentCheckout
               orderId={order.id}
               details={details}
@@ -113,6 +113,7 @@ export async function PaymentStep({
               summary={summary}
               footer={seeOrder}
               note={emailNote}
+              serviceName={words.service(serviceName)}
             />
           </ClientMessages>
         ) : (

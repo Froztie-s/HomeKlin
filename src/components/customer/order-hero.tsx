@@ -9,6 +9,8 @@ import { initialsOf } from "./job-progress";
 import { liveInProgress } from "./live-status";
 
 type OrderHeroProps = {
+  /** The page's clock: a job hours past its window without a check-out is no longer live. */
+  now: Date;
   order: Pick<CustomerOrder, "id" | "orderCode" | "status" | "cleanerName" | "cleanerPhotoUrl" | "checkedInAt" | "completedAt">;
   /** "Pembersihan Rutin" (or the fallback when the service left the catalog). */
   serviceName: string;
@@ -26,9 +28,9 @@ type OrderHeroProps = {
 // (markdown/PRODUCT.md principle 6; listMyOrders never returns it), where the job stands in words, and
 // while it is in progress the one main action, "Tonton langsung" (/orders/live?order=<id>). The live
 // pill pairs the dot with words, so the state never rests on colour alone.
-export async function OrderHero({ order, serviceName, arrival, watchHref }: OrderHeroProps) {
+export async function OrderHero({ order, serviceName, arrival, watchHref, now }: OrderHeroProps) {
   const [locale, t] = await Promise.all([getLocale(), getTranslations("OrderHero")]);
-  const live = liveInProgress({ ...order });
+  const live = liveInProgress(order, now);
   const time = (iso: string) => formatJakartaTime(iso, locale);
   const headline = order.completedAt
     ? t("headlineDone", { time: time(order.completedAt) })

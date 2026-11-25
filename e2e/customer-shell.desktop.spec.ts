@@ -41,7 +41,7 @@ test.describe("customer navigation on desktop", () => {
 
     await nav.getByRole("link", { name: "Pesanan", exact: true }).click();
     await expect(page).toHaveURL("/orders");
-    await expect(page.getByRole("heading", { level: 1, name: "Pesanan" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "Riwayat pesanan" })).toBeVisible();
     await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
   });
 

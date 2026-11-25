@@ -183,12 +183,14 @@ export function StreamControl({ orderId, serverStream }: { orderId: string; serv
               })}
             </div>
           </div>
+          {/* A quiet text button, apart from the full-width "Check-out" under it, so one is not pressed
+              for the other in a hurry (2026-11-20, UX audit item 5). */}
           <button
             type="button"
             onClick={() => run("ended")}
             aria-disabled={pending || undefined}
             aria-describedby={error ? errorId : undefined}
-            className={`${secondary} w-full`}
+            className="inline-flex min-h-touch w-fit items-center gap-1.5 self-center rounded-full px-3 text-sm font-medium text-ink-muted underline decoration-1 underline-offset-4 transition-colors duration-150 ease-out-quart hover:text-danger hover:decoration-2 active:bg-danger-surface aria-disabled:cursor-progress"
           >
             {busy("ended") ? (
               <LoaderCircle className={`size-4 ${spinner}`} aria-hidden="true" />

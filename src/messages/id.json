@@ -75,6 +75,17 @@
     "ownerTitle": "Pemilik HomeKlin",
     "ownerHome": "HomeKlin, ke Ringkasan"
   },
+  "AdminOrderSearch": {
+    "label": "Cari nomor pesanan",
+    "placeholder": "HK-1170",
+    "submit": "Cari",
+    "pending": "Mencari…",
+    "errors": {
+      "empty": "Ketik nomor pesanan, misalnya HK-1170.",
+      "invalid": "Itu bukan nomor pesanan. Tulis seperti HK-1170 atau 1170.",
+      "forbidden": "Hanya admin yang dapat mencari pesanan."
+    }
+  },
   "MarketingHeader": {
     "nav": "Navigasi situs",
     "cta": "Pesan sekarang",
@@ -264,14 +275,26 @@
     "errorBody": "Jadwal kosong tidak dapat dimuat saat ini. Muat ulang halaman untuk mencoba lagi.",
     "loading": "Memuat jadwal kosong…"
   },
+  "OrderStage": {
+    "pending_payment": "Menunggu pembayaran",
+    "paid": "Sudah dibayar",
+    "assigned": "Petugas ditugaskan",
+    "inProgress": "Sedang dikerjakan",
+    "completed": "Selesai",
+    "missed": "Tidak terlaksana",
+    "failed": "Pembayaran gagal",
+    "cancelled": "Dibatalkan",
+    "awaitingCheckOut": "Menunggu konfirmasi selesai"
+  },
   "OrdersPage": {
     "title": "Pesanan Anda",
     "listLabel": "Daftar pesanan",
-    "backToList": "Kembali ke daftar pesanan",
+    "backToList": "Kembali ke riwayat pesanan",
     "emptyTitle": "Belum ada pesanan",
     "emptyBody": "Pesanan Anda muncul di sini dengan statusnya, dari dibayar sampai selesai. Saat petugas bekerja, Anda dapat menonton siaran langsung dari halaman ini.",
     "orderLine": "Pesanan {code}",
-    "orderLineWithTime": "Pesanan {code}, {arrival}"
+    "orderLineWithTime": "Pesanan {code}, {arrival}",
+    "backToHome": "Kembali ke Beranda"
   },
   "SupportPage": {
     "title": "Bantuan",
@@ -704,7 +727,14 @@
     "statsErrorBody": "Angka minggu dan bulan ini tidak dapat dimuat saat ini. Pekerjaan Anda tetap ada di halaman Pekerjaan.",
     "errorTitle": "Beranda belum bisa dimuat",
     "errorBody": "Data akun Anda tidak dapat dimuat saat ini. Periksa koneksi Anda, lalu coba lagi.",
-    "retry": "Muat ulang"
+    "retry": "Muat ulang",
+    "nextTitle": "Pekerjaan berikutnya",
+    "nowTitle": "Sedang dikerjakan",
+    "openNext": "Buka untuk check-in",
+    "openNow": "Lanjutkan pekerjaan",
+    "noneToday": "Tidak ada pekerjaan lagi hari ini.",
+    "allJobs": "Lihat semua pekerjaan",
+    "serviceFallback": "Layanan HomeKlin"
   },
   "CleanerProfile": {
     "role": "Petugas HomeKlin",
@@ -729,7 +759,8 @@
     "customerFallback": "Pelanggan HomeKlin",
     "errorTitle": "Pekerjaan belum bisa dimuat",
     "errorBody": "Daftar pekerjaan tidak dapat dimuat saat ini. Periksa koneksi Anda, lalu coba lagi.",
-    "retry": "Muat ulang"
+    "retry": "Muat ulang",
+    "now": "Sekarang"
   },
   "CleanerJobPage": {
     "title": "Pekerjaan",
@@ -746,6 +777,8 @@
     "consentYes": "Pelanggan sudah setuju pekerjaan ini disiarkan.",
     "consentNo": "Pelanggan tidak menyetujui siaran, jadi pekerjaan ini tidak disiarkan.",
     "call": "Telepon",
+    "maps": "Buka di Maps",
+    "newTab": "(membuka tab baru)",
     "serviceFallback": "Layanan HomeKlin",
     "customerFallback": "Pelanggan HomeKlin",
     "notFoundTitle": "Pekerjaan tidak ditemukan",
@@ -796,7 +829,7 @@
       "started": "Pekerjaan ini sudah dimulai. Muat ulang halaman.",
       "unavailable": "Belum bisa terhubung. Periksa koneksi Anda, lalu coba lagi."
     },
-    "checkOutLocked": "Check-out, aktif setelah check-in"
+    "checkOutLocked": "Check-out tersedia setelah check-in."
   },
   "BackOfficeJobs": {
     "table": {
@@ -812,7 +845,8 @@
       "unassigned": "Belum ada petugas",
       "assigned": "Ditugaskan",
       "inProgress": "Check-in pukul {time}",
-      "completed": "Selesai pukul {time}"
+      "completed": "Selesai pukul {time}",
+      "overdue": "Belum check-out"
     },
     "noCleaner": "Belum ditugaskan",
     "serviceFallback": "Layanan tidak aktif"
@@ -865,7 +899,13 @@
       "noneSentence": "Belum ada imbalan dalam {count, number} hari terakhir.",
       "showTable": "Lihat angka per hari",
       "day": "Hari",
-      "fee": "Imbalan"
+      "fee": "Imbalan",
+      "titleWeekly": "Imbalan mingguan",
+      "descriptionWeekly": "{count, number} hari terakhir per minggu, {from} sampai {to}",
+      "sentenceWeekly": "Imbalan {count, number} hari terakhir berjumlah {total}. Minggu tertinggi {high}, {highDay}.",
+      "showTableWeekly": "Lihat angka per minggu",
+      "week": "Minggu",
+      "weekRange": "{from} sampai {to}"
     },
     "payouts": {
       "title": "Pembayaran dari HomeKlin",
@@ -900,7 +940,7 @@
     "window": "{start}-{end} WIB",
     "places": "{booked, number} dari {capacity, number} terisi",
     "full": "Penuh",
-    "bookedLock": "Sudah ada pesanan",
+    "bookedLock": "Tidak bisa dihapus, sudah ada pesanan",
     "capacity": "Kapasitas",
     "capacityFor": "Kapasitas {window}, {area}",
     "save": "Simpan",
@@ -928,7 +968,8 @@
       "pending": "Menambahkan…",
       "added": "Jendela ditambahkan: {weekday} {date}, {start}-{end} WIB, {area}.",
       "areaMissing": "Pilih area dulu."
-    }
+    },
+    "back": "Petugas"
   },
   "AgencyCleanersPage": {
     "title": "Petugas dan ketersediaan",
@@ -955,7 +996,8 @@
       "pending": "Menambahkan…",
       "added": "{name} ditambahkan. Petugas bisa masuk dengan kode yang dikirim ke {email}.",
       "choosePhoto": "Pilih foto",
-      "changePhoto": "Ganti foto"
+      "changePhoto": "Ganti foto",
+      "close": "Tutup"
     },
     "atWork": "Sedang bertugas",
     "upcoming": "{count, plural, =0 {Belum ada pekerjaan mendatang} other {# pekerjaan mendatang}}",
@@ -1053,7 +1095,8 @@
       "unassigned": "Perlu petugas",
       "assigned": "Ditugaskan",
       "inProgress": "Berlangsung",
-      "completed": "Selesai"
+      "completed": "Selesai",
+      "overdue": "Belum check-out"
     },
     "detailFor": "Lihat detail {service}, {day}",
     "assign": {
@@ -1166,7 +1209,8 @@
       "unassigned": "Perlu petugas",
       "assigned": "Ditugaskan",
       "inProgress": "Berlangsung",
-      "completed": "Selesai"
+      "completed": "Selesai",
+      "overdue": "Belum check-out"
     },
     "recordingTitle": "Rekaman pekerjaan",
     "loading": "Memuat video…",
@@ -1354,7 +1398,14 @@
     },
     "filteredEmptyTitle": "Tidak ada pekerjaan yang cocok",
     "filteredEmptyBody": "Tidak ada pekerjaan dengan filter ini saat ini.",
-    "orderLink": "Lihat detail pesanan {code}"
+    "orderLink": "Lihat detail pesanan {code}",
+    "playLabel": "Putar {name}",
+    "summaryOverdue": "{count, plural, other {# belum check-out}}.",
+    "overdue": {
+      "title": "Belum check-out ({count, number})",
+      "body": "Petugas sudah check-in tetapi belum check-out, lebih dari 3 jam setelah jadwal selesai. Buka pesanan untuk menghubungi petugas.",
+      "ended": "Jadwal selesai {day}, {time} WIB"
+    }
   },
   "AdminTicketsPage": {
     "title": "Obrolan bantuan",
@@ -1620,13 +1671,20 @@
     },
     "daily": {
       "title": "Pendapatan harian",
-      "description": "14 hari terakhir, {from} sampai {to}",
+      "description": "{days, number} hari terakhir, {from} sampai {to}",
       "sentence": "Pendapatan {count, number} hari terakhir berjumlah {total}. Tertinggi {high} pada {highDay}.",
       "noneSentence": "Belum ada pendapatan dalam {count, number} hari terakhir.",
       "showTable": "Lihat angka per hari",
-      "tableCaption": "Pendapatan per hari, 14 hari terakhir",
+      "tableCaption": "Pendapatan per hari, {days, number} hari terakhir",
       "day": "Tanggal",
-      "revenue": "Pendapatan"
+      "revenue": "Pendapatan",
+      "titleWeekly": "Pendapatan mingguan",
+      "descriptionWeekly": "{days, number} hari terakhir per minggu, {from} sampai {to}",
+      "sentenceWeekly": "Pendapatan {count, number} hari terakhir berjumlah {total}. Minggu tertinggi {high}, {highDay}.",
+      "showTableWeekly": "Lihat angka per minggu",
+      "tableCaptionWeekly": "Pendapatan per minggu, {days, number} hari terakhir",
+      "week": "Minggu",
+      "weekRange": "{from} sampai {to}"
     },
     "payouts": {
       "title": "Pembayaran per agensi",
@@ -1636,8 +1694,8 @@
     },
     "status": {
       "title": "Pesanan menurut status",
-      "description": "Semua pesanan sejak awal, termasuk yang belum atau tidak jadi dibayar.",
-      "total": "{count, plural, other {# pesanan}} seluruhnya",
+      "description": "Pesanan dalam {days, number} hari terakhir menurut tanggal pembayarannya; yang masih menunggu menurut tanggal dibuat.",
+      "total": "{count, plural, other {# pesanan}} dalam periode ini",
       "share": "{percent, number}%",
       "paid": "Dibayar",
       "pending_payment": "Menunggu pembayaran",
@@ -1667,14 +1725,14 @@
       "cancelled": "Batal",
       "paidOut": "Dibayarkan",
       "noOnTime": "Belum ada",
-      "signIn": "Akses masuk",
+      "signIn": "Akun agensi",
       "actions": "Tindakan",
       "since": "Sejak {date}",
       "noAreas": "Belum ada area"
     },
     "signIn": {
-      "yes": "Ada",
-      "no": "Belum ada"
+      "yes": "Sudah dibuat",
+      "no": "Belum dibuat"
     },
     "status": {
       "active": "Aktif",
@@ -1752,7 +1810,8 @@
       "yesterday": "Kemarin, {time}",
       "never": "Belum pernah masuk",
       "active": "Aktif",
-      "notYet": "Belum masuk"
+      "notYet": "Belum masuk",
+      "manage": "Kelola"
     },
     "empty": {
       "title": "Belum ada akun admin",
@@ -1846,17 +1905,24 @@
   "LoginPage": {
     "metaTitle": "Masuk",
     "title": "Masuk",
-    "leadCode": "Masukkan email Anda, lalu kami kirim kode 6 angka. Pelanggan masuk tanpa kata sandi.",
-    "leadPassword": "Gunakan email dan kata sandi akun Anda. Untuk akun petugas dan staf HomeKlin, serta akun demo.",
+    "leadCode": "Masukkan email akun Anda, lalu kami kirim kode 6 angka untuk masuk.",
+    "leadPassword": "Masuk dengan email dan kata sandi akun Anda.",
     "linkExpired": "Tautan di email ini sudah tidak berlaku. Masuk dengan kode yang kami kirim ke email Anda untuk melihat pesanan.",
     "helpPrompt": "Butuh bantuan untuk masuk?",
     "helpLink": "Hubungi tim HomeKlin"
+  },
+  "SignupPage": {
+    "metaTitle": "Daftar",
+    "title": "Daftar",
+    "lead": "Buat akun untuk memesan, membayar, dan menonton pekerjaan di rumah Anda secara langsung."
   },
   "Auth": {
     "fields": {
       "email": "Email",
       "password": "Kata sandi",
-      "showPassword": "Tampilkan kata sandi"
+      "showPassword": "Tampilkan kata sandi",
+      "fullName": "Nama lengkap",
+      "passwordHint": "Minimal 8 karakter."
     },
     "login": {
       "submit": "Masuk",
@@ -1878,6 +1944,12 @@
       "confirmEmail": "Akun Anda sudah dibuat. Buka email dari HomeKlin untuk mengaktifkannya, lalu masuk.",
       "unavailable": "Permintaan Anda belum dapat diproses. Coba lagi sebentar lagi.",
       "codeInvalid": "Kode salah atau sudah tidak berlaku. Periksa email Anda atau kirim kode baru."
+    },
+    "signup": {
+      "submit": "Buat akun",
+      "pending": "Sedang membuat akun…",
+      "switchPrompt": "Sudah punya akun?",
+      "switchLink": "Masuk"
     }
   },
   "AuthLogin": {
@@ -1887,10 +1959,20 @@
     "verifying": "Sedang masuk…",
     "codeTitle": "Masukkan kode dari email",
     "codeSentTo": "Jika <strong>{email}</strong> terdaftar di HomeKlin, kami sudah mengirim kode 6 angka ke email itu.",
-    "withPassword": "Masuk dengan kata sandi",
     "forgotPassword": "Lupa kata sandi? Masuk dengan kode email",
-    "firstTimePrompt": "Belum pernah memesan?",
-    "firstTimeLink": "Pesan layanan"
+    "modeLabel": "Cara masuk",
+    "modes": {
+      "code": {
+        "title": "Kode email",
+        "hint": "Tanpa kata sandi"
+      },
+      "password": {
+        "title": "Kata sandi",
+        "hint": "Email + sandi"
+      }
+    },
+    "signupPrompt": "Belum punya akun?",
+    "signupLink": "Daftar"
   },
   "CodeEntry": {
     "codeLabel": "Kode 6 angka",
@@ -1952,7 +2034,8 @@
       "playRecording": "Putar rekaman",
       "recordingExpired": "Rekaman sudah dihapus setelah 7 hari.",
       "recordingNone": "Pekerjaan ini tidak memiliki rekaman.",
-      "retention": "Rekaman tersimpan 7 hari setelah pekerjaan selesai, lalu dihapus otomatis."
+      "retention": "Rekaman tersimpan 7 hari setelah pekerjaan selesai, lalu dihapus otomatis.",
+      "callCleaner": "Telepon petugas"
     },
     "details": {
       "title": "Detail pesanan",
@@ -1976,7 +2059,9 @@
       "role": "Petugas {agency}",
       "none": "Agensi belum menugaskan petugas.",
       "agency": "Agensi",
-      "area": "Area layanan"
+      "area": "Area layanan",
+      "call": "Telepon",
+      "noPhone": "Agensi belum mengisi nomor HP petugas ini."
     },
     "payment": {
       "title": "Pembayaran",
@@ -2101,7 +2186,7 @@
     "totalNote": "Harga penuh, tanpa biaya tambahan.",
     "submit": "Pesan sekarang",
     "chooseServiceFirst": "Pilih layanan dulu untuk melanjutkan.",
-    "nextNote": "Alamat dan email Anda diisi di langkah berikutnya. Tidak perlu membuat akun.",
+    "nextNote": "Untuk memesan, masuk atau buat akun dulu. Alamat dan nomor HP Anda diisi di langkah berikutnya.",
     "asideLabel": "Ringkasan pesanan",
     "servicesLegend": "Pilih satu layanan",
     "serviceMissing": "Pilih salah satu layanan untuk melanjutkan.",
@@ -2337,8 +2422,8 @@
   },
   "OrdersOverview": {
     "title": "Pesanan Anda",
-    "lead": "Di sini Anda melihat pesanan yang sedang berjalan dan riwayat pesanan, serta memutar ulang rekaman pesanan yang sudah selesai.",
-    "leadNamed": "Halo, {name}. Di sini Anda melihat pesanan yang sedang berjalan dan riwayat pesanan, serta memutar ulang rekaman pesanan yang sudah selesai.",
+    "lead": "Di sini Anda melihat pesanan yang sedang berjalan dan yang akan datang. Pesanan yang sudah selesai ada di Riwayat pesanan.",
+    "leadNamed": "Halo, {name}. Di sini Anda melihat pesanan yang sedang berjalan dan yang akan datang. Pesanan yang sudah selesai ada di Riwayat pesanan.",
     "bookAgain": "Pesan layanan lagi",
     "ongoingTitle": "Sedang berlangsung",
     "livePill": "Sedang berlangsung",
@@ -2349,12 +2434,11 @@
     "recordingLater": "Rekaman tersedia setelah layanan selesai.",
     "watch": "Tonton langsung",
     "seeOrder": "Lihat pesanan",
-    "historyTitle": "Riwayat pesanan",
+    "upcomingTitle": "Akan datang",
+    "ongoingEmptyTitle": "Tidak ada pesanan yang sedang berjalan",
+    "ongoingEmptyBody": "Pesanan yang menunggu pembayaran, menunggu jadwal, atau sedang dikerjakan muncul di sini. Pesanan yang sudah selesai ada di Riwayat pesanan.",
     "emptyTitle": "Belum ada pesanan",
     "emptyBody": "Pesanan Anda muncul di sini dengan statusnya, dari dibayar sampai selesai. Saat petugas bekerja, Anda dapat menonton siaran langsung dari halaman ini.",
-    "historyEmptyTitle": "Belum ada pesanan lain",
-    "historyEmptyBody": "Pesanan yang sudah selesai atau menunggu jadwal muncul di sini.",
-    "seeAll": "Lihat semua pesanan ({count})",
     "asideLabel": "Akun dan bantuan",
     "accountTitle": "Akun Anda",
     "accountBody": "Anda masuk dengan email yang Anda isi saat memesan. Tautan pesanan dan rekaman dikirim ke email ini.",
@@ -2364,7 +2448,36 @@
       "kept": "Tersedia 7 hari, lalu dihapus otomatis.",
       "private": "Hanya Anda dan tim HomeKlin yang dapat melihatnya."
     },
-    "seeRecordings": "Lihat semua rekaman"
+    "seeRecordings": "Lihat semua rekaman",
+    "historyLinkTitle": "Riwayat pesanan",
+    "historyLinkBody": "{count, plural, other {# pesanan}} selesai atau tidak jadi, dan rekamannya"
+  },
+  "OrdersHistory": {
+    "title": "Riwayat pesanan",
+    "lead": "Semua pesanan yang sudah selesai atau tidak jadi, dari yang terbaru. Buka pesanan untuk melihat detailnya atau memutar ulang rekamannya.",
+    "ongoingNote": "{count, plural, other {# pesanan}} masih berjalan.",
+    "ongoingLink": "Lihat di Beranda",
+    "summaryLabel": "Ringkasan riwayat",
+    "stats": {
+      "done": "Pekerjaan selesai",
+      "recordings": "Rekaman tersedia",
+      "paid": "Total dibayar"
+    },
+    "filterLabel": "Saring riwayat",
+    "filters": {
+      "all": "Semua",
+      "done": "Selesai",
+      "notDone": "Tidak jadi"
+    },
+    "rowLine": "{code} · {start}-{end} WIB",
+    "emptyTitle": "Belum ada riwayat pesanan",
+    "emptyBody": "Pesanan yang sudah selesai, dibatalkan, atau gagal dibayar muncul di sini, lengkap dengan rekamannya.",
+    "filterEmptyTitle": "Tidak ada pesanan di sini",
+    "filterEmptyBody": "Belum ada pesanan dengan status ini. Pilih Semua untuk melihat seluruh riwayat.",
+    "monthSelect": "Pilih bulan",
+    "monthOption": "{month} ({count})",
+    "olderMonth": "Bulan sebelumnya",
+    "newerMonth": "Bulan berikutnya"
   },
   "SupportGuestForm": {
     "name": "Nama Anda",

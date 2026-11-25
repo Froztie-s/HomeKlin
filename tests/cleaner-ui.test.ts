@@ -1,9 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { localPhone, nextJobId, roundHours, streamFromStatus } from "@/components/cleaner/cleaner-views";
+import { focusJob, localPhone, mapsSearchUrl, nextJobId, roundHours, streamFromStatus } from "@/components/cleaner/cleaner-views";
 
 // The cleaner pages' small rules (D4, after the mocks Cleaner-Home, Cleaner-Jobs, Cleaner-Job and
 // Cleaner-Live): how a phone number reads, the hours tile, which of today's jobs is "Berikutnya", and
 // the live state the job page starts from (my_stream_status).
+
+describe("mapsSearchUrl", () => {
+  // The job page's "Buka di Maps" link (audit item 4): Google Maps' search URL with the address encoded.
+  it("asks Google Maps to search for the whole address", () => {
+    expect(mapsSearchUrl("Jl. Melati No. 10, Kebayoran Baru, Jakarta Selatan")).toBe(
+      "https://www.google.com/maps/search/?api=1&query=Jl.%20Melati%20No.%2010%2C%20Kebayoran%20Baru%2C%20Jakarta%20Selatan",
+    );
+  });
+
+  it("encodes characters that would otherwise end the query or change the URL", () => {
+    expect(mapsSearchUrl("Jl. A & B #3/4?x=1")).toBe("https://www.google.com/maps/search/?api=1&query=Jl.%20A%20%26%20B%20%233%2F4%3Fx%3D1");
+  });
+
+  it("gives null for no address, so the page shows no link", () => {
+    expect(mapsSearchUrl("")).toBeNull();
+    expect(mapsSearchUrl("   ")).toBeNull();
+  });
+});
 
 describe("localPhone", () => {
   it("writes an Indonesian number as people dial it, in groups of four", () => {
@@ -44,6 +62,14 @@ describe("nextJobId", () => {
   it("is the first of today's jobs the cleaner can still do: in progress, open or later today", () => {
     expect(nextJobId([job("a", 2), job("b", 6)], now)).toBe("a");
     expect(nextJobId([job("a", 2, { checkedInAt: "2026-11-05T02:04:00Z" }), job("b", 6)], now)).toBe("a");
+  });
+
+  it("says whether that job is in progress (Sekarang) or still to start (Berikutnya)", () => {
+    const inProgress = job("a", 2, { checkedInAt: "2026-11-05T02:04:00Z" });
+    expect(focusJob([inProgress, job("b", 6)], now)).toEqual({ job: inProgress, now: true });
+    const open = job("a", 2);
+    expect(focusJob([open, job("b", 6)], now)).toEqual({ job: open, now: false });
+    expect(focusJob([job("done", 0, { checkedInAt: "2026-11-05T00:04:00Z", completedAt: "2026-11-05T01:30:00Z" })], now)).toBeNull();
   });
 
   it("skips a job whose arrival window has closed", () => {

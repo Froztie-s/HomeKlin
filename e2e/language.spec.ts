@@ -88,7 +88,7 @@ test.describe("switching the language on the landing page", () => {
 });
 
 test.describe("the customer app in English", () => {
-  test("switches from the floating switch and stays in English while navigating", async ({ page }) => {
+  test("switches from the app bar and stays in English while navigating", async ({ page }) => {
     await page.goto("/home");
     await switchTo(page, "en").click();
 

@@ -42,3 +42,10 @@ export const flowOutlineButton =
 /** A text link inside the flow ("Ubah", "Kembali ke daftar pesanan"): underlined, a full 44 px target. */
 export const flowTextLink =
   "inline-flex min-h-touch items-center gap-1.5 rounded-sm text-sm font-semibold text-primary underline decoration-1 underline-offset-4 transition-colors duration-150 ease-out-quart hover:decoration-2 active:text-band";
+
+/**
+ * A quiet text button under a card's one button ("Batalkan tautan email" under "Kirim ulang email"):
+ * muted and underlined, small, still a full 44 px target, darker on hover and press.
+ */
+export const flowQuietButton =
+  "inline-flex min-h-touch items-center gap-1.5 rounded-sm text-sm font-medium text-ink-muted underline decoration-1 underline-offset-4 transition-colors duration-150 ease-out-quart hover:text-ink hover:decoration-2 active:text-band disabled:cursor-progress disabled:no-underline";

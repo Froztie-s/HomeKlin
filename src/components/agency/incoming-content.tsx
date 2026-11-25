@@ -64,7 +64,7 @@ export async function IncomingContent({ searchParams }: { searchParams: Promise<
   const fee = (job: AgencyJob) =>
     job.agencyFeeFinal ? formatRupiah(job.agencyFeeIdr, locale) : t("feeEstimate", { fee: formatRupiah(job.agencyFeeIdr, locale) });
 
-  const open = incomingJobs(data.jobs, status);
+  const open = incomingJobs(data.jobs, status, now);
   const rows = open.filter((job) =>
     matchesSearch([serviceName(job.serviceId), areaName(job.areaId), job.address, job.cleanerName, job.orderCode], query),
   );
@@ -84,9 +84,10 @@ export async function IncomingContent({ searchParams }: { searchParams: Promise<
   return (
     <ClientMessages namespaces={["AgencyOrdersPage"]}>
       <ul aria-label={t("countsLabel")} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <CountTile value={counts.unassigned} label={t("counts.unassigned")} />
-        <CountTile value={counts.assigned} label={t("counts.assigned")} />
-        <CountTile value={counts.inProgress} label={t("counts.inProgress")} />
+        {/* Each tile filters the list below, as its tab does (UX audit item 14). */}
+        <CountTile value={counts.unassigned} label={t("counts.unassigned")} href={filterHref("unassigned")} current={status === "unassigned"} />
+        <CountTile value={counts.assigned} label={t("counts.assigned")} href={filterHref("assigned")} current={status === "assigned"} />
+        <CountTile value={counts.inProgress} label={t("counts.inProgress")} href={filterHref("inProgress")} current={status === "inProgress"} />
         <CountTile value={counts.completedThisWeek} label={t("counts.completedThisWeek")} dark />
       </ul>
 
@@ -147,7 +148,7 @@ export async function IncomingContent({ searchParams }: { searchParams: Promise<
             </thead>
             <tbody>
               {rows.map((job) => {
-                const progress = jobProgress(job);
+                const progress = jobProgress(job, now);
                 const service = serviceName(job.serviceId) ?? t("serviceFallback");
                 const detail = { pathname: "/agency/orders/job", query: { order: job.id } };
                 const where = `${job.orderCode}, ${areaName(job.areaId)}`;

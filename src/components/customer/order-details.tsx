@@ -29,6 +29,8 @@ type OrderDetailsProps = {
   areaName: string;
   /** The moment the page is rendered: whether the recording is still kept, and its countdown. */
   now: Date;
+  /** An order not finished yet is listed on /home, so its way back leads there (2026-11-20). */
+  fromHome?: boolean;
 };
 
 // One order's page, /orders?order=<id> (T12, restyled in D5 after the Customer-Orders mock): for a paid
@@ -37,7 +39,7 @@ type OrderDetailsProps = {
 // order number, the service, the time, the address, the customer's note (B7) and how it was paid (B8),
 // and for an order waiting for payment "Bayar sekarang" (T10). Beside it, the way to help. It speaks
 // as HomeKlin only: the order as the customer reads it never carries the agency (listMyOrders).
-export async function OrderDetails({ order, serviceName, duration, areaName, now }: OrderDetailsProps) {
+export async function OrderDetails({ order, serviceName, duration, areaName, now, fromHome = false }: OrderDetailsProps) {
   const locale = await getLocale();
   const [t, tMethod, tPayment, tReplay, words] = await Promise.all([
     getTranslations("OrderConfirmation"),
@@ -49,7 +51,7 @@ export async function OrderDetails({ order, serviceName, duration, areaName, now
   const paid = order.status === "paid";
   const awaitingPayment = order.status === "pending_payment";
   const recording = recordingState(order, now.getTime());
-  const live = liveInProgress(order);
+  const live = liveInProgress(order, now);
   const lead = order.completedAt ? t("detailsLeadCompleted") : t(`detailsLead.${order.status}`);
   const method = paymentMethodKey(order.paymentMethod);
   const service = words.service(serviceName);
@@ -67,8 +69,8 @@ export async function OrderDetails({ order, serviceName, duration, areaName, now
 
   return (
     <div className="flex flex-col gap-5">
-      <BackToList />
-      {paid ? <OrderHero order={order} serviceName={service} arrival={words.arrival(order)} /> : null}
+      <BackToList toHome={fromHome} />
+      {paid ? <OrderHero order={order} serviceName={service} arrival={words.arrival(order)} now={now} /> : null}
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] lg:gap-6">
         <div className="flex min-w-0 flex-col gap-5">
           {paid || awaitingPayment ? <OrderTimelineCard order={order} /> : null}
@@ -145,7 +147,8 @@ export async function OrderDetails({ order, serviceName, duration, areaName, now
 /**
  * "Email pesanan" (B9, B14a, review H1): "Kirim ulang email" while the order waits for payment or is
  * paid (resendOrderEmail refuses other orders too), and "Batalkan tautan email" for any order, so a
- * forwarded email's link can be stopped.
+ * forwarded email's link can be stopped. The resend is the card's one button; the cancel is a quiet
+ * text button under it (UX audit, 2026-11-18), so the rarer, undoing action does not compete.
  */
 async function OrderEmails({ orderId, canResend }: { orderId: string; canResend: boolean }) {
   const t = await getTranslations("OrderEmails");
@@ -156,7 +159,7 @@ async function OrderEmails({ orderId, canResend }: { orderId: string; canResend:
       </h2>
       <p className="mt-1 max-w-prose text-sm text-ink-muted">{t("body")}</p>
       <ClientMessages namespaces={["ResendEmail", "OrderEmails"]}>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:gap-4">
+        <div className="mt-4 flex flex-col items-start gap-2">
           {canResend ? <ResendEmail orderId={orderId} /> : null}
           <RevokeLinks orderId={orderId} />
         </div>
@@ -181,15 +184,16 @@ export async function HelpCard() {
   );
 }
 
-export async function BackToList() {
+/** Back to where the order is listed: /home for one still to come, the history (/orders) otherwise. */
+export async function BackToList({ toHome = false }: { toHome?: boolean }) {
   const t = await getTranslations("OrdersPage");
   return (
     <Link
-      href="/orders"
+      href={toHome ? "/home" : "/orders"}
       className="inline-flex min-h-touch w-fit items-center gap-2 rounded-sm text-sm font-semibold text-primary underline-offset-4 transition-colors duration-150 ease-out-quart hover:underline active:text-band"
     >
       <ArrowLeft className="size-4.5 shrink-0" aria-hidden="true" />
-      {t("backToList")}
+      {t(toHome ? "backToHome" : "backToList")}
     </Link>
   );
 }

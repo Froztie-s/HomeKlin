@@ -1,4 +1,4 @@
-import { Info } from "lucide-react";
+import { Info, KeyRound, Mail, type LucideIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -17,9 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 type SearchParams = PageProps<"/[locale]/login">["searchParams"];
 
-// /login and /en/login (T5, T9b; restyled after the SignIn mocks). Customers sign in by emailed code
-// (no password; their account was made by ordering); staff, cleaners and the demo accounts use "Masuk
-// dengan kata sandi", which opens the password form at /login?cara=sandi. Both keep ?next=. An email
+// /login and /en/login (T5, T9b; restyled after the SignIn mocks). Two ways in, a switch at the top of
+// the card named by how one signs in (2026-11-20, UX audit item 22 and the user): "Kode email" (a
+// 6-digit code to an existing account) and "Kata sandi" (/login?cara=sandi; anyone with a password,
+// customers too). Both keep ?next=. The card ends with "Belum punya akun? Daftar" (/signup): ordering
+// needs an account since 2026-11-20. An email
 // order link that no longer works (/o/<token>) sends the customer here with ?tautan=tidak-berlaku,
 // which adds a notice above the form. The card and its h1 are prerendered; the lead, the notice and
 // the form depend on the address and on whether the visitor is already signed in, both known only at
@@ -58,11 +60,39 @@ async function LoginEntry({ searchParams }: { searchParams: SearchParams }) {
   const tPage = await getTranslations("LoginPage");
   const withPassword = params.cara === "sandi";
   const linkExpired = params.tautan === "tidak-berlaku";
-  const keep = next ? { next } : {};
+  const keep: Record<string, string> = next ? { next } : {};
+
+  const modes: { key: "code" | "password"; Icon: LucideIcon; href: { pathname: "/login"; query: Record<string, string> } }[] = [
+    { key: "code", Icon: Mail, href: { pathname: "/login", query: keep } },
+    { key: "password", Icon: KeyRound, href: { pathname: "/login", query: { ...keep, cara: "sandi" } } },
+  ];
 
   return (
     <>
-      <AuthLead>{withPassword ? tPage("leadPassword") : tPage("leadCode")}</AuthLead>
+      <nav aria-label={t("modeLabel")} className="mt-4 grid grid-cols-2 gap-1 rounded-md bg-sunken p-1">
+        {modes.map(({ key, Icon, href }) => {
+          const active = (key === "password") === withPassword;
+          return (
+            <Link
+              key={key}
+              href={href}
+              aria-current={active ? "page" : undefined}
+              className={`flex min-h-touch items-center gap-2.5 rounded-sm px-3 py-2 text-left transition-colors duration-150 ease-out-quart ${
+                active ? "bg-card text-ink shadow-card" : "text-ink-muted hover:bg-card/60 hover:text-ink"
+              }`}
+            >
+              <Icon className={`size-4.5 shrink-0 ${active ? "text-primary" : ""}`} aria-hidden="true" />
+              <span className="flex min-w-0 flex-col leading-tight">
+                <span className="text-sm font-semibold">{t(`modes.${key}.title`)}</span>
+                <span className="text-xs">{t(`modes.${key}.hint`)}</span>
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+      <div className="mt-3">
+        <AuthLead>{withPassword ? tPage("leadPassword") : tPage("leadCode")}</AuthLead>
+      </div>
       <div role="status" className="mt-5 empty:hidden">
         {linkExpired ? (
           <p className="flex items-start gap-2.5 rounded-md bg-info-surface px-4 py-3 text-sm font-medium text-info">
@@ -85,20 +115,13 @@ async function LoginEntry({ searchParams }: { searchParams: SearchParams }) {
             }
           />
         ) : (
-          <>
-            <LoginCodeForm next={next} />
-            <p className={`${switchRow} mt-3`}>
-              <Link href={{ pathname: "/login", query: { ...keep, cara: "sandi" } }} className={switchLinkClass}>
-                {t("withPassword")}
-              </Link>
-            </p>
-          </>
+          <LoginCodeForm next={next} />
         )}
       </div>
       <p className={`${switchRow} mt-5 border-t border-border pt-4`}>
-        {t("firstTimePrompt")}
-        <Link href="/services" className={switchLinkClass}>
-          {t("firstTimeLink")}
+        {t("signupPrompt")}
+        <Link href={{ pathname: "/signup", query: keep }} className={switchLinkClass}>
+          {t("signupLink")}
         </Link>
       </p>
     </>

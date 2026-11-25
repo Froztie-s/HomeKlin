@@ -11,11 +11,8 @@ import { OrdersContentUnavailable, readCustomerOrders } from "./orders-content";
 import { OrdersOverview } from "./orders-overview";
 import { ServiceRow } from "./service-row";
 
-/** How many past orders the signed-in home shows before "Lihat semua pesanan". */
-const homeOrders = 3;
-
 // The customer app home, /home (D5, mocks Customer-Home and Phone-Home). A signed-in customer sees
-// "Pesanan Anda": a job in progress first, then their latest orders, their account and help, from their
+// "Pesanan Anda": a job in progress first, then the orders still to come (the finished ones are on /orders), their account and help, from their
 // own session (listMyOrders, never the agency). Anyone else (a visitor, or staff, who cannot order)
 // sees where to start: the area, which leads to step 1 (/services?area=...), and HomeKlin's services
 // with their one full price. It reads the session, so it renders inside the page's <Suspense>.
@@ -32,7 +29,6 @@ export async function HomeContent() {
         serviceName={(order) => read.services.find((service) => service.id === order.serviceId)?.name[locale]}
         account={read.account}
         now={now}
-        limit={homeOrders}
       />
     );
   }

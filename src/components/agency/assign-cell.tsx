@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { initialsOf } from "@/components/auth/user-avatar";
 import { AssignCleaner } from "./assign-cleaner";
+import { secondaryButton } from "./styles";
 
 type AssignCellProps = {
   orderId: string;
@@ -34,7 +35,8 @@ export function AssignCell({ orderId, cleaners, cleanerId, cleanerName }: Assign
         type="button"
         onClick={() => setEditing(true)}
         aria-label={t("changeFor", { name: cleanerName })}
-        className="inline-flex min-h-touch shrink-0 cursor-pointer items-center rounded-sm px-1.5 text-sm font-semibold text-primary underline-offset-4 transition-colors duration-150 ease-out-quart hover:underline active:text-band"
+        // An outlined button like the row's other actions, not bare bold text (UX audit item 15).
+        className={secondaryButton}
       >
         {t("change")}
       </button>
