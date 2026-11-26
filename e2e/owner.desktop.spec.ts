@@ -53,6 +53,11 @@ test.describe("the owner", () => {
     await expect(days).toHaveCount(31);
     const today = Number(((await days.last().getByRole("cell").nth(1).textContent()) ?? "0").replace(/\D/g, ""));
     expect(today).toBeGreaterThanOrEqual(world.revenueIdr);
+    // The toggle opens and closes the table. Close it again before the range changes: the panel is the
+    // same element in every range, so a table left open stays open (and the 90-day toggle below would
+    // close it instead of opening it).
+    await daily.getByText("Lihat angka per hari").click();
+    await expect(days).toHaveCount(0);
 
     const byStatus = page.getByRole("region", { name: "Pesanan menurut status" });
     for (const status of ["Dibayar", "Menunggu pembayaran", "Gagal", "Dibatalkan"]) await expect(byStatus).toContainText(status);

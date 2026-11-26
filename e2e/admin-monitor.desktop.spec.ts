@@ -8,18 +8,38 @@ import { signedInAs } from "./setup/auth-state";
 // its video, status chip (icon or dot plus a word), order number, cleaner, "service, area", agency and
 // "Buka" (the video in full screen); each of today's jobs whose cleaner has not checked in yet, with
 // "Belum check-in" and the start time, and no video or "Buka". The summary line counts what the page
-// read. The spec makes its own agency, cleaners, jobs and streams (e2e/monitor-test-data.ts) and
-// removes them at the end; other specs share the project, so their cards may appear as well.
+// read. Since 2026-11-20 a job checked in to and never checked out, hours past its window, leaves the
+// live grid and is listed under it as "Belum check-out", and the summary line ends with its count. The
+// spec makes its own agency, cleaners, jobs and streams (e2e/monitor-test-data.ts), one such late job
+// among them, and removes them at the end; other specs share the project, so their cards, and their own
+// late jobs, may appear as well.
 
 test.describe.configure({ mode: "serial", timeout: 120_000 });
 
 let data: MonitorWorld;
 let video: Buffer;
+/** A job whose window ended hours ago and whose cleaner never checked out, with the stream it left running. */
+let late: { id: string; code: string; cleaner: string };
 
 test.beforeAll(async ({ browser }) => {
   test.setTimeout(180_000);
   data = await createMonitorWorld("m1");
   video = await makeTestVideo(browser);
+  const cleanerName = "Uji Petugas Pantau Terlambat";
+  const cleaner = await data.world.cleaner(data.agencyId, cleanerName);
+  // Its window (two hours) began 400 minutes ago, so it ended 280 minutes ago: past the 3 hours of grace.
+  const job = await data.world.job({
+    agencyId: data.agencyId,
+    cleaner,
+    startsIn: -400,
+    address: "Jl. Uji Pantau Terlambat, Cakung, Jakarta Timur",
+    checkedInMinutesAgo: 390,
+  });
+  const stream = await adminClient()
+    .from("stream_sessions")
+    .insert({ order_id: job.id, cleaner_id: cleaner.id, agency_id: data.agencyId, source: "demo", status: "active" });
+  if (stream.error) throw new Error(`Could not start the late job's stream: ${stream.error.message}`);
+  late = { id: job.id, code: job.code, cleaner: cleanerName };
 });
 
 test.afterAll(async () => {
@@ -37,7 +57,20 @@ async function summaryNumbers(summary: Locator): Promise<number[]> {
   return ((await summary.textContent()) ?? "").match(/\d+/g)?.map(Number) ?? [];
 }
 
+/** "Belum check-out (N)" under the grid: the jobs checked in to and never checked out, hours past their window. */
+const overdueList = (page: Page, name = /^Belum check-out \(\d+\)$/) => page.getByRole("region", { name });
+
+/**
+ * How many jobs the page lists as not checked out. count() does not wait, and the list streams in with
+ * the cards: the caller has seen the grid or the empty state first.
+ */
+const overdueCount = (page: Page, name?: RegExp) => overdueList(page, name).getByRole("listitem").count();
+
 test("live cards show the order number, the status chip, the job and Buka", async ({ page }) => {
+  // The test project's demo clip is a stand-in the browser cannot play, so a card would fall back to
+  // "Coba lagi" and its "Buka" would open the order's page (below). Serve a playing clip, so the cards
+  // that have a picture offer the full-screen button.
+  await serveTestVideo(page, video);
   await page.goto("/admin/monitor");
   await expect(page.getByRole("heading", { level: 1, name: "Pemantauan langsung" })).toBeVisible();
 
@@ -56,13 +89,19 @@ test("live cards show the order number, the status chip, the job and Buka", asyn
     await expect(card.getByRole("status")).toHaveText(status);
     // The chip carries an icon or the live dot beside its word, never colour alone.
     await expect(card.getByRole("status").locator("svg, [data-dot]")).toHaveCount(1);
+    await expect(card.locator("video")).toHaveCount(1);
+  }
+
+  // With a picture to enlarge, "Buka" is the full-screen button, and the card has no link of that name.
+  for (const job of [data.live.active, data.live.weak]) {
+    const card = grid(page).locator(`[data-feed="${job.id}"]`);
     const open = card.getByRole("button", { name: `Buka siaran ${job.cleaner} dalam layar penuh` });
     await expect(open).toBeVisible();
     await expect(open).toHaveText("Buka");
     const box = await open.boundingBox();
     expect(box?.height).toBeGreaterThanOrEqual(44);
     expect(box?.width).toBeGreaterThanOrEqual(44);
-    await expect(card.locator("video")).toHaveCount(1);
+    await expect(card.getByRole("link", { name: /^Buka detail pesanan/ })).toHaveCount(0);
   }
 
   // A disconnected stream's frame says so on a sunken panel; with no picture to enlarge, "Buka" opens
@@ -73,6 +112,9 @@ test("live cards show the order number, the status chip, the job and Buka", asyn
   const openOrder = disconnected.getByRole("link", { name: `Buka detail pesanan ${data.live.disconnected.code}` }).filter({ hasText: "Buka" });
   await expect(openOrder).toBeVisible();
   await expect(openOrder).toHaveAttribute("href", `/admin/orders/${data.live.disconnected.code}`);
+  const linkBox = await openOrder.boundingBox();
+  expect(linkBox?.height).toBeGreaterThanOrEqual(44);
+  expect(linkBox?.width).toBeGreaterThanOrEqual(44);
 });
 
 test("a job of today whose cleaner has not checked in is a card with its start time and no Buka", async ({ page }) => {
@@ -93,19 +135,46 @@ test("a job of today whose cleaner has not checked in is a card with its start t
   await expect(page.locator(`[data-waiting="${data.left.unassigned}"], [data-waiting="${data.left.tomorrow}"]`)).toHaveCount(0);
 });
 
-test("the summary line counts the jobs in progress, those with trouble, and those not checked in", async ({ page }) => {
+test("a job checked in to but never checked out, hours past its window, is listed under Belum check-out and is no longer a live card", async ({ page }) => {
+  await page.goto("/admin/monitor");
+  const list = overdueList(page);
+  await expect(list).toBeVisible();
+  await expect(list.getByRole("heading", { level: 2 })).toHaveText(/^Belum check-out \(\d+\)$/);
+  await expect(list).toContainText("lebih dari 3 jam setelah jadwal selesai");
+  const item = list.getByRole("listitem").filter({ hasText: late.code });
+  await expect(item).toHaveCount(1);
+  await expect(item).toContainText(`${late.code} · ${late.cleaner}`);
+  await expect(item).toContainText(/Jadwal selesai .+, \d{2}\.\d{2} WIB/);
+  await expect(item).toContainText(data.agencyName);
+  // Its stream is still marked live, yet the grid leaves it out, with no card of its own.
+  const { data: stream } = await adminClient().from("stream_sessions").select("status").eq("order_id", late.id).single<{ status: string }>();
+  expect(stream?.status).toBe("active");
+  await expect(grid(page).locator(`[data-feed="${data.live.active.id}"]`)).toBeVisible();
+  await expect(feed(page, late.id)).toHaveCount(0);
+  // The row is a link to the order, where admin can call the cleaner.
+  const link = item.getByRole("link");
+  await expect(link).toHaveAttribute("href", `/admin/orders/${late.code}`);
+  expect((await link.boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(44);
+  await link.click();
+  await expect(page).toHaveURL(`/admin/orders/${late.code}`);
+});
+
+test("the summary line counts the jobs in progress, those with trouble, those not checked in and those not checked out", async ({ page }) => {
   await page.goto("/admin/monitor");
   const summary = page.getByTestId("monitor-summary");
-  await expect(summary).toHaveText(/^\d+ pekerjaan sedang berlangsung\. \d+ terkendala\. \d+ belum check-in\.$/);
+  await expect(summary).toHaveText(/^\d+ pekerjaan sedang berlangsung\. \d+ terkendala\. \d+ belum check-in\. \d+ belum check-out\.$/);
+  await expect(grid(page)).toBeVisible();
   // The cards carry the status they were read with, so the counts can be checked against them
   // whatever other specs have running at the same time.
   const live = await page.locator("[data-feed]:not([data-initial-status='ended'])").count();
   const troubled = await page.locator("[data-feed][data-initial-status='weak'], [data-feed][data-initial-status='disconnected']").count();
   const waiting = await page.locator("[data-waiting]").count();
-  expect(await summaryNumbers(summary)).toEqual([live, troubled, waiting]);
+  const overdue = await overdueCount(page);
+  expect(await summaryNumbers(summary)).toEqual([live, troubled, waiting, overdue]);
   expect(live).toBeGreaterThanOrEqual(3);
   expect(troubled).toBeGreaterThanOrEqual(2);
   expect(waiting).toBeGreaterThanOrEqual(1);
+  expect(overdue).toBeGreaterThanOrEqual(1);
   // "Perbarui daftar" reads the list again with a full page load.
   await expect(page.getByRole("link", { name: "Perbarui daftar" })).toHaveAttribute("href", "");
 });
@@ -126,11 +195,17 @@ test("Buka puts that card's video into full screen", async ({ page }) => {
 });
 
 test("reads in English", async ({ page }) => {
+  // A playing clip, so the weak card keeps its full-screen "Open" button instead of the link to the order.
+  await serveTestVideo(page, video);
   await page.goto("/en/admin/monitor");
   await expect(page.getByRole("heading", { level: 1, name: "Live monitoring" })).toBeVisible();
   await expect(page.getByTestId("monitor-summary")).toHaveText(
-    /^\d+ jobs? in progress\. \d+ having trouble\. \d+ not checked in yet\.$/,
+    /^\d+ jobs? in progress\. \d+ having trouble\. \d+ not checked in yet\. \d+ not checked out\.$/,
   );
+  const notCheckedOut = overdueList(page, /^Not checked out \(\d+\)$/);
+  await expect(notCheckedOut).toContainText(late.code);
+  await expect(notCheckedOut).toContainText("more than 3 hours after the window ended");
+  await expect(notCheckedOut).toContainText(/Window ended .+, \d{2}\.\d{2} WIB/);
   const live = grid(page, "Monitored jobs").locator(`[data-feed="${data.live.weak.id}"]`);
   await expect(live).toContainText("Regular Cleaning, East Jakarta");
   await expect(live.getByRole("status")).toHaveText("Weak signal");
@@ -162,8 +237,11 @@ test.describe("filters", () => {
     // Every card left has trouble.
     await expect(page.locator("[data-feed][data-initial-status='active']")).toHaveCount(0);
 
+    // The list of jobs not checked out is not a card: the filter leaves it, and the summary still ends with its count.
     const shown = await page.locator("[data-feed]").count();
-    expect(await summaryNumbers(page.getByTestId("monitor-summary"))).toEqual([shown, shown]);
+    const overdue = await overdueCount(page);
+    expect(overdue).toBeGreaterThanOrEqual(1);
+    expect(await summaryNumbers(page.getByTestId("monitor-summary"))).toEqual([shown, shown, overdue]);
     await expect(page.getByTestId("monitor-summary")).not.toContainText("belum check-in");
   });
 
@@ -204,7 +282,11 @@ test.describe("filters", () => {
     await page.goto(`/admin/monitor?view=troubled&area=${quiet}`);
     await expect(feed(page, data.live.weak.id)).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Tidak ada pekerjaan yang cocok" })).toBeVisible();
-    await expect(page.getByTestId("monitor-summary")).toHaveText("0 pekerjaan sedang berlangsung. 0 terkendala.");
+    // The summary ends with the area's jobs not checked out, when it has any (another spec's may be there).
+    const overdue = await overdueCount(page);
+    await expect(page.getByTestId("monitor-summary")).toHaveText(
+      `0 pekerjaan sedang berlangsung. 0 terkendala.${overdue > 0 ? ` ${overdue} belum check-out.` : ""}`,
+    );
     await page.getByRole("link", { name: "Tampilkan semua pekerjaan" }).click();
     await expect(page).toHaveURL("/admin/monitor");
     await expect(feed(page, data.live.active.id)).toBeVisible();
