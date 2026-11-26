@@ -218,7 +218,9 @@ test.describe("another customer", () => {
   test("sees neither recording, nor the job, nor a link to the file", async ({ page }) => {
     for (const id of Object.values(world.orders)) {
       await page.goto(`/orders?order=${id}`);
-      await expect(page.getByText("Belum ada pesanan")).toBeVisible();
+      // Another customer's order id opens no order page: they get their own history, which is empty.
+      await expect(page.getByText("Belum ada riwayat pesanan")).toBeVisible();
+      await expect(details(page)).toHaveCount(0);
       await expect(page.locator("video")).toHaveCount(0);
       const served = await (await page.request.get(`/orders?order=${id}`)).text();
       for (const html of [await page.content(), served]) {

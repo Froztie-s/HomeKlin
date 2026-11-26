@@ -110,8 +110,10 @@ test.describe("signing in", () => {
 
     await fillLogin(page, customer);
     await expect(page).toHaveURL("/orders");
-    await expect(page.getByRole("heading", { level: 1, name: "Pesanan" })).toBeVisible();
-    await expect(page.getByText("Belum ada pesanan")).toBeVisible();
+    // /orders is "Riwayat pesanan" since 2026-11-20 (the orders still to come are on /home); a new
+    // customer has no history yet.
+    await expect(page.getByRole("heading", { level: 1, name: "Riwayat pesanan", exact: true })).toBeVisible();
+    await expect(page.getByText("Belum ada riwayat pesanan")).toBeVisible();
   });
 
   test("takes a customer to /home and refuses them the admin and cleaner sections", async ({ page }) => {
@@ -153,7 +155,9 @@ test.describe("signing in", () => {
 
     await page.goto("/orders");
     await expect(page).toHaveURL("/cleaner");
-    await expect(page.getByText("Belum ada pesanan")).toHaveCount(0);
+    // Neither the customer's history nor the home's empty state ("Belum ada pesanan") is shown to them.
+    await expect(page.getByText("Belum ada riwayat pesanan")).toHaveCount(0);
+    await expect(page.getByText("Belum ada pesanan", { exact: true })).toHaveCount(0);
 
     // The cleaner's account tab shows who is signed in and the way out.
     await page.getByRole("navigation", { name: "Navigasi petugas" }).getByRole("link", { name: "Akun" }).click();

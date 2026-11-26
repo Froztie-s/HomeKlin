@@ -44,7 +44,7 @@ test("on a phone the panel folds into the bar, the back link and the heading abo
 test("the password form offers the code instead of a password reset, keeping next", async ({ page }) => {
   await page.goto("/login?next=%2Forders&cara=sandi");
   await expect(page.getByLabel("Kata sandi", { exact: true })).toBeVisible();
-  await expect(page.getByText("Gunakan email dan kata sandi akun Anda.", { exact: false })).toBeVisible();
+  await expect(page.getByText("Masuk dengan email dan kata sandi akun Anda.", { exact: false })).toBeVisible();
   // No "remember me" box: sessions already persist.
   await expect(page.getByRole("checkbox")).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Lupa kata sandi? Masuk dengan kode email" })).toHaveAttribute(

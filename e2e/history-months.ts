@@ -4,6 +4,15 @@ import { expect, type Page } from "@playwright/test";
 // kept in the address as ?bulan=2026-11. These open the month that holds an order, whatever the date
 // the test runs on, by walking the months the select offers.
 
+/**
+ * The page's content sits behind <Suspense> (the role check), so it can be revealed a moment after
+ * `goto` resolves; its h1 is the first thing the content holds. Waiting for it keeps the counts below
+ * from reading the loading state.
+ */
+async function waitForContent(page: Page): Promise<void> {
+  await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toBeVisible();
+}
+
 /** The months the history page offers, the latest first. */
 export async function historyMonths(page: Page): Promise<string[]> {
   const select = page.locator("main select");
@@ -15,11 +24,13 @@ export async function historyMonths(page: Page): Promise<string[]> {
 export async function openHistoryMonthOf(page: Page, orderId: string, prefix = "", query = ""): Promise<void> {
   const row = page.locator(`main a[href="${prefix}/orders?order=${orderId}"]`);
   await page.goto(`${prefix}/orders${query ? `?${query}` : ""}`);
+  await waitForContent(page);
   if ((await row.count()) > 0) return;
   for (const month of await historyMonths(page)) {
     const params = new URLSearchParams(query);
     params.set("bulan", month);
     await page.goto(`${prefix}/orders?${params.toString()}`);
+    await waitForContent(page);
     if ((await row.count()) > 0) return;
   }
   await expect(row, `no month of ${prefix}/orders lists ${orderId}`).toHaveCount(1);
