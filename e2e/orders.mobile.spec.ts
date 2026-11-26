@@ -99,6 +99,14 @@ test.describe("with an order of each status", () => {
     if (!window) throw new Error(`The ${name} order was not booked`);
     return window;
   };
+  // The failed and cancelled orders, the one with the later window first (the history's order). Their
+  // windows are the last open 13.00 and 15.00 before a 13-day edge, so which is later depends on the time
+  // of day the test runs (after 13.00 the last 15.00 window can be a day earlier): the expected order
+  // comes from the booked windows, not from a fixed guess.
+  const notDoneLatestFirst = () =>
+    (["failed", "cancelled"] as const)
+      .toSorted((a, b) => Date.parse(windowOf(b).startsAt) - Date.parse(windowOf(a).startsAt))
+      .map((name) => ids[name]);
   const arrival = (window: Window, language: "id" | "en" = "id") =>
     `${dayText(window.startsAt, language)}, ${windowText(window)} WIB`;
   // A whole hour 40 days back, two hours long.
@@ -199,7 +207,7 @@ test.describe("with an order of each status", () => {
     await expect(page.getByText("3 pesanan masih berjalan.")).toBeVisible();
     // The latest month opens first: the failed and cancelled orders' windows are still to come, the
     // passed order's window is 40 days back, in an earlier month.
-    expect(await historyHrefs(page)).toEqual([ids.cancelled, ids.failed].map((id) => `/orders?order=${id}`));
+    expect(await historyHrefs(page)).toEqual(notDoneLatestFirst().map((id) => `/orders?order=${id}`));
     const months = await historyMonths(page);
     expect(months).toHaveLength(2);
     await expect(page.getByLabel("Pilih bulan")).toHaveValue(months[0]);
@@ -225,7 +233,7 @@ test.describe("with an order of each status", () => {
     await filterLink(page, "Tidak jadi").click();
     await expect(page).toHaveURL(`/orders?filter=tidak-jadi&bulan=${months[0]}`);
     await expect(filterLink(page, "Tidak jadi")).toHaveAttribute("aria-current", "page");
-    expect(await historyHrefs(page)).toEqual([ids.cancelled, ids.failed].map((id) => `/orders?order=${id}`));
+    expect(await historyHrefs(page)).toEqual(notDoneLatestFirst().map((id) => `/orders?order=${id}`));
     await filterLink(page, "Selesai").click();
     await expect(page.getByText("Tidak ada pesanan di sini")).toBeVisible();
     expect(await historyHrefs(page)).toEqual([]);
