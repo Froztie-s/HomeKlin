@@ -20,3 +20,15 @@ Quality Plan target: backend availability of at least 99% during the pilot and U
 - This is a stand-in for an external monitor. The plan in the README is an UptimeRobot monitor on the
   same address, which checks every 5 minutes from outside GitHub and keeps its own report. Use whichever
   figure the client group accepts, or both.
+
+## Results
+
+| Date of report | Counted from | Checks | Up | Down | Availability |
+|---|---|---|---|---|---|
+| 2026-11-26 | 2026-11-05 (first run) | 73 | 73 | 0 | 100.00% (target: at least 99%) |
+
+Read the number with its limit in mind: a 10-minute schedule would give about 3,000 checks in 21 days, but GitHub
+started only 73, because it runs scheduled workflows when it has spare capacity and skips many on a repository with
+little activity. All 73 checks that ran were up, so no outage was seen, but the record does not prove continuous
+coverage. For the client group's UAT window, add the UptimeRobot monitor described in the README (every 5 minutes,
+outside GitHub) and report both figures.
