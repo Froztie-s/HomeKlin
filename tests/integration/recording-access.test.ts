@@ -22,6 +22,7 @@ const roles = ["owner", "otherCustomer", "agency", "otherAgency", "admin", "clea
 type Viewer = (typeof roles)[number];
 const users: Partial<Record<Viewer, TestUser>> = {};
 const recordings = { available: "", expired: "" };
+let storedBytes: Buffer | null = null;
 let agencyId = "";
 let nextWindow = Date.UTC(2031, 3, 1, 1);
 const filesMade: string[] = [];
@@ -96,6 +97,12 @@ beforeAll(async () => {
   const available = await attachRecording(admin, await paidOrder());
   filesMade.push(available.filePath);
   recordings.available = available.id;
+  // The app copies one clip of the library (picked from the order's id), which may be a real demo clip
+  // that other people put in the shared test project, not only this file's own clip. So the replay
+  // link is compared with the file stored for the recording, whichever clip that is.
+  const { data: stored, error: storedError } = await admin.storage.from(recordingsBucket).download(available.filePath);
+  if (!stored) throw new Error(`The recording's file could not be read: ${storedError?.message}`);
+  storedBytes = Buffer.from(await stored.arrayBuffer());
   recordings.expired = await expiredRecording();
 }, 120_000);
 
@@ -127,7 +134,9 @@ describe("recordingLink: who may replay", { timeout: 30_000 }, () => {
     expect(Date.parse(link.availableUntil)).toBeGreaterThan(Date.now() + 6 * day);
     const response = await fetch(link.url);
     expect(response.ok).toBe(true);
-    expect(new Uint8Array(await response.arrayBuffer())).toEqual(clipBytes);
+    const played = Buffer.from(await response.arrayBuffer());
+    expect(played.length).toBeGreaterThan(0);
+    expect(played.equals(storedBytes ?? Buffer.alloc(0))).toBe(true);
   });
 
   it.each(refused)("refuses %s as if there were no recording", async (viewer) => {

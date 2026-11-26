@@ -229,11 +229,11 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: every table has RLS; cross-role and cross-tenant tests pass; no secrets in repo; findings fixed or logged.
   - Verify: test suite plus `security-auditor` agent review.
   - Deps: all features. Skills: `security-and-hardening`.
-- [ ] **T35 Compatibility, accessibility, usability trial** (M) — needs real devices and three people; accessibility checks are best run after the design revamp; the device matrix and usability sheets are in `docs/qa/manual-test-sheets.md`
+- [ ] **T35 Compatibility, accessibility, usability trial** (M) — needs real devices and three people; accessibility checks are best run after the design revamp; the device matrix and usability sheets are in `docs/qa/manual-test-sheets.md`. 2026-11-26: the review of the merged UX PR found one accessibility defect (the "Buka" link's name lacked its visible word, WCAG 2.5.3), now fixed; the people and device parts are still the user's
   - Accept: main flows pass on Chrome Android, Safari iOS 16+, desktop Chrome/Edge/Firefox; 3 people book a service unaided; accessibility fixes done.
   - Verify: device matrix recorded in `docs/`.
   - Deps: all UI. Skills: `browser-testing-with-devtools`, `frontend-ui-engineering`.
-- [ ] **T36 Mobile performance pass** (S) — deferred on purpose: run `/agent-skills:webperf` after the design revamp (2026-11-05, user), since the revamp changes every page
+- [x] **T36 Mobile performance pass** (S) — done 2026-11-26 (after the redesign, as agreed): audit in `docs/qa/webperf-2026-11-26.md` (Pixel 9, Slow 4G, 4x CPU, cold cache; landing LCP 2.40 s, CLS 0; `/services` 1.7-2.0 s; `/login` 1.3 s: all within LCP <= 2.5 s and CLS <= 0.1). The two High findings are fixed (retired Bricolage/Figtree fonts no longer preloaded: 7 font preloads became 3; the Supabase Realtime client is imported only when a chat opens). Logged, not fixed: request-time data chains and function region (medium, needs the deployed stack to measure), uploaded photos served full size (medium; needs `images.remotePatterns`, the user's decision), ratings layout shift (data dependent), and four low items. Only lab numbers: no Lighthouse (not installed, no new dependency) and no field data
   - Accept: key customer pages load acceptably on a mobile connection; findings fixed.
   - Verify: `/agent-skills:webperf` audit report.
   - Deps: T35. Skills: `performance-optimization`.
