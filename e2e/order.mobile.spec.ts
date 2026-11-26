@@ -58,8 +58,10 @@ test.describe("as a guest", () => {
     await expect(page.getByRole("link", { name: "Masuk" })).toHaveAttribute("href", `/login?next=${encodeURIComponent(wanted)}`);
 
     const email = guestEmail(guests);
-    await page.getByLabel("Nama lengkap").fill("Uji Pendaftar");
-    await page.getByLabel("Email", { exact: true }).fill(email);
+    // By role, not by label: Next keeps the page just left (the sign-in form) in the document, hidden,
+    // so a label would find its "Email" field too; a role query skips what is hidden.
+    await page.getByRole("textbox", { name: "Nama lengkap" }).fill("Uji Pendaftar");
+    await page.getByRole("textbox", { name: "Email", exact: true }).fill(email);
     await page.getByLabel("Kata sandi", { exact: true }).fill("kata-sandi-uji-123");
     await page.getByRole("button", { name: "Buat akun" }).click();
     await expect(page).toHaveURL(wanted, { timeout: 15_000 });

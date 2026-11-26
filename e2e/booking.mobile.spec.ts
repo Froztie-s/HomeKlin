@@ -1,5 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { adminClient } from "../tests/integration/test-project";
+import { adminClient, createTestUser, deleteTestUsers, type TestUser } from "../tests/integration/test-project";
 import {
   agencyMarks,
   cancelOrder,
@@ -19,8 +19,8 @@ import { readTestUsers, signedInAs } from "./setup/auth-state";
 // (/pesan: the address, the phone, a note for the Petugas, the streaming consent) and on to step 3,
 // the payment, where the order waits for payment. Also: the consent is required, a window someone else takes in the meantime
 // is refused with other windows offered, a window that is gone when the page opens, an unknown
-// service, and a visitor who opens the old booking address and signs in on the way. Guests ordering
-// with an emailed code are in e2e/order.mobile.spec.ts. To the customer HomeKlin is one company:
+// service, and a visitor who opens the old booking address and signs in on the way. A visitor sent to
+// sign in, and signing up, are in e2e/order.mobile.spec.ts. To the customer HomeKlin is one company:
 // nothing on these pages, nor in the data sent to the browser, names the agency that got the job.
 // Test data (e2e/booking-test-data.ts): late windows in Jakarta Barat only, one per test, and every
 // order made here is deleted again with its place given back.
@@ -152,10 +152,13 @@ test.describe("as a signed-in customer", () => {
       const confirmation = page.getByRole("region", { name: "Pembayaran" });
       await expect(currentStep).toContainText("Bayar");
       await expect(confirmation.getByText("Menunggu pembayaran")).toBeVisible();
-      await expect(confirmation.getByText(service.name)).toBeVisible();
-      await expect(confirmation.getByText(price, { exact: true })).toBeVisible();
-      await expect(confirmation.getByText(`${dayText(target.startsAt)}, ${windowText(target)} WIB`)).toBeVisible();
-      await expect(confirmation.getByText(address)).toBeVisible();
+      // The order's own card (the aside); on a phone the booking bar repeats the service and the
+      // price (src/components/customer/booking-bar.tsx), so they are read from the card, not the bar.
+      const order = confirmation.getByRole("complementary");
+      await expect(order.getByText(service.name)).toBeVisible();
+      await expect(order.getByText(price, { exact: true })).toBeVisible();
+      await expect(order.getByText(`${dayText(target.startsAt)}, ${windowText(target)} WIB`)).toBeVisible();
+      await expect(order.getByText(address)).toBeVisible();
       // The next step is paying (T10, e2e/payment.mobile.spec.ts).
       await expect(confirmation.getByRole("button", { name: "Bayar sekarang" }).first()).toBeVisible();
 
@@ -368,15 +371,37 @@ test.describe("as a signed-in customer", () => {
       const radios = page.getByRole("radiogroup", { name: "Layanan" }).getByRole("radio");
       await radios.first().scrollIntoViewIfNeeded();
       await expect(times).not.toBeInViewport();
+      // Once React has taken over the page, so the tap runs the handler that scrolls on.
+      await radios.first().evaluate(
+        (input) =>
+          new Promise<void>((resolve) => {
+            const ready = () => (Object.keys(input).some((key) => key.startsWith("__reactFiber")) ? resolve() : requestAnimationFrame(ready));
+            ready();
+          }),
+      );
       await radios.first().click({ force: true });
       await expect(times).toBeInViewport();
+      // The scroll glides; let it come to rest before going on.
+      await expect
+        .poll(async () => {
+          const first = await page.evaluate(() => window.scrollY);
+          await page.waitForTimeout(150);
+          return first === (await page.evaluate(() => window.scrollY));
+        })
+        .toBe(true);
 
+      // Back among the services, with the first two cards on screen: when the next card is off screen
+      // the browser itself scrolls to show the focused one, which is not what is checked here.
       await page.evaluate(() => window.scrollTo(0, 0));
+      await radios.first().scrollIntoViewIfNeeded();
       await radios.first().focus();
       const before = await page.evaluate(() => window.scrollY);
       await page.keyboard.press("ArrowDown");
       await expect(radios.nth(1)).toBeChecked();
+      // A scroll on to "Jam kosong" would be under way by now (it starts on the next frame and glides).
+      await page.waitForTimeout(800);
       expect(await page.evaluate(() => window.scrollY)).toBeLessThanOrEqual(before + 200);
+      await expect(times).not.toBeInViewport();
     });
 
     test("keeps the choice, the price and the button in a bar at the bottom while the button is out of sight", async ({ page }) => {
@@ -428,14 +453,34 @@ test.describe("as a signed-in customer", () => {
 });
 
 test.describe("as a visitor", () => {
-  // Ordering needs no account beforehand (T9b): the old booking address leads straight to the order
-  // page with the same choice, without a sign-in on the way.
-  test("opens the old booking address and lands on the order page with the same choice, without signing in", async ({ page }) => {
+  // Ordering needs a customer account since 2026-11-20 (the user): the old booking address sends a
+  // visitor to /login with it as ?next=, and once signed in the visitor lands on the order page with the
+  // same choice. (A signed-in customer going straight there is in e2e/order.mobile.spec.ts.)
+  let customer: TestUser;
+  test.beforeAll(async () => {
+    customer = await createTestUser("book-visitor", { full_name: "Uji Pelanggan" });
+  });
+  test.afterAll(async () => {
+    if (customer) await deleteTestUsers([customer]);
+  });
+
+  test("opens the old booking address, is sent to sign in, and lands on the order page with the same choice", async ({ page }) => {
     const target = await windowFor("08.00", 2);
     const params = new URLSearchParams({ service: service.id, area, starts: target.startsAt });
-    await page.goto(`/book?${params.toString()}`);
+    const old = `/book?${params.toString()}`;
+    await page.goto(old);
+    await expect(page).toHaveURL(`/login?next=${encodeURIComponent(old)}`);
 
-    await expect(page).toHaveURL(orderPath(service.id, area, target.startsAt));
+    // The "Kata sandi" tab keeps ?next=; these accounts have a password.
+    await page.getByRole("link", { name: /^Kata sandi/ }).click();
+    // The password form replaces the code form: wait for it before typing, so the email goes into it.
+    const passwordField = page.getByLabel("Kata sandi", { exact: true });
+    await expect(passwordField).toBeVisible();
+    await page.getByLabel("Email", { exact: true }).fill(customer.email);
+    await passwordField.fill(customer.password);
+    await page.getByRole("button", { name: "Masuk", exact: true }).click();
+
+    await expect(page).toHaveURL(orderPath(service.id, area, target.startsAt), { timeout: 15_000 });
     const choice = page.getByRole("region", { name: "Layanan dan jadwal" });
     await expect(choice.getByText(service.name, { exact: true })).toBeVisible();
     await expect(choice.getByText(`${windowText(target)} WIB`, { exact: true })).toBeVisible();

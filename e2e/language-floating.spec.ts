@@ -91,12 +91,39 @@ test("is reachable by keyboard and switches the language, keeping the page", asy
   await expect(page).toHaveURL("/services");
 });
 
-test("stays in place while the page scrolls", async ({ page }) => {
+test("stays in place while the page scrolls", async ({ page }, testInfo) => {
   await page.goto("/services");
   const group = toggle(page, "/services");
-  const before = (await group.boundingBox())!;
-  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-  const after = (await group.boundingBox())!;
+  await expect(group).toBeVisible();
+  const box = async () => (await group.boundingBox())!;
+
+  // The switch is fixed to the viewport, but on a phone it glides up above the booking bar while the bar
+  // shows (the bar slides in once the page has hydrated) and down again once the bar steps aside (the
+  // step's own button on screen, near the end of the page; e2e/booking-flow.spec.ts). So the first
+  // position is read once it rests 12 px above the bar, and the scroll compared leaves the bar as it is.
+  const bar = page.getByTestId("booking-bar");
+  if (await bar.isVisible()) {
+    await expect(bar).toHaveAttribute("data-shown", "true");
+    await expect
+      .poll(async () => {
+        const [barBox, switchBox] = [(await bar.boundingBox())!, await box()];
+        return Math.round(barBox.y - (switchBox.y + switchBox.height));
+      })
+      .toBe(12);
+  }
+  const before = await box();
+  await page.evaluate(() => window.scrollBy(0, 300));
+  const after = await box();
   expect(Math.round(after.y)).toBe(Math.round(before.y));
   expect(Math.round(after.x)).toBe(Math.round(before.x));
+
+  // At the end of the page it is still in the bottom-left corner, over the bottom edge; with no booking
+  // bar (a desktop) it has not moved at all.
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const end = await box();
+  const viewport = page.viewportSize()!;
+  expect(Math.round(end.x)).toBe(Math.round(before.x));
+  expect(end.y + end.height).toBeLessThanOrEqual(viewport.height);
+  expect(end.y + end.height).toBeGreaterThan(viewport.height - 120);
+  if (testInfo.project.name === "desktop") expect(Math.round(end.y)).toBe(Math.round(before.y));
 });

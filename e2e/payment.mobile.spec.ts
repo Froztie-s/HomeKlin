@@ -70,7 +70,8 @@ test.describe("as a signed-in customer", () => {
     try {
       const step = confirmation(page);
       await expect(step.getByText("Menunggu pembayaran", { exact: true })).toBeVisible();
-      await expect(step.getByText(/^Rp\s[\d.]+$/)).toBeVisible();
+      // The order's card shows the total; the phone bar (checked below) repeats it, so read it from the card.
+      await expect(step.getByRole("complementary").getByText(/^Rp\s[\d.]+$/)).toBeVisible();
       await expect(page.getByText(/Pembayaran simulasi, tidak ada uang sungguhan/)).toBeVisible();
       await expect(page.getByText("Pembayaran sedang dikonfirmasi")).toHaveCount(0);
       // The three ways, QRIS chosen to begin with; the card option needs Midtrans' public key.
@@ -90,7 +91,8 @@ test.describe("as a signed-in customer", () => {
       await page.getByRole("radio", { name: /QRIS/ }).check();
       await payButton(page).scrollIntoViewIfNeeded();
       await expect(bar).toHaveCount(0);
-      await expect(page.getByTestId("booking-bar")).toHaveAttribute("data-shown", "false");
+      // (Scoped to this step: Next keeps step 2, left a moment ago, in the document, hidden, with its own bar.)
+      await expect(step.getByTestId("booking-bar")).toHaveAttribute("data-shown", "false");
 
       // 1. QRIS: the QR code appears on this page, and nothing took the customer to Midtrans.
       await payButton(page).click();
@@ -164,7 +166,10 @@ test.describe("as a signed-in customer", () => {
       await payButton(page).click();
 
       // The bank's check opens over the page (or, when the bank asks nothing more, the card is processed).
-      await expect(page.getByRole("dialog", { name: "Verifikasi kartu dari bank" }).or(page.getByRole("heading", { name: "Pembayaran kartu sedang diproses" }))).toBeVisible({
+      // (Either may show, or both at once: the bank's frame over the page that already waits. Hence first().)
+      await expect(
+        page.getByRole("dialog", { name: "Verifikasi kartu dari bank" }).or(page.getByRole("heading", { name: "Pembayaran kartu sedang diproses" })).first(),
+      ).toBeVisible({
         timeout: paymentWait,
       });
       const state = await payment(orderId);
