@@ -2,6 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createTestUser, deleteTestUsers, type TestUser } from "../tests/integration/test-project";
 import { cancelOrder, lateWindow } from "./booking-test-data";
 import { bookSignedIn } from "./order-test-data";
+import { signedInAs } from "./setup/auth-state";
 
 // The booking flow's focused layout (2026-11-17), on a phone and a desktop. "Pesan sekarang" on the
 // landing page opens step 1 (the service and the time). While the customer books (step 1 /services,
@@ -9,7 +10,10 @@ import { bookSignedIn } from "./order-test-data";
 // reachable by keyboard right after the skip link), the steps, and the floating ID | EN switch, which
 // keeps the step's choice and never covers the form or the payment button. "Kembali" goes from step 2
 // to step 1 with the choice and what was typed, from step 1 back to where the customer came from, and
-// from the payment to the customer's orders.
+// from the payment to the customer's home, where the placed order waits (since 2026-11-20 /orders is
+// the history). Since 2026-11-20 ordering needs an account: a visitor who opens step 2 is sent to
+// /login (e2e/order.mobile.spec.ts), so the tests of step 2 and 3 run as a signed-in customer; step 1
+// stays open to a visitor. On a phone step 3 also has a booking bar with its own "Bayar sekarang".
 // Test data: step 3 books one late window in Jakarta Selatan (the default area, where no other spec
 // books), 08.00 on the phone and 10.00 on the desktop, for a customer made for the run; the order and
 // the customer are deleted at the end with the place given back.
@@ -82,6 +86,18 @@ test.describe("Pesan sekarang on the landing page", () => {
 });
 
 test.describe("the booking steps", () => {
+  test("Kembali on step 1 opened from outside the site leads to the customer home", async ({ page }) => {
+    await page.goto("/services");
+    await pressBack(page, "Kembali");
+    await expect(page).toHaveURL("/home");
+    await expect(mainNav(page)).toBeVisible();
+  });
+});
+
+// Step 2 (/pesan) is for customers only: a visitor is sent to log in, so these open it signed in.
+test.describe("the booking steps, signed in as a customer", () => {
+  test.use(signedInAs.customer);
+
   test("show no navigation, only Kembali in the header, reachable right after the skip link", async ({ page }) => {
     for (const { path, step } of [
       { path: "/services", step: "Langkah 1 dari 3" },
@@ -95,13 +111,6 @@ test.describe("the booking steps", () => {
       await page.keyboard.press("Tab");
       await expect(backLink(page, "Kembali")).toBeFocused();
     }
-  });
-
-  test("Kembali on step 1 opened from outside the site leads to the customer home", async ({ page }) => {
-    await page.goto("/services");
-    await pressBack(page, "Kembali");
-    await expect(page).toHaveURL("/home");
-    await expect(mainNav(page)).toBeVisible();
   });
 
   test("Kembali on step 2 returns to step 1 with the choice, and step 2 keeps what was typed", async ({ page }) => {
@@ -184,7 +193,7 @@ test.describe("step 3, the payment", () => {
     if (customer) await deleteTestUsers([customer]);
   });
 
-  test("is focused too, its button is clear of the language switch, and Ke pesanan Anda leads to the orders", async ({ page }, testInfo) => {
+  test("is focused too, its buttons are clear of the language switch, and Ke pesanan Anda leads to the customer home", async ({ page }, testInfo) => {
     await page.goto("/login?cara=sandi");
     await page.getByLabel("Email", { exact: true }).fill(customer.email);
     await page.getByLabel("Kata sandi", { exact: true }).fill(customer.password);
@@ -199,21 +208,29 @@ test.describe("step 3, the payment", () => {
     await expect(page.getByText("Langkah 3 dari 3", { exact: true })).toBeVisible();
     await expectFocused(page, "Ke pesanan Anda");
 
-    // The payment button is not under the floating switch, wherever the page is scrolled to.
-    const pay = page.getByRole("button", { name: "Bayar sekarang" });
-    await pay.scrollIntoViewIfNeeded();
+    // The payment button is not under the floating switch, wherever the page is scrolled to. The card's
+    // own "Bayar sekarang" comes first; on a phone the booking bar repeats it while the card's button is
+    // out of sight, so every "Bayar sekarang" the page shows to a user is checked, not only the first.
+    const payButtons = page.getByRole("button", { name: "Bayar sekarang" });
+    await payButtons.first().scrollIntoViewIfNeeded();
     const clear = async () => {
-      const [button, languages] = [(await pay.boundingBox())!, (await page.getByRole("group", { name: "Bahasa" }).boundingBox())!];
-      const overlaps =
-        button.x < languages.x + languages.width &&
-        languages.x < button.x + button.width &&
-        button.y < languages.y + languages.height &&
-        languages.y < button.y + button.height;
-      return !overlaps;
+      const languages = (await page.getByRole("group", { name: "Bahasa" }).boundingBox())!;
+      for (const pay of await payButtons.all()) {
+        const button = await pay.boundingBox();
+        if (!button) continue;
+        const overlaps =
+          button.x < languages.x + languages.width &&
+          languages.x < button.x + button.width &&
+          button.y < languages.y + languages.height &&
+          languages.y < button.y + button.height;
+        if (overlaps) return false;
+      }
+      return true;
     };
-    expect(await clear()).toBe(true);
+    // Polled: the booking bar slides away and back, and the switch glides with it.
+    await expect.poll(clear).toBe(true);
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    expect(await clear()).toBe(true);
+    await expect.poll(clear).toBe(true);
 
     await pressBack(page, "Ke pesanan Anda");
     await expect(page).toHaveURL("/home");
