@@ -18,7 +18,10 @@ concurrency:
 jobs:
   checks:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # 45 minutes: the end-to-end step builds the app and runs about 530 browser tests after the unit
+    # tests; since mid-November that no longer fits in 20 minutes (runs on 69eb901 and dfa3cd4 were
+    # cancelled at exactly 20:15 in the e2e step, with every earlier step green).
+    timeout-minutes: 45
     # The separate Supabase test project (markdown/SPEC.md, "Testing Strategy"): the integration tests
     # use it directly, and the end-to-end build points the app at it (playwright.config.ts), so CI never
     # touches the live project. Set the three repository secrets from the TEST_ lines in your .env.
