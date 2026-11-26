@@ -5,7 +5,7 @@ import { adminClient } from "../tests/integration/test-project";
 // T5 on a phone (customers and cleaners are mobile-first): signing in, `next`, signing out, and the
 // role check that refuses a signed-in user a section that is not theirs. Since T9b there is no separate
 // sign-up (the account is made by ordering, e2e/order.mobile.spec.ts) and customers sign in by emailed
-// code; these accounts have a password, which "Staf & demo" (kata sandi) still accepts. Runs against
+// code; these accounts have a password, which the "Kata sandi" tab still accepts. Runs against
 // the separate Supabase test project (playwright.config.ts). Every user here is made for this file
 // with a unique address on example.com, and deleted again afterwards. Every test starts signed out.
 
@@ -47,9 +47,9 @@ test.afterAll(async () => {
   for (const id of createdIds.splice(0)) await admin.auth.admin.deleteUser(id);
 });
 
-/** On /login: "Staf & demo" (kata sandi), then the email and password. */
+/** On /login: the "Kata sandi" tab, then the email and password. */
 async function fillLogin(page: Page, account: Account, password = account.password) {
-  const withPassword = page.getByRole("link", { name: /^Staf & demo/ });
+  const withPassword = page.getByRole("link", { name: /^Kata sandi/ });
   const passwordField = page.getByLabel("Kata sandi", { exact: true });
   // The form streams in after the page shell; wait for it, then switch to the password if needed.
   await expect(withPassword.or(passwordField)).toBeVisible();
@@ -103,7 +103,7 @@ test.describe("signing in", () => {
     await expect(page.getByRole("heading", { level: 1, name: "Masuk", exact: true })).toBeVisible();
     // Customers get a code; the password way keeps the page the visitor wanted.
     await expect(page.getByRole("button", { name: "Kirim kode" })).toBeVisible();
-    await expect(page.getByRole("link", { name: /^Staf & demo/ })).toHaveAttribute(
+    await expect(page.getByRole("link", { name: /^Kata sandi/ })).toHaveAttribute(
       "href",
       "/login?next=%2Forders&cara=sandi",
     );
@@ -191,7 +191,7 @@ test.describe("in English", () => {
   test("signs in from /en/login, with English messages, and stays in English", async ({ page }) => {
     await page.goto("/en/login");
     await expect(page.getByRole("heading", { level: 1, name: "Log in", exact: true })).toBeVisible();
-    await page.getByRole("link", { name: /^Staff & demo/ }).click();
+    await page.getByRole("link", { name: /^Password/ }).click();
     await expect(page).toHaveURL("/en/login?cara=sandi");
     await page.getByLabel("Email", { exact: true }).fill(customer.email);
     await page.getByLabel("Password", { exact: true }).fill("not-the-password");

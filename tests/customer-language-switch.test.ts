@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 // The customer pages' language switch sits in the top app bar, as on the cleaner app (UX audit,

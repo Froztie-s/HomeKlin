@@ -23,11 +23,15 @@ export type OrderSearchError = "empty" | "invalid" | "forbidden";
 export type OrderSearchState = { error: OrderSearchError; value: string } | null;
 
 const locale = z.enum(routing.locales).catch(routing.defaultLocale);
+// The typed number: text only, trimmed and cut to 64 characters; anything else counts as empty.
+const codeField = z
+  .string()
+  .catch("")
+  .transform((text) => text.trim().slice(0, 64));
 
 export async function findOrder(_previous: OrderSearchState, formData: FormData): Promise<OrderSearchState> {
   if (!(await authorize(["admin"]))) return { error: "forbidden", value: "" };
-  const raw = formData.get("code");
-  const value = typeof raw === "string" ? raw.trim().slice(0, 64) : "";
+  const value = codeField.parse(formData.get("code"));
   if (!value) return { error: "empty", value: "" };
   const code = normalizeOrderNumber(value);
   if (!code) return { error: "invalid", value };

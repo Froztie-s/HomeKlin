@@ -1399,6 +1399,7 @@
     "filteredEmptyTitle": "No matching jobs",
     "filteredEmptyBody": "No jobs match these filters right now.",
     "orderLink": "View order {code} details",
+    "openOrder": "Open order {code} details",
     "playLabel": "Play {name}",
     "summaryOverdue": "{count, plural, other {# not checked out}}.",
     "overdue": {

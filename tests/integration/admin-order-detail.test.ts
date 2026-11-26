@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { getAdminOrderDetail } from "@/lib/jobs/admin-order";
-import { adminClient, visitorClient } from "./test-project";
+import { adminClient, createTestUser, deleteTestUsers, visitorClient, type TestUser } from "./test-project";
 import { createWorld, hours, type World } from "./world";
 
 // B2 (Phase 15, supabase/migrations/20261114130000_admin_order_detail.sql, the cleaner's phone added in
@@ -10,12 +10,17 @@ import { createWorld, hours, type World } from "./world";
 // the fee split (real after check-out, expected before), the status times and the stream's state.
 
 let world: World;
+let owner: TestUser | undefined;
 
 beforeAll(async () => {
   world = await createWorld("b2");
+  // The owner has no admin powers (T29b): the "admins only" test below includes this role too.
+  owner = await createTestUser("b2-owner");
+  await adminClient().from("profiles").update({ role: "owner" }).eq("id", owner.id);
 }, 180_000);
 
 afterAll(async () => {
+  await deleteTestUsers([owner]);
   await world.cleanup();
 }, 120_000);
 
@@ -109,7 +114,8 @@ describe("admin_order_detail", { timeout: 60_000 }, () => {
 
   it("is for admins only", async () => {
     const job = await world.job({ startsAt: new Date(Date.now() + hours(4)) });
-    for (const user of [world.users.customer, world.users.agencyA, world.users.cleanerA]) {
+    if (!owner) throw new Error("The owner test user was not created (see beforeAll).");
+    for (const user of [world.users.customer, world.users.agencyA, world.users.cleanerA, owner]) {
       const { error } = await user.client.rpc("admin_order_detail", { p_order: job });
       expect(error?.message, user.email).toBe("not_admin");
     }

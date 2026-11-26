@@ -520,15 +520,13 @@ test.describe("the agency", () => {
     await range.getByRole("link", { name: "7 hari" }).click();
     await expect(page).toHaveURL("/agency?days=7");
     await expect(range.getByRole("link", { name: "7 hari" })).toHaveAttribute("aria-current", "true");
-    // The numbers come from the T40 summary functions. The test project's agency role cannot read
-    // order_fees yet (docs/redesign-gaps.md, Partner agency); the page then says so instead of showing 0.
-    await expect(page.getByRole("list", { name: "Angka utama, 7 hari terakhir" }).or(page.getByRole("main").getByRole("alert"))).toBeVisible();    // The fee chart follows the chosen period (2026-11-20): 7 bars for 7 days, 13 weekly bars for 90.
+    // The numbers come from the T40 summary functions (agencies read their own fees since fdc67db).
+    await expect(page.getByRole("list", { name: "Angka utama, 7 hari terakhir" })).toBeVisible();
+    // The fee chart follows the chosen period (2026-11-20): 7 bars for 7 days, 13 weekly bars for 90.
     const chart = page.getByRole("region", { name: /^Imbalan (harian|mingguan)$/ });
-    if (await chart.count()) {
-      await expect(chart.locator("[data-day]")).toHaveCount(7);
-      await page.goto("/agency?days=90");
-      await expect(page.getByRole("region", { name: "Imbalan mingguan" }).locator("[data-day]")).toHaveCount(13);
-    }
+    await expect(chart.locator("[data-day]")).toHaveCount(7);
+    await page.goto("/agency?days=90");
+    await expect(page.getByRole("region", { name: "Imbalan mingguan" }).locator("[data-day]")).toHaveCount(13);
   });
 
   test("watches its own cleaner's live stream, whose status follows the cleaner's", async ({ page }) => {

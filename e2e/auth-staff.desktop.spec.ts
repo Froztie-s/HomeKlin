@@ -44,10 +44,10 @@ test.afterAll(async () => {
   for (const id of createdIds.splice(0)) await admin.auth.admin.deleteUser(id);
 });
 
-/** Staff keep email and password (T9b): "Staf & demo" (kata sandi) on /login. */
+/** Staff keep email and password (T9b): the "Kata sandi" tab on /login. */
 async function logIn(page: Page, account: Account) {
   await page.goto("/login");
-  await page.getByRole("link", { name: /^Staf & demo/ }).click();
+  await page.getByRole("link", { name: /^Kata sandi/ }).click();
   await expect(page).toHaveURL("/login?cara=sandi");
   await page.getByLabel("Email", { exact: true }).fill(account.email);
   await page.getByLabel("Kata sandi", { exact: true }).fill(account.password);

@@ -1399,6 +1399,7 @@
     "filteredEmptyTitle": "Tidak ada pekerjaan yang cocok",
     "filteredEmptyBody": "Tidak ada pekerjaan dengan filter ini saat ini.",
     "orderLink": "Lihat detail pesanan {code}",
+    "openOrder": "Buka detail pesanan {code}",
     "playLabel": "Putar {name}",
     "summaryOverdue": "{count, plural, other {# belum check-out}}.",
     "overdue": {
