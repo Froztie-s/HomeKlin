@@ -97,12 +97,14 @@ test("an admin lands on live monitoring, is refused an agency page, and signs ou
   await expect(page).toHaveURL("/admin/monitor");
   await expect(page.getByRole("heading", { level: 1, name: "Pemantauan langsung" })).toBeVisible();
 
-  // Staff signed in on the landing page see their chip, which leads back to their dashboard.
+  // Staff who open a public page (the landing page) are sent to their own home, not shown the
+  // visitor's page (StaffRedirect, 2026-11-20); for an admin that is live monitoring.
   await page.goto("/");
-  await expect(page.getByRole("banner").getByRole("link", { name: "Uji Admin, dasbor Anda" })).toHaveAttribute(
-    "href",
-    "/admin/monitor",
-  );
+  await expect(page).toHaveURL("/admin/monitor");
+  await expect(page.getByRole("heading", { level: 1, name: "Pemantauan langsung" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Rumah bersih yang bisa Anda tonton langsung" }),
+  ).toHaveCount(0);
 
   await page.goto("/admin/monitor");
   await page.getByRole("complementary").getByRole("button", { name: "Keluar" }).click();

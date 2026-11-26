@@ -136,8 +136,10 @@ test.describe("another customer", () => {
   test.use({ storageState: async ({}, provide) => provide(sessions.other) });
 
   test("cannot see or review the job", async ({ page }) => {
+    // Another customer's order id opens no order page: they get their own history, which is empty.
     await page.goto(`/orders?order=${world.orders.none}`);
-    await expect(page.getByText("Belum ada pesanan")).toBeVisible();
+    await expect(page.getByText("Belum ada riwayat pesanan")).toBeVisible();
+    await expect(page.getByRole("region", { name: "Detail pesanan" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Kirim ulasan" })).toHaveCount(0);
     const attempt = await world.other.client.rpc("submit_review", { p_order: world.orders.none, p_service_rating: 1 });
     expect(attempt.error?.message).toBe("job_not_found");
