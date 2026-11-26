@@ -2,7 +2,10 @@
 
 import type { RealtimeChannel, SupabaseClient } from "@supabase/supabase-js";
 import { useEffect, useRef, useState } from "react";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser";
+
+// The browser client (with Realtime, 74 KB gzip) is imported only when a chat opens, not at the top of
+// this file: the customer navigation links to /support on every page, and a static import made each
+// page's prefetch of that route download the client (T36, docs/qa/webperf-2026-11-26.md, finding 2).
 
 // A Supabase Realtime subscription for the help chat and the ticket inbox (T20, T21). The browser
 // client is signed in as the visitor, and Realtime applies row-level security to every change, so a
@@ -48,12 +51,16 @@ export function useRealtime(topic: string, changes: readonly ChangeFilter[], han
   });
 
   useEffect(() => {
-    const client = getSupabaseBrowserClient();
-    if (!client) return;
+    if (!configured) return;
     let stopped = false;
+    let client: SupabaseClient | null = null;
     let channel: RealtimeChannel | null = null;
 
-    async function join(supabase: SupabaseClient) {
+    async function join() {
+      const { getSupabaseBrowserClient } = await import("@/lib/supabase/browser");
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase || stopped) return;
+      client = supabase;
       // The channel must join with the visitor's own token: joined without it (as an anonymous visitor),
       // row-level security lets nothing through. The client's own token hand-over can come after the
       // join, so the session's token is set first (as tests/integration/support.test.ts does).
@@ -81,13 +88,13 @@ export function useRealtime(topic: string, changes: readonly ChangeFilter[], han
       channel = joined;
     }
 
-    join(client).catch((error: unknown) => {
+    join().catch((error: unknown) => {
       console.error(error);
       if (!stopped) setState("offline");
     });
     return () => {
       stopped = true;
-      if (channel) void client.removeChannel(channel);
+      if (client && channel) void client.removeChannel(channel);
     };
   }, [topic]);
 
