@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Browser } from "@playwright/test";
 import { adminClient } from "../tests/integration/test-project";
 import { signedInAs } from "./setup/auth-state";
 
@@ -23,6 +23,13 @@ test.afterAll(async () => {
   await adminClient().from("faq_entries").delete().ilike("keywords", `%${word}%`);
 });
 
+/**
+ * A signed-out visitor's browser. browser.newContext() carries the project's use options, so without an
+ * empty session it would be signed in as admin, and since 2026-11-20 staff are sent from the help page to
+ * their own console (StaffRedirect): the help page would never be the one read.
+ */
+const visitorContext = (browser: Browser, baseURL: string | undefined) => browser.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
+
 test.describe("as admin", () => {
   test.use(signedInAs.admin);
 
@@ -39,7 +46,7 @@ test.describe("as admin", () => {
     await expect(panel.getByLabel("Pertanyaan (Indonesia)")).toBeFocused();
   });
 
-  test("a published entry is added and shows on the help page at once", async ({ page, browser }) => {
+  test("a published entry is added and shows on the help page at once", async ({ page, browser, baseURL }) => {
     await page.goto("/admin/faq?new");
     const panel = page.getByTestId("faq-create-panel");
     await panel.getByLabel("Pertanyaan (Indonesia)").fill(entry.questionId);
@@ -56,9 +63,10 @@ test.describe("as admin", () => {
     await expect(row.locator("summary")).toContainText(`Kata kunci: ${word}, uji`);
     await expect(row.locator("summary")).toContainText("Dipublikasikan");
 
-    const visitor = await browser.newContext();
+    const visitor = await visitorContext(browser, baseURL);
     const help = await visitor.newPage();
     await help.goto(`/support?q=${word}`);
+    await expect(help.getByRole("heading", { level: 1, name: "Bantuan", exact: true })).toBeVisible();
     await expect(help.getByText(entry.questionId)).toBeVisible();
     await visitor.close();
   });
@@ -74,7 +82,7 @@ test.describe("as admin", () => {
     await expect(rows.first().locator("summary")).toContainText(/Dipublikasikan|Draf/);
   });
 
-  test("unticking the box makes it a draft the help page no longer shows", async ({ page, browser }) => {
+  test("unticking the box makes it a draft the help page no longer shows", async ({ page, browser, baseURL }) => {
     await page.goto("/admin/faq");
     const row = page.locator("[data-faq]").filter({ hasText: entry.questionId });
     await row.locator("summary").click();
@@ -83,10 +91,10 @@ test.describe("as admin", () => {
     await expect(page.getByRole("status").filter({ hasText: `${entry.questionId} disimpan.` })).toContainText("Masih Draf");
     await expect(page.locator("[data-faq]").filter({ hasText: entry.questionId }).locator("summary")).toContainText("Draf");
 
-    const visitor = await browser.newContext();
+    const visitor = await visitorContext(browser, baseURL);
     const help = await visitor.newPage();
     await help.goto(`/support?q=${word}`);
-    await expect(help.getByRole("heading", { level: 1 })).toBeVisible();
+    await expect(help.getByRole("heading", { level: 1, name: "Bantuan", exact: true })).toBeVisible();
     await expect(help.getByText(entry.questionId)).toHaveCount(0);
     await visitor.close();
   });

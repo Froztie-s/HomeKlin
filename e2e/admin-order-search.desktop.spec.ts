@@ -5,6 +5,9 @@ import { signedInAs } from "./setup/auth-state";
 // sidebar under the role card; it reads "hk 1170" or "1170" as "HK-1170" and goes to the order's page,
 // and an input that cannot be an order number shows an error under the field without leaving the page.
 // The number used here is far beyond the sequence, so the order page answers with its not-found state.
+// The shell draws the search twice (sidebar from 1024 px, menu below) and shows one copy at a time, so on a
+// desk the sidebar's is the only one in the page. The search form is named by the same label as its
+// input, so the input is found by its role (getByLabel would match the form too).
 
 test.use(signedInAs.admin);
 
@@ -12,6 +15,7 @@ const missing = "HK-9999999";
 
 test("goes to the order's page from any admin page, whatever way the number is written", async ({ page }) => {
   await page.goto("/admin/services");
+  await expect(page.getByRole("search", { name: "Cari nomor pesanan" })).toHaveCount(1);
   const search = page.getByRole("complementary").getByRole("search", { name: "Cari nomor pesanan" });
   await search.getByLabel("Cari nomor pesanan").fill("  hk 9999999 ");
   await search.getByRole("button", { name: "Cari" }).click();
@@ -19,7 +23,7 @@ test("goes to the order's page from any admin page, whatever way the number is w
   await expect(page.getByRole("heading", { level: 1, name: "Pesanan tidak ditemukan" })).toBeAttached();
 
   // The field starts empty on the next page; a bare number works too, and Enter sends it.
-  const field = page.getByRole("complementary").getByLabel("Cari nomor pesanan");
+  const field = page.getByRole("complementary").getByRole("textbox", { name: "Cari nomor pesanan" });
   await expect(field).toHaveValue("");
   await field.fill("9999998");
   await field.press("Enter");
@@ -40,7 +44,7 @@ test("shows an error under the field and stays on the page for an input that is 
 
 test("works in English, keeping the language", async ({ page }) => {
   await page.goto("/en/admin/monitor");
-  const field = page.getByRole("complementary").getByLabel("Find an order number");
+  const field = page.getByRole("complementary").getByRole("textbox", { name: "Find an order number" });
   await field.fill("1170x");
   await field.press("Enter");
   await expect(page.getByRole("complementary").getByRole("alert")).toContainText("That is not an order number.");

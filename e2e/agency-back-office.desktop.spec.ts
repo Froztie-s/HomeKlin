@@ -582,7 +582,14 @@ test.describe("the agency", () => {
     await expect(page.getByRole("form", { name: "Add a time slot" }).getByRole("button", { name: "Add slot" })).toBeVisible();
 
     await page.goto("/en/agency/cleaners");
-    await expect(page.getByRole("form", { name: "Add a cleaner" })).toContainText("6-digit code");
+    // The form is in a dialog that the header's "Add a cleaner" opens (2026-11-20, UX audit item 17).
+    await expect(page.getByRole("dialog", { name: "Add a cleaner" })).toBeHidden();
+    await page.getByRole("link", { name: "Add a cleaner" }).click();
+    const dialog = page.getByRole("dialog", { name: "Add a cleaner" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("form", { name: "Add a cleaner" })).toContainText("6-digit code");
+    await dialog.getByRole("button", { name: "Close" }).click();
+    await expect(dialog).toBeHidden();
     await expect(page.getByRole("button", { name: "Edit the phone and area of Uji Petugas Siaran" })).toBeVisible();
 
     await page.goto("/en/agency/services");
