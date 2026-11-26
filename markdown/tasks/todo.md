@@ -229,7 +229,7 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
   - Accept: every table has RLS; cross-role and cross-tenant tests pass; no secrets in repo; findings fixed or logged.
   - Verify: test suite plus `security-auditor` agent review.
   - Deps: all features. Skills: `security-and-hardening`.
-- [ ] **T35 Compatibility, accessibility, usability trial** (M) — needs real devices and three people; accessibility checks are best run after the design revamp; the device matrix and usability sheets are in `docs/qa/manual-test-sheets.md`. 2026-11-26: the review of the merged UX PR found one accessibility defect (the "Buka" link's name lacked its visible word, WCAG 2.5.3), now fixed; the people and device parts are still the user's
+- [ ] **T35 Compatibility, accessibility, usability trial** (M) — needs real devices and three people; accessibility checks are best run after the design revamp; the device matrix and usability sheets are in `docs/qa/manual-test-sheets.md`. 2026-11-26: the review of the merged UX PR found one accessibility defect (the "Buka" link's name lacked its visible word, WCAG 2.5.3), now fixed. An automated axe scan of 76 page runs (all roles, both languages) found only an accepted decorative-numeral contrast flag: `docs/qa/accessibility-scan-2026-11-26.md`. The people and device parts are still the user's
   - Accept: main flows pass on Chrome Android, Safari iOS 16+, desktop Chrome/Edge/Firefox; 3 people book a service unaided; accessibility fixes done.
   - Verify: device matrix recorded in `docs/`.
   - Deps: all UI. Skills: `browser-testing-with-devtools`, `frontend-ui-engineering`.
