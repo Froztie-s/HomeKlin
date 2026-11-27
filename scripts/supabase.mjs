@@ -9,6 +9,8 @@
 //   keys <live|test>       write the project's secret key into .env (SUPABASE_SECRET_KEY / TEST_...)
 //   autoconfirm <live|test> switch off email confirmation: sign-up signs the user in at once
 //                          (Supabase's built-in email reaches only the project team, 2 per hour)
+//   confirm-email <live|test> switch on email confirmation: sign-up needs the emailed 6-digit code before the
+//                          customer has a session (live, user decision 2026-11-27; the test project stays off)
 //   test-rate-limits       let the test project accept the test suites' many sign-ins (test only)
 //   migrate <live|test>    apply the files in supabase/migrations that the project has not had yet
 //   ethereal               create a throw-away Ethereal SMTP account (mail is accepted, never
@@ -213,6 +215,13 @@ const commands = {
     await api("PATCH", `/projects/${ref}/config/auth`, { mailer_autoconfirm: true });
     const config = await api("GET", `/projects/${ref}/config/auth`);
     console.log(`Email confirmation is ${config.mailer_autoconfirm ? "off (sign-up signs in at once)" : "still on"}.`);
+  },
+
+  async "confirm-email"(argument) {
+    const ref = projectRef(target(argument));
+    await api("PATCH", `/projects/${ref}/config/auth`, { mailer_autoconfirm: false });
+    const config = await api("GET", `/projects/${ref}/config/auth`);
+    console.log(`Email confirmation is ${config.mailer_autoconfirm ? "still off" : "on (sign-up needs the emailed code)"}.`);
   },
 
   async ethereal() {
