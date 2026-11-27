@@ -97,6 +97,32 @@ describe("check-out", { timeout: 30_000 }, () => {
     expect(Date.parse(data?.completed_at)).toBe(Date.parse(first.data));
   });
 
+  // The app calls a job overdue ("Belum check-out") 3 hours after its window (src/lib/jobs/overdue.ts), but
+  // "nothing in the database changes": check_out has no time limit, so a late cleaner can still finish it.
+  it("still completes a checked-in job whose window ended 5 hours ago, at the time of the check-out", async () => {
+    const job = await world.job({ startsAt: at(-hours(7)), hours: 2, checkedIn: true });
+    const before = now();
+
+    const { data: completedAt, error } = await world.users.cleanerA.client.rpc("check_out", { p_order: job });
+
+    expect(error).toBeNull();
+    const { data } = await adminClient().from("orders").select("ends_at, completed_at").eq("id", job).single();
+    expect(data?.completed_at).not.toBeNull();
+    expect(Date.parse(data?.completed_at)).toBe(Date.parse(completedAt));
+    // Set when the cleaner checked out (now), not back-dated to the window's end.
+    expect(Date.parse(data?.completed_at)).toBeGreaterThanOrEqual(before - 60_000);
+    expect(Date.parse(data?.completed_at) - Date.parse(data?.ends_at)).toBeGreaterThan(hours(4.9));
+  });
+
+  it("writes the agency's fee for a job checked out late, just as for one checked out on time", async () => {
+    const job = await world.job({ startsAt: at(-hours(7)), hours: 2, checkedIn: true });
+
+    expect((await world.users.cleanerA.client.rpc("check_out", { p_order: job })).error).toBeNull();
+
+    const { data } = await adminClient().from("order_fees").select("order_id, fee_idr").eq("order_id", job);
+    expect(data).toHaveLength(1);
+  });
+
   it("refuses a job that was not checked in, and another cleaner's job", async () => {
     const job = await world.job({ startsAt: at(0) });
     expect((await world.users.cleanerA.client.rpc("check_out", { p_order: job })).error?.message).toBe("not_checked_in");

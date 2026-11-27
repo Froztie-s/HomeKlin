@@ -265,6 +265,33 @@ describe("the history page (/orders)", () => {
     ]);
   });
 
+  it("turns the Jakarta month over exactly at 17:00:00.000Z, 1 ms earlier is still the old month", () => {
+    // Jakarta is UTC+7, so midnight on the 1st is 17:00Z on the last day of the month before.
+    expect(jakartaMonthOf("2026-10-31T16:59:59.999Z")).toBe("2026-10");
+    expect(jakartaMonthOf("2026-10-31T17:00:00.000Z")).toBe("2026-11");
+  });
+
+  it("turns the Jakarta year over with the month, so 17:00Z on 31 December is January of the next year", () => {
+    expect(jakartaMonthOf("2026-12-31T16:59:59.999Z")).toBe("2026-12");
+    expect(jakartaMonthOf("2026-12-31T17:00:00.000Z")).toBe("2027-01");
+  });
+
+  it("splits two orders 1 ms apart across the Jakarta month edge into two groups, the later month first", () => {
+    const lastOfOctober = { ...base, id: "last-of-october", startsAt: "2026-10-31T16:59:59.999Z" };
+    const firstOfNovember = { ...base, id: "first-of-november", startsAt: "2026-10-31T17:00:00.000Z" };
+    // The input order must not matter: try both.
+    for (const orders of [[lastOfOctober, firstOfNovember], [firstOfNovember, lastOfOctober]]) {
+      expect(groupByMonth(orders).map((group) => [group.month, ids(group.orders)])).toEqual([
+        ["2026-11", ["first-of-november"]],
+        ["2026-10", ["last-of-october"]],
+      ]);
+    }
+  });
+
+  it("gives no group for no orders", () => {
+    expect(groupByMonth([])).toEqual([]);
+  });
+
   it("sums up the jobs done, the recordings still to watch and what was paid", () => {
     expect(historySummary([done, recorded, missed, cancelled, failed], now)).toEqual({ done: 2, recordings: 1, paidIdr: 85_000 * 2 + 120_000 });
   });

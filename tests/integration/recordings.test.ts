@@ -23,6 +23,9 @@ let stranger: TestUser | undefined;
 let agencyId = "";
 let nextWindow = Date.UTC(2031, 2, 3, 1);
 const filesMade: string[] = [];
+// The clip the seed test adds to the shared library: that test removes it, and afterAll does too in case
+// the test failed or timed out before it could.
+const seedClipName = `${prefix}-seed.mp4`;
 
 /**
  * The size of the library clip the app copies for this order (pickClip). The library is shared: besides
@@ -103,7 +106,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   const admin = adminClient();
-  await admin.storage.from(recordingsBucket).remove(filesMade);
+  await admin.storage.from(recordingsBucket).remove([...filesMade, `${clipFolder}/${seedClipName}`]);
   await deleteTestUsers([customer, stranger]);
   await admin.from("availability_slots").delete().eq("area_id", area);
   await admin.from("agencies").delete().like("key", `${prefix}-%`);
@@ -225,37 +228,40 @@ describe("recordings stay private", { timeout: 30_000 }, () => {
 describe("the seed's completed jobs", { timeout: 60_000 }, () => {
   it("adds a clip once, and gives each demo job a replayable recording however often it runs", async () => {
     const admin = adminClient();
-    const name = `${prefix}-seed.mp4`;
-    const file = { name, bytes: clipBytes, contentType: "video/mp4" };
-    expect(await uploadClips({ client: admin, files: [file] })).toEqual({ added: 1, kept: 0 });
-    expect(await uploadClips({ client: admin, files: [file] })).toEqual({ added: 0, kept: 1 });
+    const file = { name: seedClipName, bytes: clipBytes, contentType: "video/mp4" };
+    // The clip goes into the library every test file shares, so it is removed whatever happens below.
+    try {
+      expect(await uploadClips({ client: admin, files: [file] })).toEqual({ added: 1, kept: 0 });
+      expect(await uploadClips({ client: admin, files: [file] })).toEqual({ added: 0, kept: 1 });
 
-    const jobs = [
-      { id: randomUUID(), serviceId, areaId: area, agencyId, daysAgo: 1 },
-      { id: randomUUID(), serviceId, areaId: area, agencyId, daysAgo: 3 },
-    ];
-    const options = { client: admin, customerId: user(customer).id, jobs, now: new Date() };
-    await seedCompletedJobs(options);
-    const first = await admin.from("recordings").select("id").in("order_id", jobs.map((job) => job.id));
-    await seedCompletedJobs(options);
+      const jobs = [
+        { id: randomUUID(), serviceId, areaId: area, agencyId, daysAgo: 1 },
+        { id: randomUUID(), serviceId, areaId: area, agencyId, daysAgo: 3 },
+      ];
+      const options = { client: admin, customerId: user(customer).id, jobs, now: new Date() };
+      await seedCompletedJobs(options);
+      const first = await admin.from("recordings").select("id").in("order_id", jobs.map((job) => job.id));
+      await seedCompletedJobs(options);
 
-    const { data: rows } = await admin
-      .from("recordings")
-      .select("id, order_id, file_path, expires_at, orders(status, completed_at, ends_at)")
-      .in("order_id", jobs.map((job) => job.id));
-    expect(rows).toHaveLength(2);
-    expect(rows?.map((row) => row.id).sort()).not.toEqual(first.data?.map((row) => row.id).sort());
-    for (const job of jobs) {
-      const row = rows?.find((candidate) => candidate.order_id === job.id);
-      filesMade.push(row?.file_path ?? "");
-      const seeded = row?.orders as unknown as { status: string; completed_at: string; ends_at: string };
-      expect(seeded.status).toBe("paid");
-      expect(Date.parse(seeded.completed_at)).toBe(Date.parse(seeded.ends_at));
-      // 7 days after the job ended, as SPEC says.
-      expect(Date.parse(row?.expires_at ?? "")).toBeCloseTo(Date.parse(seeded.ends_at) + 7 * day, -5);
+      const { data: rows } = await admin
+        .from("recordings")
+        .select("id, order_id, file_path, expires_at, orders(status, completed_at, ends_at)")
+        .in("order_id", jobs.map((job) => job.id));
+      // Remember every copy before asserting anything, so a failed check below still gets them cleaned up.
+      for (const row of rows ?? []) filesMade.push(row.file_path);
+      expect(rows).toHaveLength(2);
+      expect(rows?.map((row) => row.id).sort()).not.toEqual(first.data?.map((row) => row.id).sort());
+      for (const job of jobs) {
+        const row = rows?.find((candidate) => candidate.order_id === job.id);
+        const seeded = row?.orders as unknown as { status: string; completed_at: string; ends_at: string };
+        expect(seeded.status).toBe("paid");
+        expect(Date.parse(seeded.completed_at)).toBe(Date.parse(seeded.ends_at));
+        // 7 days after the job ended, as SPEC says.
+        expect(Date.parse(row?.expires_at ?? "")).toBeCloseTo(Date.parse(seeded.ends_at) + 7 * day, -5);
+      }
+    } finally {
+      await admin.storage.from(recordingsBucket).remove([`${clipFolder}/${seedClipName}`]);
     }
-
-    await admin.storage.from(recordingsBucket).remove([`${clipFolder}/${name}`]);
   }, 60_000);
 
   it("adds nothing when there are no clips yet", async () => {

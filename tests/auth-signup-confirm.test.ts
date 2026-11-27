@@ -98,6 +98,38 @@ describe("signUp", () => {
     expect(await signUp(null, form(newCustomer))).toMatchObject({ formError: "rateLimited" });
   });
 
+  // The code step must only appear when a code was (or may have been) sent. When Supabase fails to make
+  // the account or to send the email, answering codeSent would leave the visitor waiting for a code that
+  // never comes, so these errors must show on the sign-up form instead.
+  it("shows an error, never the code step, when Supabase fails with a 500 unexpected_failure", async () => {
+    signUpMock.mockResolvedValue({ data: { user: null, session: null }, error: { status: 500, code: "unexpected_failure" } });
+
+    const state = await signUp(null, form(newCustomer));
+
+    expect(state).toMatchObject({ formError: "unavailable", values: { email: "Nadia@Example.com", fullName: "Nadia Uji" } });
+    expect(state).not.toHaveProperty("codeSent");
+    expect(redirectMock).not.toHaveBeenCalled();
+  });
+
+  it("shows an error, never the code step, when Supabase rejects the email address (email_address_invalid)", async () => {
+    signUpMock.mockResolvedValue({ data: { user: null, session: null }, error: { status: 400, code: "email_address_invalid" } });
+
+    const state = await signUp(null, form(newCustomer));
+
+    expect(state).toMatchObject({ formError: "emailRejected" });
+    expect(state).not.toHaveProperty("codeSent");
+    expect(redirectMock).not.toHaveBeenCalled();
+  });
+
+  it("shows an error, never the code step, for an error that carries no code at all", async () => {
+    signUpMock.mockResolvedValue({ data: { user: null, session: null }, error: { status: 500 } });
+
+    const state = await signUp(null, form(newCustomer));
+
+    expect(state).toMatchObject({ formError: "unavailable" });
+    expect(state).not.toHaveProperty("codeSent");
+  });
+
   it("refuses invalid input before asking Supabase", async () => {
     expect(await signUp(null, form({ ...newCustomer, email: "nadia@", password: "pendek" }))).toMatchObject({
       fieldErrors: { email: "emailInvalid", password: "passwordTooShort" },
