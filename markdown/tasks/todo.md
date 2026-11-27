@@ -414,6 +414,6 @@ Conventions for every task: tests written first; `npm run typecheck`, `npm run l
 
 ## Phase 17: Sign-up with email confirmation (user decision 2026-11-27)
 
-- [ ] **S1 Sign-up confirms the email with a code** (M) — in progress 2026-11-27: `/signup` asks for the 6-digit code after the form (`confirmSignUp`, no password replacement), then Supabase email confirmation is switched on for the live project (`npm run supabase -- ...`, user approved); the test project keeps it off
+- [x] **S1 Sign-up confirms the email with a code** (M) — done 2026-11-27 (merge 5f72057, deployed 22549d6): `/signup` asks for the 6-digit code after the form (`confirmSignUp`, `resendSignUpCode`; the chosen password is kept), and email confirmation was switched on for the live project with `npm run supabase -- confirm-email live` (user approved); the test project keeps it off. 1164 unit and integration tests pass. The one thing left is the user's real sign-up on the live site
   - Accept: a new customer cannot place an order or receive order emails before confirming the address; the code step works in both languages; existing sign-up e2e specs pass unchanged.
   - Verify: unit tests for the actions; `npm run check`; e2e; live sign-up checked once by the user.
