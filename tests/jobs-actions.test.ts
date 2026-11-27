@@ -136,4 +136,60 @@ describe("jobProgress", () => {
     expect(jobProgress({ ...base, cleanerName: "Yuliana", checkedInAt: "x" })).toBe("inProgress");
     expect(jobProgress({ ...base, cleanerName: "Yuliana", checkedInAt: "x", completedAt: "y" })).toBe("completed");
   });
+
+  // A job checked in to and not checked out is overdue ("Belum check-out") once checkOutGraceHours (3 h)
+  // have passed since its window ended (src/lib/jobs/overdue.ts); until then it is still in progress.
+  describe("with the time now and the window's end", () => {
+    const endsAt = "2026-11-14T08:00:00.000Z";
+    const boundary = Date.parse(endsAt) + 3 * 3_600_000;
+    const checkedIn = { cleanerName: "Yuliana", checkedInAt: "2026-11-14T06:05:00.000Z", completedAt: null, endsAt };
+
+    it("is overdue exactly 3 hours after the window's end", () => {
+      expect(jobProgress(checkedIn, new Date(boundary))).toBe("overdue");
+    });
+
+    it("is still in progress 1 ms before the 3 hours are up", () => {
+      expect(jobProgress(checkedIn, new Date(boundary - 1))).toBe("inProgress");
+    });
+
+    it("stays overdue after the boundary, 1 ms and days later", () => {
+      expect(jobProgress(checkedIn, new Date(boundary + 1))).toBe("overdue");
+      expect(jobProgress(checkedIn, new Date(boundary + 5 * 24 * 3_600_000))).toBe("overdue");
+    });
+
+    it("is in progress during the window itself", () => {
+      expect(jobProgress(checkedIn, new Date("2026-11-14T07:00:00.000Z"))).toBe("inProgress");
+    });
+
+    it("is completed, not overdue, once it was checked out, however late", () => {
+      const checkedOut = { ...checkedIn, completedAt: "2026-11-14T13:00:00.000Z" };
+      expect(jobProgress(checkedOut, new Date(boundary + 3_600_000))).toBe("completed");
+    });
+
+    it("is never overdue without a check-in: late and unchecked-in reads as assigned or unassigned", () => {
+      const late = new Date(boundary + 3_600_000);
+      expect(jobProgress({ ...checkedIn, checkedInAt: null }, late)).toBe("assigned");
+      expect(jobProgress({ ...checkedIn, checkedInAt: null, cleanerName: null }, late)).toBe("unassigned");
+    });
+  });
+
+  // Pinned as it is today: callers that do not pass the time now (the customer's order page,
+  // src/components/customer/job-progress.ts) or the window's end can never see "overdue".
+  describe("without the time now or the window's end", () => {
+    const endsAt = "2026-11-14T08:00:00.000Z";
+    const longAfter = new Date("2026-11-24T08:00:00.000Z");
+    const checkedIn = { cleanerName: "Yuliana", checkedInAt: "2026-11-14T06:05:00.000Z", completedAt: null };
+
+    it("never returns overdue without now, even with the window's end long past", () => {
+      expect(jobProgress({ ...checkedIn, endsAt })).toBe("inProgress");
+    });
+
+    it("never returns overdue without the window's end, even with now long after it", () => {
+      expect(jobProgress(checkedIn, longAfter)).toBe("inProgress");
+    });
+
+    it("never returns overdue with neither", () => {
+      expect(jobProgress(checkedIn)).toBe("inProgress");
+    });
+  });
 });
