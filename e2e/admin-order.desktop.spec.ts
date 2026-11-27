@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { adminClient } from "../tests/integration/test-project";
 import { jakartaClock, jobPhone } from "./job-test-data";
-import { createMonitorWorld, type MonitorWorld } from "./monitor-test-data";
+import { createMonitorWorld, makeTestVideo, serveTestVideo, type MonitorWorld } from "./monitor-test-data";
 import { signedInAs } from "./setup/auth-state";
 
 // D1: the admin order detail page after the user's mocks "Admin-Order" and "Admin-Order-Issue", at
@@ -13,13 +13,17 @@ import { signedInAs } from "./setup/auth-state";
 test.describe.configure({ mode: "serial", timeout: 120_000 });
 
 let data: MonitorWorld;
+let testVideo: Buffer;
 let finishedCode: string;
 const question = "Uji pertanyaan tentang pesanan ini dari pelanggan";
 const note = "Uji catatan: mohon lepas sepatu di pintu masuk.";
 
-test.beforeAll(async () => {
+test.beforeAll(async ({ browser }) => {
   test.setTimeout(180_000);
   data = await createMonitorWorld("d1o");
+  // The test project's demo clip is an 8-byte stand-in that cannot play: "Buka siaran ..." (full screen) is
+  // a button only while the frame has a picture, so a spec that expects it serves a short real video.
+  testVideo = await makeTestVideo(browser);
   const admin = adminClient();
   const cleaner = await data.world.cleaner(data.agencyId, "Uji Petugas Detail Selesai");
   const job = await data.world.job({ agencyId: data.agencyId, cleaner, startsIn: -200, address: "Jl. Uji Detail Selesai", completedMinutesAgo: 20 });
@@ -53,16 +57,17 @@ const card = (page: Page, name: string) => page.getByRole("region", { name, exac
 
 test("a live order shows its video, facts, people, payment and status steps", async ({ page }) => {
   const job = data.live.active;
+  await serveTestVideo(page, testVideo);
   await page.goto(`/admin/orders/${job.code}`);
   await expect(page.getByRole("heading", { level: 1, name: "Pembersihan Rutin" })).toBeVisible();
   await expect(page.getByRole("status").first()).toHaveText("Sedang berlangsung");
   await expect(page.getByText(new RegExp(`^Pesanan ${job.code}, `))).toBeVisible();
   await expect(page.getByRole("link", { name: "Kembali ke pemantauan langsung" })).toHaveAttribute("href", "/admin/monitor");
 
-  const video = card(page, "Siaran langsung");
-  await expect(video.locator("video")).toHaveCount(1);
-  await expect(video.getByRole("button", { name: `Buka siaran ${job.cleaner} dalam layar penuh` })).toBeVisible();
-  await expect(video).toContainText("Rekaman tersimpan 7 hari");
+  const feed = card(page, "Siaran langsung");
+  await expect(feed.locator("video")).toHaveCount(1);
+  await expect(feed.getByRole("button", { name: `Buka siaran ${job.cleaner} dalam layar penuh` })).toBeVisible();
+  await expect(feed).toContainText("Rekaman tersimpan 7 hari");
 
   const facts = card(page, "Detail pesanan");
   await expect(facts).toContainText("Pembersihan Rutin");
