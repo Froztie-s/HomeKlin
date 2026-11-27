@@ -6,8 +6,8 @@ import { redirect } from "@/i18n/navigation";
 import { isSessionCookieName } from "@/lib/supabase/config";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { createSupabaseServiceClient } from "@/lib/supabase/service";
-import { claimCustomerAccount } from "./code-session";
-import { parseCodeLogin, parseLocale, parseSignIn, parseSignUp, type AuthErrorKey } from "@/lib/validation/auth";
+import { claimCustomerAccount, setCustomerPassword } from "./code-session";
+import { parseCodeLogin, parseConfirmSignUp, parseLocale, parseSignIn, parseSignUp, type AuthErrorKey } from "@/lib/validation/auth";
 import { parseCode } from "@/lib/validation/booking";
 import { authFailureKey, type AuthFailureKey } from "./errors";
 import { isAppRole, safeNextPath } from "./roles";
@@ -139,32 +139,40 @@ export async function signUp(_previous: AuthFormState, formData: FormData): Prom
  * verifyOtp; example "Verify Signup One-Time Password (OTP)"). The server looks the token up by the
  * email, so it also covers codes that signInWithOtp sent to an account that is not confirmed yet.
  *
- * This deliberately does NOT call claimCustomerAccount (src/lib/auth/code-session.ts). That function
- * replaces a customer's password with a random one after a code sign-in, because customers sign in by
- * code and anyone could have registered their email with a password first. Here the code is what
- * proves the address, and the customer has just chosen this password and must keep it.
+ * Whose password is stored is settled here (ship review C1, 2026-11-27). For an address that already has an
+ * unconfirmed account Supabase keeps the FIRST password and ignores the one this form sent, so an intruder who
+ * registered the address first would keep a working password. The sign-up step therefore sends the password
+ * the visitor typed along with the code, and once the code is right it is set with setCustomerPassword (and
+ * the account is marked, so a later code sign-in keeps it). Without one (posted before the page's script
+ * ran, or one that fails the rules) the account is claimed instead: a random password, and the customer signs
+ * in by code, as everywhere else. Changing the password ends every session, so both paths renew the session.
  */
 export async function confirmSignUp(_previous: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const values = { email: textField(formData, "email") };
-  const parsed = parseCodeLogin(formData);
+  const parsed = parseConfirmSignUp(formData);
   if (!parsed.ok) return { fieldErrors: parsed.fieldErrors, values };
   const code = parseCode(formData.get("code"));
   if (!code) return { formError: "codeInvalid", codeSent: true, values };
 
-  const { email, locale, next } = parsed.data;
+  const { email, locale, next, password } = parsed.data;
   const supabase = await createSupabaseServerClient({ writeCookies: true });
   const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
   if (error || !data.user) {
     if (error?.status === 429) return { formError: "rateLimited", codeSent: true, values };
     return { formError: "codeInvalid", codeSent: true, values };
   }
+  const server = createSupabaseServiceClient();
+  if (password) await setCustomerPassword(supabase, server, data.user.id, email, password);
+  else await claimCustomerAccount(supabase, server, data.user.id, email);
   return enter(supabase, data.user.id, next, locale, values);
 }
 
 /**
  * Sign-up with "Confirm email" on: send the confirmation code again. Supabase refuses a new one within
  * a minute of the last (429, which the form's own countdown also waits out). Unlike sendLoginCode, any
- * other failure is reported: this email just signed up, so saying so reveals nothing new.
+ * other failure is reported. That can tell an outsider that a sign-up is pending for an address (a 429 on a
+ * second request within a minute), which is little: the sign-up form already says "email taken" for a
+ * confirmed address, and the code is never shown to the one who asks.
  */
 export async function resendSignUpCode(_previous: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const values = { email: textField(formData, "email") };

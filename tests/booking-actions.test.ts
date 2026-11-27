@@ -166,11 +166,11 @@ describe("sendOrderCode (guest, step 1)", () => {
     user = null;
   });
 
-  it("emails a code that may create the account, and books nothing yet", async () => {
+  it("emails a code to an existing account only (it never creates one), and books nothing yet", async () => {
     signInWithOtp.mockResolvedValue({ error: null });
 
     expect(await sendOrderCode(null, form())).toMatchObject({ codeSent: true });
-    expect(signInWithOtp).toHaveBeenCalledWith({ email: "nadia@example.com", options: { shouldCreateUser: true } });
+    expect(signInWithOtp).toHaveBeenCalledWith({ email: "nadia@example.com", options: { shouldCreateUser: false } });
     expect(rpc).not.toHaveBeenCalled();
   });
 

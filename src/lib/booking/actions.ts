@@ -136,7 +136,12 @@ export async function bookService(_previous: BookingFormState, formData: FormDat
   return book(supabase, parsed.data, data.user?.email ?? undefined, values);
 }
 
-/** A guest's order is complete: email them the code. Books nothing. */
+/**
+ * A guest's order is complete: email them the code. Books nothing. No page uses this any more (ordering needs
+ * an account since 2026-11-27, ADR 0007), but a Server Action is a public endpoint: it never creates an
+ * account (`shouldCreateUser: false`), so it cannot be used to start accounts for, or send mail to, addresses
+ * that have none (ship review, 2026-11-27).
+ */
 export async function sendOrderCode(_previous: BookingFormState, formData: FormData): Promise<BookingFormState> {
   const values = typed(formData);
   const parsed = parseGuestOrder(formData);
@@ -145,7 +150,7 @@ export async function sendOrderCode(_previous: BookingFormState, formData: FormD
   const supabase = await createSupabaseServerClient({ writeCookies: true });
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: { shouldCreateUser: true },
+    options: { shouldCreateUser: false },
   });
   if (error) {
     if (error.status === 429 || error.code?.startsWith("over_")) return { formError: "rateLimited", values };

@@ -9,6 +9,8 @@ import { FormAlert, useResultKey } from "./form-controls";
 type SignupCodeStepProps = {
   /** The address the code was sent to, as the visitor typed it on the sign-up step. */
   email: string;
+  /** The password typed on the sign-up step (browser memory), sent with the code; empty without JavaScript. */
+  password: string;
   /** The page to open after confirming (?next=), carried on in a hidden field. */
   next?: string;
   /** "Ganti email": back to the sign-up step, with name and email kept. */
@@ -18,13 +20,14 @@ type SignupCodeStepProps = {
 // The second step of signing up when "Confirm email" is on (user decision 2026-11-27): Supabase made
 // the account and emailed a 6-digit code, and this step takes it. It is a form of its own, posted to
 // confirmSignUp (a Server Action, so it also posts before JavaScript loads), and carries only the
-// email, never the password. With JavaScript the form is sent from onSubmit inside a transition, so React
+// email and, with JavaScript, the password typed on the first step (confirmSignUp sets it once the code is
+// right, so the person who types the code decides the password; it is never shown or sent back). With JavaScript the form is sent from onSubmit inside a transition, so React
 // does not reset it after a wrong code and the digits stay to be corrected (the same as the sign-in
 // code form). "Kirim ulang kode" calls resendSignUpCode, which sends the confirmation email again;
 // the countdown before it can be used again is CodeEntry's.
 // Sources: node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md ("Event Handlers",
 // "Showing a pending state") and https://react.dev/reference/react/useActionState
-export function SignupCodeStep({ email, next, onChangeEmail }: SignupCodeStepProps) {
+export function SignupCodeStep({ email, password, next, onChangeEmail }: SignupCodeStepProps) {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const [confirmState, confirmAction, confirming] = useActionState(confirmSignUp, null);
@@ -78,6 +81,7 @@ export function SignupCodeStep({ email, next, onChangeEmail }: SignupCodeStepPro
     <form ref={form} action={confirmAction} onSubmit={onSubmit} noValidate className="flex flex-col">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="email" value={email} />
+      {password ? <input type="hidden" name="password" value={password} /> : null}
       {next ? <input type="hidden" name="next" value={next} /> : null}
       <CodeEntry
         id="signup-code"

@@ -13,10 +13,15 @@ const signOut = vi.fn();
 const redirectMock = vi.fn();
 let profile: { role: string } | null = null;
 
-// A customer who has just chosen a password must keep it, so the confirmation never claims the account
-// (that replaces the password with a random one; see confirmSignUp).
-const { claimCustomerAccount } = vi.hoisted(() => ({ claimCustomerAccount: vi.fn() }));
-vi.mock("@/lib/auth/code-session", () => ({ claimCustomerAccount }));
+// Who holds the password after the code is typed (ship review C1, 2026-11-27): Supabase keeps the FIRST
+// password registered for an unconfirmed address, so the one typed on the form may not be the stored
+// one. confirmSignUp therefore sets the password the person typed together with the code
+// (setCustomerPassword), or, when none came along, replaces it with a random one (claimCustomerAccount).
+const { claimCustomerAccount, setCustomerPassword } = vi.hoisted(() => ({
+  claimCustomerAccount: vi.fn(),
+  setCustomerPassword: vi.fn(),
+}));
+vi.mock("@/lib/auth/code-session", () => ({ claimCustomerAccount, setCustomerPassword }));
 vi.mock("@/lib/supabase/service", () => ({ createSupabaseServiceClient: () => ({}) }));
 vi.mock("@/lib/supabase/server", () => ({
   createSupabaseServerClient: async () => ({
@@ -117,10 +122,35 @@ describe("confirmSignUp", () => {
     expect(redirectMock).toHaveBeenCalledWith({ href: "/home", locale: "en" });
   });
 
-  it("does not claim the account, so the password the customer just chose still works", async () => {
+  it("sets the password typed together with the code, so the password registered first no longer works", async () => {
+    verifyOtp.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    await confirmSignUp(null, form({ email: "Nadia@Example.com", code: "123456", password: "kata-sandi-uji-1" }));
+    expect(setCustomerPassword).toHaveBeenCalledTimes(1);
+    expect(setCustomerPassword.mock.calls[0]?.slice(2)).toEqual(["u1", "nadia@example.com", "kata-sandi-uji-1"]);
+    expect(claimCustomerAccount).not.toHaveBeenCalled();
+  });
+
+  it("claims the account (random password) when no password came with the code, e.g. posted before the script ran", async () => {
     verifyOtp.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     await confirmSignUp(null, form({ email: "nadia@example.com", code: "123456" }));
+    expect(claimCustomerAccount).toHaveBeenCalledTimes(1);
+    expect(claimCustomerAccount.mock.calls[0]?.slice(2)).toEqual(["u1", "nadia@example.com"]);
+    expect(setCustomerPassword).not.toHaveBeenCalled();
+  });
+
+  it("does not trust a password that fails the sign-up rules: it claims the account instead", async () => {
+    verifyOtp.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
+    await confirmSignUp(null, form({ email: "nadia@example.com", code: "123456", password: "short" }));
+    expect(setCustomerPassword).not.toHaveBeenCalled();
+    expect(claimCustomerAccount).toHaveBeenCalledTimes(1);
+  });
+
+  it("changes no password when the code is wrong", async () => {
+    verifyOtp.mockResolvedValue({ data: { user: null }, error: { status: 403, code: "otp_expired", message: "invalid" } });
+    const state = await confirmSignUp(null, form({ email: "nadia@example.com", code: "654321", password: "kata-sandi-uji-1" }));
+    expect(setCustomerPassword).not.toHaveBeenCalled();
     expect(claimCustomerAccount).not.toHaveBeenCalled();
+    expect(JSON.stringify(state)).not.toContain("kata-sandi-uji-1");
   });
 
   it("ignores spaces in the code", async () => {

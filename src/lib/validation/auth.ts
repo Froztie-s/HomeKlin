@@ -59,6 +59,17 @@ const signUpSchema = z.object({
 // Signing in with an emailed code (T9b): the email first, then the same email with the code.
 const codeLoginSchema = z.object({ email, locale, next });
 
+// Confirming a sign-up with the code: the password typed on the sign-up step travels along (kept in the
+// browser's memory) and is set once the code is right. It is optional and never fails the form: without
+// JavaScript there is none, and one that breaks the sign-up rules is not used (the account is then given a
+// random password and the customer signs in by code).
+const confirmSignUpSchema = z.object({
+  email,
+  locale,
+  next,
+  password: passwordWithinLimit(passwordRequired.min(8)).optional().catch(undefined),
+});
+
 export type SignInInput = z.infer<typeof signInSchema>;
 export type SignUpInput = z.infer<typeof signUpSchema>;
 
@@ -106,6 +117,11 @@ export function parseSignIn(formData: FormData) {
 
 export function parseSignUp(formData: FormData) {
   return parse(signUpSchema, formData);
+}
+
+/** The email, language, next page and (when valid) password of a sign-up confirmation. */
+export function parseConfirmSignUp(formData: FormData) {
+  return parse(confirmSignUpSchema, formData);
 }
 
 /** The email (and language and next page) of a sign-in by emailed code. */
