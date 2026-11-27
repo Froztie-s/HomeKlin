@@ -2,12 +2,13 @@ import { expect, test, type Page } from "@playwright/test";
 import { adminClient, type TestUser } from "../tests/integration/test-project";
 import {
   createJobWorld,
-  isJakartaToday,
+  isJakartaTodayOrEarlier,
   jakartaClock,
   jobPhone,
   jobService,
   seededAgencyId,
   sessionOf,
+  startsInToday,
   type JobTimes,
   type JobWorld,
 } from "./job-test-data";
@@ -48,7 +49,9 @@ test.beforeAll(async ({ browser, baseURL }) => {
   cleaner = await world.cleaner(agencyId, "Uji Petugas Ponsel");
   const otherCleaner = await world.cleaner(agencyId, "Uji Petugas Lain");
   // Open now: check-in opens 15 minutes before the window. The early one opens in about 1 h 45 min.
-  jobs.open = await world.job({ agencyId, cleaner, startsIn: 5, address: address.open, note });
+  // The open job starts in 5 minutes, or 5 minutes ago in the last minutes before midnight in Jakarta:
+  // a job that starts tomorrow is not in "Hari ini" and is not "Berikutnya" (startsInToday).
+  jobs.open = await world.job({ agencyId, cleaner, startsIn: startsInToday(5), address: address.open, note });
   jobs.early = await world.job({ agencyId, cleaner, startsIn: 120, address: address.early });
   jobs.other = await world.job({ agencyId, cleaner: otherCleaner, startsIn: 10, address: address.other });
   session = await sessionOf(browser, baseURL, cleaner);
@@ -59,8 +62,10 @@ test.afterAll(async () => {
   await world?.cleanup();
 });
 
+// "Hari ini" holds the jobs of today and any unfinished one from before (job-days.ts), so a job that was
+// today when the spec began is still in it if midnight passes while the spec runs.
 const sectionOf = (startsAt: string, language: "id" | "en" = "id") =>
-  isJakartaToday(startsAt) ? (language === "id" ? /^Hari ini, / : /^Today, /) : language === "id" ? "Akan datang" : "Upcoming";
+  isJakartaTodayOrEarlier(startsAt) ? (language === "id" ? /^Hari ini, / : /^Today, /) : language === "id" ? "Akan datang" : "Upcoming";
 const windowOf = (job: JobTimes) => `${jakartaClock(job.startsAt)}-${jakartaClock(job.endsAt)} WIB`;
 const jobPath = (job: { code: string }, language: "id" | "en" = "id") => `${language === "en" ? "/en" : ""}/cleaner/jobs/${job.code}`;
 

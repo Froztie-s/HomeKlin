@@ -195,3 +195,21 @@ export const jakartaClock = (iso: string | number) => timeFormat.format(new Date
 
 /** Whether a moment falls on today's date in Jakarta. */
 export const isJakartaToday = (iso: string) => dateKeyFormat.format(new Date(iso)) === dateKeyFormat.format(new Date());
+
+/**
+ * Whether a moment falls on today's date in Jakarta or on an earlier day. The cleaner's job list holds
+ * both under "Hari ini": an unfinished job from before still needs the cleaner (src/components/jobs/job-days.ts).
+ */
+export const isJakartaTodayOrEarlier = (iso: string) => dateKeyFormat.format(new Date(iso)) <= dateKeyFormat.format(new Date());
+
+/**
+ * Minutes from now to the start of a job that is on today's date in Jakarta: `minutes` ahead, unless
+ * that would be tomorrow (in the last minutes before midnight), then the same number of minutes back.
+ * Either way the job is in the cleaner's "today" list, and a job in its window is open for check-in, so a
+ * spec that needs "a job that is open now" gets one at any time of day.
+ */
+export function startsInToday(minutes: number): number {
+  // One minute more than asked: a job starts a few seconds after its minutes (JobWorld.job).
+  const later = new Date(Date.now() + (minutes + 1) * minute);
+  return dateKeyFormat.format(later) === dateKeyFormat.format(new Date()) ? minutes : -minutes;
+}
