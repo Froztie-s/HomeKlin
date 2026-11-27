@@ -115,10 +115,66 @@ export async function signUp(_previous: AuthFormState, formData: FormData): Prom
   });
   if (error) return { formError: authFailureKey(error), values };
 
-  // The project skips email confirmation, so sign-up signs the customer in at once. Should confirmation
-  // ever be switched back on, there is no session yet and the form says to check the inbox.
-  if (!data.session) return { formError: "confirmEmail", values };
+  // With "Confirm email" off (the test project, and the live one until 2026-11-27) sign-up signs the
+  // customer in at once. With it on, Supabase makes the account but gives no session: it emails a
+  // 6-digit code (the confirmation template carries {{ .Token }}, no link), and the form shows the code
+  // step, which confirmSignUp finishes. An email that already has a confirmed account comes back with
+  // no error either, but with an empty `identities` list (Supabase hides it on purpose), so say
+  // "email taken" as the form always has; no code is sent for it.
+  // Source: node_modules/@supabase/auth-js/dist/module/GoTrueClient.d.ts (signUp, remarks)
+  if (!data.session) {
+    if (data.user?.identities?.length === 0) return { formError: "emailTaken", values };
+    return { codeSent: true, values };
+  }
   return redirect({ href: safeNextPath(next, "customer"), locale });
+}
+
+/**
+ * Sign-up with "Confirm email" on, step 2: check the code from the confirmation email, which proves the
+ * address, then sign the new customer in and send them to `next` or their home.
+ *
+ * `type: "email"` is the right type for a code sent by sign-up confirmation in this version of the
+ * library: its docs list `email` as "an OTP sent to the user's email during sign-up or sign-in" and mark
+ * `signup` and `magiclink` as deprecated (node_modules/@supabase/auth-js/dist/module/GoTrueClient.d.ts,
+ * verifyOtp; example "Verify Signup One-Time Password (OTP)"). The server looks the token up by the
+ * email, so it also covers codes that signInWithOtp sent to an account that is not confirmed yet.
+ *
+ * This deliberately does NOT call claimCustomerAccount (src/lib/auth/code-session.ts). That function
+ * replaces a customer's password with a random one after a code sign-in, because customers sign in by
+ * code and anyone could have registered their email with a password first. Here the code is what
+ * proves the address, and the customer has just chosen this password and must keep it.
+ */
+export async function confirmSignUp(_previous: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const values = { email: textField(formData, "email") };
+  const parsed = parseCodeLogin(formData);
+  if (!parsed.ok) return { fieldErrors: parsed.fieldErrors, values };
+  const code = parseCode(formData.get("code"));
+  if (!code) return { formError: "codeInvalid", codeSent: true, values };
+
+  const { email, locale, next } = parsed.data;
+  const supabase = await createSupabaseServerClient({ writeCookies: true });
+  const { data, error } = await supabase.auth.verifyOtp({ email, token: code, type: "email" });
+  if (error || !data.user) {
+    if (error?.status === 429) return { formError: "rateLimited", codeSent: true, values };
+    return { formError: "codeInvalid", codeSent: true, values };
+  }
+  return enter(supabase, data.user.id, next, locale, values);
+}
+
+/**
+ * Sign-up with "Confirm email" on: send the confirmation code again. Supabase refuses a new one within
+ * a minute of the last (429, which the form's own countdown also waits out). Unlike sendLoginCode, any
+ * other failure is reported: this email just signed up, so saying so reveals nothing new.
+ */
+export async function resendSignUpCode(_previous: AuthFormState, formData: FormData): Promise<AuthFormState> {
+  const values = { email: textField(formData, "email") };
+  const parsed = parseCodeLogin(formData);
+  if (!parsed.ok) return { fieldErrors: parsed.fieldErrors, values };
+
+  const supabase = await createSupabaseServerClient({ writeCookies: true });
+  const { error } = await supabase.auth.resend({ type: "signup", email: parsed.data.email });
+  if (error) return { formError: authFailureKey(error), codeSent: true, values };
+  return { codeSent: true, values };
 }
 
 export async function signOut(formData: FormData): Promise<void> {

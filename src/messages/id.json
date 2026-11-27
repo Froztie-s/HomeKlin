@@ -1942,13 +1942,17 @@
       "rateLimited": "Terlalu banyak percobaan. Tunggu beberapa menit, lalu coba lagi.",
       "weakPassword": "Kata sandi ini terlalu mudah ditebak. Pilih kata sandi lain.",
       "emailRejected": "Email ini tidak dapat digunakan. Gunakan alamat email lain.",
-      "confirmEmail": "Akun Anda sudah dibuat. Buka email dari HomeKlin untuk mengaktifkannya, lalu masuk.",
+      "confirmEmail": "Email Anda belum dikonfirmasi. Pilih Kode email di atas, masukkan email Anda, lalu ketik kode 6 angka yang kami kirim.",
       "unavailable": "Permintaan Anda belum dapat diproses. Coba lagi sebentar lagi.",
       "codeInvalid": "Kode salah atau sudah tidak berlaku. Periksa email Anda atau kirim kode baru."
     },
     "signup": {
       "submit": "Buat akun",
       "pending": "Sedang membuat akun…",
+      "codeTitle": "Masukkan kode dari email",
+      "codeSentTo": "Kami sudah mengirim kode 6 angka ke <strong>{email}</strong>. Masukkan kode itu untuk mengaktifkan akun Anda.",
+      "verify": "Aktifkan akun",
+      "verifying": "Sedang mengaktifkan…",
       "switchPrompt": "Sudah punya akun?",
       "switchLink": "Masuk"
     }

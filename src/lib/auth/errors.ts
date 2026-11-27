@@ -23,6 +23,8 @@ const byCode: Record<string, AuthFailureKey> = {
   over_email_send_rate_limit: "rateLimited",
   weak_password: "weakPassword",
   email_address_invalid: "emailRejected",
+  // Signing in with a password before the sign-up code was typed (Confirm email is on).
+  email_not_confirmed: "confirmEmail",
 };
 
 export function authFailureKey(error: AuthErrorLike): AuthFailureKey {
