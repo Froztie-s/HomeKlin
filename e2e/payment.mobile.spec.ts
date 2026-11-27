@@ -1,9 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import { adminClient } from "../tests/integration/test-project";
+import { adminClient, createTestUser, deleteTestUsers, type TestUser } from "../tests/integration/test-project";
 import { cancelOrder, lateWindow, ordersAt, type Window } from "./booking-test-data";
+import { sessionOf } from "./job-test-data";
 import { bookSignedIn } from "./order-test-data";
 import { notification, notify } from "./payment-test-data";
-import { readTestUsers, signedInAs } from "./setup/auth-state";
+import type { StorageState } from "./setup/auth-state";
 
 // T10 on a phone: paying for an order on HomeKlin's own payment step with the Midtrans Sandbox
 // (simulated, no real money). From the step (/orders/pay?order=<id>) the customer chooses QRIS, a bank's
@@ -14,7 +15,9 @@ import { readTestUsers, signedInAs } from "./setup/auth-state";
 // The server refuses an order that no longer waits for payment, even when the page still offers it.
 // Test data (e2e/booking-test-data.ts): late windows in Jakarta Barat 7 and 8 open days before the
 // last, so they never meet the booking specs' (0 to 2) or the order specs' (3 to 5) when all run at
-// once; every order made here is deleted again with its place given back.
+// once; every order made here is deleted again with its place given back. The customer is the spec's
+// own (made in beforeAll, deleted in afterAll), never the shared one: a customer may hold at most 3 unpaid
+// orders (too_many_unpaid), which other specs' open orders on the shared customer could reach in a parallel run.
 
 const area = "jakarta-barat";
 const service = "regular";
@@ -22,7 +25,8 @@ const service = "regular";
 const paymentWait = 30_000;
 
 const usedStarts: string[] = [];
-const customerId = () => readTestUsers().find((user) => user.role === "customer")?.id;
+let customer: TestUser;
+let session: StorageState;
 
 async function windowFor(time: string, daysBack: number): Promise<Window> {
   const window = await lateWindow(area, time, daysBack);
@@ -30,11 +34,17 @@ async function windowFor(time: string, daysBack: number): Promise<Window> {
   return window;
 }
 
+test.beforeAll(async ({ browser, baseURL }) => {
+  test.setTimeout(120_000);
+  customer = await createTestUser("pay-customer", { full_name: "Uji Pelanggan Bayar" });
+  session = await sessionOf(browser, baseURL, customer);
+});
+
 test.afterAll(async () => {
+  test.setTimeout(120_000);
   // An order left by a test that failed half-way: delete it and give its place back.
-  const id = customerId();
-  if (!id) return;
-  for (const orderId of await ordersAt(id, area, usedStarts)) await cancelOrder(orderId);
+  if (customer) for (const orderId of await ordersAt(customer.id, area, usedStarts)) await cancelOrder(orderId);
+  await deleteTestUsers([customer]);
 });
 
 // The card's own button comes first; the phone bar (./booking-bar.tsx, 2026-11-20) repeats it below.
@@ -61,7 +71,7 @@ async function hydrated(page: Page) {
 }
 
 test.describe("as a signed-in customer", () => {
-  test.use(signedInAs.customer);
+  test.use({ storageState: async ({}, provide) => provide(session) });
   test.describe.configure({ timeout: 180_000 });
 
   test("offers the ways to pay on the page, and pays with QRIS, then a bank, changing method in between", async ({ page, request }) => {

@@ -13,6 +13,28 @@ async function waitForContent(page: Page): Promise<void> {
   await expect(page.getByRole("main").getByRole("heading", { level: 1 })).toBeVisible();
 }
 
+const monthKeyFormat = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta", year: "numeric", month: "2-digit", day: "2-digit" });
+
+/** The Jakarta month of a moment as the select's values have it, "2026-11" (a window near a month's edge can fall in either). */
+export const jakartaMonth = (iso: string): string => monthKeyFormat.format(new Date(iso)).slice(0, 7);
+
+/**
+ * What the history page lists for orders with these windows, worked out from the windows alone: one
+ * group per Jakarta month, the latest month first, and in each month the latest job first. Specs that
+ * book windows near a month's edge (a 13-day edge can fall on the 1st) read the expected months and rows
+ * from this, never from a single assumed month.
+ */
+export function expectedHistory(orders: readonly { id: string; startsAt: string }[]): { month: string; ids: string[] }[] {
+  const groups: { month: string; ids: string[] }[] = [];
+  for (const order of orders.toSorted((a, b) => Date.parse(b.startsAt) - Date.parse(a.startsAt))) {
+    const month = jakartaMonth(order.startsAt);
+    const last = groups.at(-1);
+    if (last?.month === month) last.ids.push(order.id);
+    else groups.push({ month, ids: [order.id] });
+  }
+  return groups;
+}
+
 /** The months the history page offers, the latest first. */
 export async function historyMonths(page: Page): Promise<string[]> {
   const select = page.locator("main select");

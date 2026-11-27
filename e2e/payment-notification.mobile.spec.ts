@@ -1,9 +1,10 @@
 import { expect, test, type Page } from "@playwright/test";
-import { adminClient } from "../tests/integration/test-project";
+import { adminClient, createTestUser, deleteTestUsers, type TestUser } from "../tests/integration/test-project";
 import { cancelOrder, lateWindow, ordersAt, type Window } from "./booking-test-data";
+import { sessionOf } from "./job-test-data";
 import { bookSignedIn } from "./order-test-data";
 import { notification, notify, orderRow } from "./payment-test-data";
-import { readTestUsers, signedInAs } from "./setup/auth-state";
+import type { StorageState } from "./setup/auth-state";
 
 // T11 on a phone: Midtrans' payment notification decides the order's status. The test plays Midtrans:
 // it POSTs notifications signed with the Sandbox server key to the running app's
@@ -11,13 +12,16 @@ import { readTestUsers, signedInAs } from "./setup/auth-state";
 // (Midtrans cannot reach this machine). The customer then sees the order's new status. A repeat changes
 // nothing, a failed or expired payment gives the window's place back, and a forged notification is
 // refused. Test data (e2e/booking-test-data.ts): late windows in Jakarta Barat 6 open days before the
-// last, which no other spec books; every order made here is deleted again.
+// last, which no other spec books; every order made here is deleted again. The customer is the spec's
+// own (made in beforeAll, deleted in afterAll), never the shared one: a customer may hold at most 3 unpaid
+// orders (too_many_unpaid), which other specs' open orders on the shared customer could reach in a parallel run.
 
 const area = "jakarta-barat";
 const service = "regular";
 const day = 6;
 const usedStarts: string[] = [];
-const customerId = () => readTestUsers().find((user) => user.role === "customer")?.id;
+let customer: TestUser;
+let session: StorageState;
 
 async function windowAt(time: string): Promise<Window> {
   const window = await lateWindow(area, time, day);
@@ -25,10 +29,17 @@ async function windowAt(time: string): Promise<Window> {
   return window;
 }
 
+test.beforeAll(async ({ browser, baseURL }) => {
+  test.setTimeout(120_000);
+  customer = await createTestUser("payn-customer", { full_name: "Uji Pelanggan Notifikasi" });
+  session = await sessionOf(browser, baseURL, customer);
+});
+
 test.afterAll(async () => {
-  const id = customerId();
-  if (!id) return;
-  for (const orderId of await ordersAt(id, area, usedStarts)) await cancelOrder(orderId);
+  test.setTimeout(120_000);
+  // An order left by a test that failed half-way: delete it and give its place back.
+  if (customer) for (const orderId of await ordersAt(customer.id, area, usedStarts)) await cancelOrder(orderId);
+  await deleteTestUsers([customer]);
 });
 
 async function placesTaken(slotId: string): Promise<number> {
@@ -40,7 +51,7 @@ async function placesTaken(slotId: string): Promise<number> {
 const confirmation = (page: Page) => page.getByRole("region", { name: "Pembayaran" });
 
 test.describe("Midtrans' notification, as the customer sees it", () => {
-  test.use(signedInAs.customer);
+  test.use({ storageState: async ({}, provide) => provide(session) });
   test.describe.configure({ timeout: 90_000 });
 
   test("a successful payment shows the order as paid, and the same notification again changes nothing", async ({ page, request }) => {

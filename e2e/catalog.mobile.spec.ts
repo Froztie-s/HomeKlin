@@ -112,7 +112,8 @@ test.describe("free slots", () => {
     }
 
     const days = panel.getByLabel("Tanggal").getByRole("option");
-    expect(await days.count()).toBeGreaterThanOrEqual(5);
+    // The days stream in with the windows: count them until they have all arrived, not once.
+    await expect.poll(() => days.count()).toBeGreaterThanOrEqual(5);
     // Short day names, so the select fits a 360 px phone ("Besok, Sen 16 Nov", "Sel, 17 Nov").
     await expect(days.first()).toHaveText(/^(Hari ini|Besok|Sen|Sel|Rab|Kam|Jum|Sab)\b/);
     // Monday to Saturday only: no Sunday in the seed.

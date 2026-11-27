@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { expect, test, type Page } from "@playwright/test";
 import { adminClient, createTestUser, deleteTestUsers, type TestUser } from "../tests/integration/test-project";
 import { agencyMarks, cancelOrder, dayText, lateWindow, windowText, type Window } from "./booking-test-data";
-import { historyMonths, openHistoryMonthOf } from "./history-months";
+import { expectedHistory, historyMonths, jakartaMonth, openHistoryMonthOf } from "./history-months";
 import { signInWithPassword } from "./order-test-data";
 import { notification, notify } from "./payment-test-data";
 import type { StorageState } from "./setup/auth-state";
@@ -99,14 +99,6 @@ test.describe("with an order of each status", () => {
     if (!window) throw new Error(`The ${name} order was not booked`);
     return window;
   };
-  // The failed and cancelled orders, the one with the later window first (the history's order). Their
-  // windows are the last open 13.00 and 15.00 before a 13-day edge, so which is later depends on the time
-  // of day the test runs (after 13.00 the last 15.00 window can be a day earlier): the expected order
-  // comes from the booked windows, not from a fixed guess.
-  const notDoneLatestFirst = () =>
-    (["failed", "cancelled"] as const)
-      .toSorted((a, b) => Date.parse(windowOf(b).startsAt) - Date.parse(windowOf(a).startsAt))
-      .map((name) => ids[name]);
   const arrival = (window: Window, language: "id" | "en" = "id") =>
     `${dayText(window.startsAt, language)}, ${windowText(window)} WIB`;
   // A whole hour 40 days back, two hours long.
@@ -115,6 +107,19 @@ test.describe("with an order of each status", () => {
     startsAt: new Date(pastStart).toISOString(),
     endsAt: new Date(pastStart + 7_200_000).toISOString(),
   };
+  // What the history lists (the failed, cancelled and passed orders), by the Jakarta month of each window,
+  // the latest first, and in a month the later window first. The failed and cancelled windows are the last
+  // open 13.00 and 15.00 before a 13-day edge, so which is later depends on the time of day the test runs
+  // (after 13.00 the last 15.00 window can be a day earlier), and on the 1st of a month their days can fall
+  // in different Jakarta months, so the page then lists them under two months instead of one. The months
+  // and the rows of each are worked out from the booked windows, not from a fixed guess.
+  const historyGroups = () =>
+    expectedHistory([
+      { id: ids.failed, startsAt: windowOf("failed").startsAt },
+      { id: ids.cancelled, startsAt: windowOf("cancelled").startsAt },
+      { id: ids.past, startsAt: past.startsAt },
+    ]);
+  const orderHrefs = (orderIds: readonly string[]) => orderIds.map((id) => `/orders?order=${id}`);
 
   test.beforeAll(async ({ request }) => {
     windows.waiting = await lateWindow(area, "08.00");
@@ -177,13 +182,15 @@ test.describe("with an order of each status", () => {
 
   test("the home lists the orders still to come under Akan datang, the soonest first", async ({ page }) => {
     await page.goto("/home");
+    // The page's content streams in after its shell: wait for the title before counting what is not there.
+    await expect(page.getByRole("heading", { level: 1, name: "Pesanan Anda" })).toBeVisible();
     await expect(page.getByRole("tablist")).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "Akan datang" })).toBeVisible();
     await expect(ordersList(page).getByRole("listitem")).toHaveCount(3);
     const soonest = (["waiting", "paid", "off"] as const).toSorted(
       (a, b) => Date.parse(windowOf(a).startsAt) - Date.parse(windowOf(b).startsAt),
     );
-    expect(await hrefsOf(page)).toEqual(soonest.map((name) => `/orders?order=${ids[name]}`));
+    await expect.poll(() => hrefsOf(page)).toEqual(orderHrefs(soonest.map((name) => ids[name])));
 
     for (const [id, word] of [
       [ids.waiting, "Menunggu pembayaran"],
@@ -205,41 +212,56 @@ test.describe("with an order of each status", () => {
     await page.goto("/orders");
     await expect(page.getByRole("heading", { level: 1, name: "Riwayat pesanan" })).toBeVisible();
     await expect(page.getByText("3 pesanan masih berjalan.")).toBeVisible();
-    // The latest month opens first: the failed and cancelled orders' windows are still to come, the
-    // passed order's window is 40 days back, in an earlier month.
-    expect(await historyHrefs(page)).toEqual(notDoneLatestFirst().map((id) => `/orders?order=${id}`));
+    // The latest month opens first: the failed and cancelled orders' windows are still to come (both in
+    // one month, or in two when they fall either side of a month's edge), the passed order's window is 40
+    // days back, in an earlier month of its own.
+    const groups = historyGroups();
+    expect(groups.at(-1)).toEqual({ month: jakartaMonth(past.startsAt), ids: [ids.past] });
+    expect(groups.length).toBeGreaterThanOrEqual(2);
+    await expect.poll(() => historyHrefs(page)).toEqual(orderHrefs(groups[0].ids));
     const months = await historyMonths(page);
-    expect(months).toHaveLength(2);
+    expect(months).toEqual(groups.map((group) => group.month));
     await expect(page.getByLabel("Pilih bulan")).toHaveValue(months[0]);
-    for (const [id, word] of [
+
+    // The arrow goes to the next older month, kept in the address; each month lists what its windows say.
+    // (Paid, but its window passed with no check-in: the pill says where the order is, order-stage.ts.)
+    const pill = new Map([
       [ids.failed, "Pembayaran gagal"],
       [ids.cancelled, "Dibatalkan"],
-    ]) {
-      await expect(rowOf(page, id).getByText(word, { exact: true })).toBeVisible();
+      [ids.past, "Tidak terlaksana"],
+    ]);
+    for (const [index, group] of groups.entries()) {
+      if (index > 0) {
+        await page.getByRole("link", { name: /^Bulan sebelumnya/ }).click();
+        await expect(page).toHaveURL(`/orders?bulan=${group.month}`);
+      }
+      await expect.poll(() => historyHrefs(page)).toEqual(orderHrefs(group.ids));
+      for (const id of group.ids) await expect(rowOf(page, id).getByText(pill.get(id) ?? "", { exact: true })).toBeVisible();
+      if (group.ids.includes(ids.failed)) {
+        await expect(rowOf(page, ids.failed)).toContainText(`${windowText(windowOf("failed"))} WIB`);
+      }
     }
-    await expect(rowOf(page, ids.failed)).toContainText(`${windowText(windowOf("failed"))} WIB`);
 
-    // The arrow and the select both change the month, kept in the address.
-    await page.getByRole("link", { name: /^Bulan sebelumnya/ }).click();
-    await expect(page).toHaveURL(`/orders?bulan=${months[1]}`);
-    expect(await historyHrefs(page)).toEqual([`/orders?order=${ids.past}`]);
-    // Paid, but its window passed with no check-in: the pill says where the order is (order-stage.ts).
-    await expect(rowOf(page, ids.past).getByText("Tidak terlaksana", { exact: true })).toBeVisible();
+    // The select changes the month too, kept in the address.
     await page.getByLabel("Pilih bulan").selectOption(months[0]);
     await expect(page).toHaveURL(`/orders?bulan=${months[0]}`);
-    await expect(rowOf(page, ids.failed)).toBeVisible();
+    await expect(rowOf(page, groups[0].ids[0])).toBeVisible();
 
     await expect(filterLink(page, "Semua")).toHaveAttribute("aria-current", "page");
     await filterLink(page, "Tidak jadi").click();
     await expect(page).toHaveURL(`/orders?filter=tidak-jadi&bulan=${months[0]}`);
     await expect(filterLink(page, "Tidak jadi")).toHaveAttribute("aria-current", "page");
-    expect(await historyHrefs(page)).toEqual(notDoneLatestFirst().map((id) => `/orders?order=${id}`));
+    // All three are "not done" (failed, cancelled, and a window that passed unused): the same months.
+    await expect.poll(() => historyHrefs(page)).toEqual(orderHrefs(groups[0].ids));
     await filterLink(page, "Selesai").click();
     await expect(page.getByText("Tidak ada pesanan di sini")).toBeVisible();
-    expect(await historyHrefs(page)).toEqual([]);
+    await expect.poll(() => historyHrefs(page)).toEqual([]);
 
-    // Back from an order, the same filter and month are open.
+    // Back from an order, the same filter and month are open. The filter opens the latest month: the failed
+    // order's own month is chosen when it is another one.
     await filterLink(page, "Tidak jadi").click();
+    const failedMonth = jakartaMonth(windowOf("failed").startsAt);
+    if (failedMonth !== months[0]) await page.getByLabel("Pilih bulan").selectOption(failedMonth);
     await rowOf(page, ids.failed).click();
     await expect(page).toHaveURL(`/orders?order=${ids.failed}`);
     await page.goBack();
@@ -339,8 +361,9 @@ test.describe("with an order of each status", () => {
       for (const id of [ids.others, randomUUID()]) {
         await page.goto(`${address}${id}`);
         if (address === "/orders?order=") {
-          // The history page in its place, on its latest month: the failed and cancelled orders.
-          await expect(page.locator('main a[href^="/orders?order="]')).toHaveCount(2);
+          // The history page in its place, on its latest month: the failed and cancelled orders (both,
+          // unless their windows fall in two months: then the later one's month).
+          await expect(page.locator('main a[href^="/orders?order="]')).toHaveCount(historyGroups()[0].ids.length);
         } else {
           // The payment page (and its old address) leads to the home, with the orders still to come.
           await expect(page).toHaveURL("/home");
@@ -367,11 +390,14 @@ test.describe("with an order of each status", () => {
 
     await page.goto("/en/orders");
     await expect(page.getByRole("heading", { level: 1, name: "Order history" })).toBeVisible();
+    // Each in the month of its own window (the failed and cancelled ones can fall in two months).
+    await openHistoryMonthOf(page, ids.failed, "/en");
     await expect(rowOf(page, ids.failed, "/en").getByText("Payment failed", { exact: true })).toBeVisible();
+    await openHistoryMonthOf(page, ids.cancelled, "/en");
     await expect(rowOf(page, ids.cancelled, "/en").getByText("Cancelled", { exact: true })).toBeVisible();
     await openHistoryMonthOf(page, ids.past, "/en");
     await expect(rowOf(page, ids.past, "/en").getByText("Did not take place", { exact: true })).toBeVisible();
-    await page.goto("/en/orders");
+    await openHistoryMonthOf(page, ids.failed, "/en");
     await rowOf(page, ids.failed, "/en").click();
     await page.getByRole("link", { name: "Back to your order history" }).click();
     await expect(page).toHaveURL("/en/orders");

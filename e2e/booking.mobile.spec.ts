@@ -32,7 +32,12 @@ const phone = "0812 3456 7890";
 const agencyWording = /agensi|agency|mitra|partner/i;
 
 const usedStarts: string[] = [];
-const customerId = () => readTestUsers().find((user) => user.role === "customer")?.id;
+/** The setup's signed-in customer. It fails loudly when there is none, so a check on "no order made" cannot be skipped. */
+function customerId(): string {
+  const id = readTestUsers().find((user) => user.role === "customer")?.id;
+  if (!id) throw new Error("The setup project recorded no customer (e2e/.auth/users.json): cannot check which orders were made.");
+  return id;
+}
 
 /** A late window for this test, remembered so the clean-up finds any order made at it. */
 async function windowFor(time: string, daysBack = 0): Promise<Window> {
@@ -43,9 +48,7 @@ async function windowFor(time: string, daysBack = 0): Promise<Window> {
 
 test.afterAll(async () => {
   // An order left by a test that failed half-way: delete it and give its place back.
-  const id = customerId();
-  if (!id) return;
-  for (const orderId of await ordersAt(id, area, usedStarts)) await cancelOrder(orderId);
+  for (const orderId of await ordersAt(customerId(), area, usedStarts)) await cancelOrder(orderId);
 });
 
 const bookingForm = (page: Page, lang: "id" | "en" = "id") => page.getByRole("form", { name: lang === "id" ? "Pesan layanan" : "Book a cleaning" });
@@ -207,8 +210,7 @@ test.describe("as a signed-in customer", () => {
     await expect(consentSwitch(page)).toBeFocused();
     await expect(page).toHaveURL(/\/pesan\?/);
     await expect(page.getByLabel("Alamat lengkap")).toHaveValue(address);
-    const id = customerId();
-    if (id) expect(await ordersAt(id, area, [target.startsAt])).toEqual([]);
+    expect(await ordersAt(customerId(), area, [target.startsAt])).toEqual([]);
   });
 
   test("shows each problem next to its field", async ({ page }) => {
@@ -255,8 +257,7 @@ test.describe("as a signed-in customer", () => {
       // What the customer typed and agreed to is kept.
       await expect(page.getByLabel("Alamat lengkap")).toHaveValue(address);
       await expect(consentSwitch(page)).toBeChecked();
-      const id = customerId();
-      if (id) expect(await ordersAt(id, area, [target.startsAt])).toEqual([]);
+      expect(await ordersAt(customerId(), area, [target.startsAt])).toEqual([]);
     } finally {
       await restore();
     }
@@ -273,17 +274,19 @@ test.describe("as a signed-in customer", () => {
         names: await scope.getByRole("radio").evaluateAll((radios) => radios.map((radio) => radio.getAttribute("aria-label"))),
         texts: (await scope.locator("label").allInnerTexts()).map((text) => text.replace(/\s+/g, " ").trim()),
       });
+      // The chips are redrawn for the chosen day: read them only once the full chip of that day is there
+      // (the day's chips arrive together), never in the moment between choosing the day and its redraw.
+      await expect(times.getByRole("radio", { name: `${stepOneChip(full)}, penuh` })).toBeDisabled();
       const stepOne = await chips(times.locator("fieldset"));
       expect(stepOne.texts).toContain(`${windowText(full)} penuh`);
-      await expect(times.getByRole("radio", { name: `${stepOneChip(full)}, penuh` })).toBeDisabled();
 
       // Step 2 with the time still to choose (as from a landing link): the same chips, the same rule.
       await page.goto(orderPath(service.id, area));
       await page.getByLabel("Tanggal", { exact: true }).selectOption(jakartaDate(full.startsAt));
+      await expect(page.getByRole("radio", { name: `${stepOneChip(full)}, penuh` })).toBeDisabled();
       const stepTwo = await chips(page.getByRole("group", { name: dayText(full.startsAt) }));
       expect(stepTwo).toEqual(stepOne);
       for (const text of stepTwo.texts) expect(text).toMatch(/^\d{2}\.\d{2}-\d{2}\.\d{2}( penuh)?$/);
-      await expect(page.getByRole("radio", { name: `${stepOneChip(full)}, penuh` })).toBeDisabled();
     } finally {
       await restore();
     }
