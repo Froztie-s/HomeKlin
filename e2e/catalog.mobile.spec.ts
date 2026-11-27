@@ -165,10 +165,14 @@ test.describe("free slots", () => {
     test("still shows the windows in Jakarta time", async ({ page }) => {
       await page.goto("/services");
       const panel = page.getByRole("region", { name: "Jam kosong di Jakarta Selatan" });
+      // The windows stream in after the page shell: wait for the dates before reading them (under load the
+      // list was read empty and the test saw no windows at all).
+      await expect(panel.getByLabel("Tanggal").getByRole("option").first()).toBeAttached();
       const days = await panel.getByLabel("Tanggal").getByRole("option").evaluateAll((options) => options.map((option) => (option as HTMLOptionElement).value));
       let seen = 0;
       for (const day of days.slice(0, 2)) {
         await panel.getByLabel("Tanggal").selectOption(day);
+        await expect(panel.getByRole("radio").first()).toBeVisible();
         for (const name of await panel.getByRole("radio").evaluateAll((radios) => radios.map((radio) => radio.getAttribute("aria-label") ?? ""))) {
           expect(seededStarts).toContain(name.slice(0, 5));
           seen += 1;
