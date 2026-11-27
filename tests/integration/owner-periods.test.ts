@@ -142,6 +142,27 @@ describe("the owner's numbers for a period", { timeout: 30_000 }, () => {
     expect(week.daily).toHaveLength(14);
   });
 
+  // 20261127100000_owner_numbers_calendar_window.sql (ship review, 2026-11-27): the tiles used a rolling
+  // window ("the last N x 24 hours") while the chart showed N Jakarta calendar days, so an order paid
+  // just inside the rolling window was in "Pendapatan" but not in the chart. Both are now the same N days.
+  it("counts the same orders in the tiles and in the chart, also one just inside the old rolling window", async () => {
+    for (const days of [7, 30, 90]) {
+      const edge = new Date(Date.now() - days * day + hours(1));
+      // Paid but not finished, so the agencies' completed-job counts of the tests below stay as they are.
+      const order = await world.job({ startsAt: new Date(Date.now() - (days + 2) * day) });
+      const { error } = await adminClient()
+        .from("orders")
+        .update({ created_at: edge.toISOString(), payment_result_at: edge.toISOString() })
+        .eq("id", order);
+      if (error) throw new Error(`Could not date the order: ${error.message}`);
+    }
+    for (const days of [7, 30, 90]) {
+      const data = await numbers(days);
+      const chart = data.daily_period.reduce((total, row) => total + Number(row.revenue_idr), 0);
+      expect(chart, `the last ${days} days: chart against tile`).toBe(data.period.revenue_idr);
+    }
+  });
+
   it("splits the payouts by agency for the period", async () => {
     const find = (data: Numbers, agency: string) => data.payouts_by_agency.find((row) => row.agency_id === agency);
     const week = await numbers(7);
