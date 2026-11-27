@@ -27,6 +27,10 @@ describe("authFailureKey", () => {
     expect(authFailureKey({ code: "email_address_invalid" })).toBe("emailRejected");
   });
 
+  it("reports an account whose email was never confirmed (Confirm email is on)", () => {
+    expect(authFailureKey({ code: "email_not_confirmed" })).toBe("confirmEmail");
+  });
+
   it("treats anything else, or no error at all, as the service being unavailable", () => {
     expect(authFailureKey({ code: "unexpected_failure" })).toBe("unavailable");
     expect(authFailureKey({})).toBe("unavailable");

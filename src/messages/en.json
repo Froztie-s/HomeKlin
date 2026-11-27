@@ -1942,13 +1942,17 @@
       "rateLimited": "Too many attempts. Wait a few minutes, then try again.",
       "weakPassword": "This password is too easy to guess. Choose another one.",
       "emailRejected": "This email address cannot be used. Use another one.",
-      "confirmEmail": "Your account is created. Open the email from HomeKlin to activate it, then log in.",
+      "confirmEmail": "Your email is not confirmed yet. Choose Email code above, enter your email, then type the 6-digit code we send.",
       "unavailable": "We could not process this right now. Try again in a moment.",
       "codeInvalid": "The code is wrong or has expired. Check your email or send a new code."
     },
     "signup": {
       "submit": "Create account",
       "pending": "Creating your account…",
+      "codeTitle": "Enter the code from the email",
+      "codeSentTo": "We sent a 6-digit code to <strong>{email}</strong>. Enter it to activate your account.",
+      "verify": "Activate account",
+      "verifying": "Activating…",
       "switchPrompt": "Already have an account?",
       "switchLink": "Log in"
     }
