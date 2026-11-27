@@ -14,7 +14,7 @@ tested against the real test database and is deployed.
 |---|---|---|
 | **Critical:** sign-up with email confirmation let whoever registered an address first keep a working password after the real owner confirmed (Supabase keeps the first password of an unconfirmed address) | code review C1, security H1 | the person who types the code decides the password: `setCustomerPassword` after the code check, account marked server-side, later code sign-ins keep it; real-database test of the attack (commit c1f96b9, deployed) |
 | Unused guest action could create accounts and mail strangers | code review, security | `sendOrderCode` no longer creates accounts |
-| Owner dashboard: revenue tile and daily chart used different windows and could disagree | test review | new migration `20261127100000_owner_numbers_calendar_window.sql` + regression test (applied to the test project; **live waits for your permission**, see below) |
+| Owner dashboard: revenue tile and daily chart used different windows and could disagree | test review | new migration `20261127100000_owner_numbers_calendar_window.sql` + regression test (applied to the test project and, with your permission, to live on 2026-11-27) |
 | Tests that passed or failed by timing (code sign-in e2e missing, admin search for a real order, reads before the page streamed in, shared customer in parallel payment specs, clock edges, a playable video for the admin order page, leftover seed clip) | test review | merges t1-tests, t2-e2e and the admin order spec fix |
 | ADR 0004 described guest checkout | review | ADR 0007 written, 0004 marked superseded |
 
@@ -26,8 +26,7 @@ tested against the real test database and is deployed.
 3. **GitHub secret `MIDTRANS_CLIENT_KEY`**: three payment e2e specs fail in CI without it (the card option is absent).
 
 ### Recommended before UAT
-- Apply the owner migration to live (`npm run supabase -- migrate live`), after you have read it: it only changes two lines of `owner_numbers`.
-- Raise the auth email allowance (`rate_limit_email_sent`, now 30 per hour for sign-up, resend and code sign-in together) for the UAT window; testers share it.
+- The auth email allowance (`rate_limit_email_sent`) stays at 30 per hour for sign-up, resend and code sign-in together (your decision); testers share it, so tell them what "too many attempts" means.
 - Give admin and owner their own passwords (one shared demo password covers every seeded account), and rotate after UAT.
 - Decide: an unpaid order can still be paid after its window has passed (no check in the database); overdue check-out jobs read "in progress" on the customer's order page.
 - Choose the photo hosts for `images.remotePatterns`.
