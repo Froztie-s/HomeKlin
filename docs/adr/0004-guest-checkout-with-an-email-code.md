@@ -1,6 +1,6 @@
 # ADR 0004: Ordering without sign-up, with an emailed code
 
-- Status: accepted (2026-10-25, the user's decision; task T9b)
+- Status: superseded by [ADR 0007](0007-ordering-needs-a-confirmed-account.md) (2026-11-27). Accepted 2026-10-25 (the user's decision; task T9b). The emailed code now proves the address when the customer signs up, not at checkout.
 
 ## Context
 A separate sign-up before booking lost customers, but an order must belong to someone: only the
