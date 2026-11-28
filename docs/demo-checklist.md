@@ -10,7 +10,7 @@ demo; the script follows the Quality Plan scenarios.
 | [ ] | The live database has every migration | `npm run supabase -- migrate live` says "up to date". |
 | [ ] | Demo clips are in place | `.mp4` or `.webm` files under 50 MB in the local `clips/` folder. |
 | [ ] | Seed data is fresh | `npm run db:seed -- live`, at most 15 minutes before the demo: the upcoming job starts 10 minutes after the seed, and check-in opens 15 minutes before it. The finished jobs get fresh 7-day recordings. |
-| [ ] | Vercel settings (checked 2026-11-26 from outside: `/api/cron/payouts` and `/api/cron/recordings` answer 503 on the live site, so **`CRON_SECRET` is not set yet**: the weekly payout run and the 7-day recording cleanup do not run) | `CRON_SECRET`, `SUPABASE_SECRET_KEY`, `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, the SMTP values and `SITE_URL` are set; the latest deployment of `main` is live. |
+| [ ] | Vercel settings (checked 2026-11-26 from outside: `/api/cron/payouts` and `/api/cron/recordings` answer 503 on the live site, then; set by the user on 2026-11-28 and confirmed: the routes now answer 401 without it) | `CRON_SECRET`, `SUPABASE_SECRET_KEY`, `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`, the SMTP values and `SITE_URL` are set; the latest deployment of `main` is live. |
 | [ ] | The demo passwords | `SEED_DEMO_PASSWORD` from `.env`, shared privately with the presenters. |
 | [ ] | Phones | One phone for the customer, one for the cleaner (location allowed for the browser), a laptop for agency, admin and owner. Open the site on each phone once. |
 | [ ] | Email | The presenter's own email for ordering (the 6-digit code arrives through Gmail SMTP; check spam). |

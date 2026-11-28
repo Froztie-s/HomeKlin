@@ -22,7 +22,7 @@ tested against the real test database and is deployed.
 1. **Sign up once on the live site** with an address of yours: type the code, check you land on the order flow; then sign up
    again with the same address and a different password and check that only the password you typed with the code works
    (the real-Supabase behaviour is the one thing only a live run can prove).
-2. **`CRON_SECRET` in Vercel** (both cron routes answer 503: weekly payouts and the 7-day recording deletion are not running).
+2. ~~**`CRON_SECRET` in Vercel**~~ Done 2026-11-28: set by the user; after a redeploy both cron routes answer 401 without it.
 3. ~~**GitHub secret `MIDTRANS_CLIENT_KEY`**~~ Done 2026-11-28: added by the user; CI is green.
 
 ### Recommended before UAT
