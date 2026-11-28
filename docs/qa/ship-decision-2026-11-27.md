@@ -23,7 +23,7 @@ tested against the real test database and is deployed.
    again with the same address and a different password and check that only the password you typed with the code works
    (the real-Supabase behaviour is the one thing only a live run can prove).
 2. **`CRON_SECRET` in Vercel** (both cron routes answer 503: weekly payouts and the 7-day recording deletion are not running).
-3. **GitHub secret `MIDTRANS_CLIENT_KEY`**: three payment e2e specs fail in CI without it (the card option is absent).
+3. ~~**GitHub secret `MIDTRANS_CLIENT_KEY`**~~ Done 2026-11-28: added by the user; CI is green.
 
 ### Recommended before UAT
 - The auth email allowance (`rate_limit_email_sent`) stays at 30 per hour for sign-up, resend and code sign-in together (your decision); testers share it, so tell them what "too many attempts" means.
